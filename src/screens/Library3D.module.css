@@ -1,0 +1,197 @@
+/* 3D Library Screen Styles */
+
+.library3D {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--color-cream);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .library3D * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Header */
+.header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding: 16px;
+  background: linear-gradient(to bottom, rgba(245, 240, 232, 0.95), transparent);
+  pointer-events: none;
+}
+
+.headerInner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.libraryBadge {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-navy);
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(27, 42, 74, 0.2);
+}
+
+.libraryIcon {
+  font-size: 20px;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  color: var(--color-navy);
+  margin: 0 0 2px;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--color-brown);
+  margin: 0;
+  opacity: 0.8;
+}
+
+/* Scene Container */
+.sceneContainer {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Controls */
+.controls {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 10;
+}
+
+.controlButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(27, 42, 74, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+}
+
+.controlButton:hover {
+  border-color: var(--color-gold);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.controlButton:active {
+  transform: translateY(0);
+}
+
+.controlIcon {
+  font-size: 20px;
+}
+
+.controlLabel {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-navy);
+}
+
+/* Fallback */
+.fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--color-cream);
+  padding: 20px;
+}
+
+.fallbackContent {
+  text-align: center;
+  max-width: 320px;
+}
+
+.fallbackTitle {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: var(--color-navy);
+  margin: 0 0 12px;
+}
+
+.fallbackText {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--color-brown);
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+.fallbackButton {
+  padding: 12px 24px;
+  background: var(--color-gold);
+  border: none;
+  border-radius: 12px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fallbackButton:hover {
+  background: #9A7A22;
+  transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.1rem;
+  }
+
+  .subtitle {
+    font-size: 0.7rem;
+  }
+
+  .controls {
+    bottom: 70px;
+  }
+
+  .controlButton {
+    padding: 8px 12px;
+  }
+
+  .controlIcon {
+    font-size: 18px;
+  }
+
+  .controlLabel {
+    font-size: 0.65rem;
+  }
+}
