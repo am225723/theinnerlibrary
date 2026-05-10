@@ -23,10 +23,12 @@ const Book = ({
   const [hovered, setHovered] = useState(false);
   const [animState, setAnimState] = useState(BOOK_STATES.IDLE);
   const animProgressRef = useRef(0);
-  const targetRef = useRef({
+  // targetRef reserved for future camera tracking
+  const _targetRef = useRef({
     position: new THREE.Vector3(...position),
     rotation: new THREE.Euler(0, 0, 0),
   });
+  void _targetRef;
 
   // Load saved cover design
   const savedCover = useMemo(() => {
@@ -236,7 +238,7 @@ const Book = ({
     }
   }, [isSelected, animState]);
 
-  // Reset book
+  // Reset book to shelf
   const resetBook = useCallback(() => {
     animProgressRef.current = 0;
     setAnimState(BOOK_STATES.RETURNING);
@@ -244,6 +246,7 @@ const Book = ({
       setAnimState(BOOK_STATES.IDLE);
     }, TIMINGS.RETURN_TO_SHELF);
   }, []);
+  void resetBook;
 
   return (
     <group

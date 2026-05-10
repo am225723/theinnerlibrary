@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import {
   PageWrapper, PageHeader, PromptCard, PromptLabel,
   OptionGrid, ReflectionCard, Button, ButtonGroup, SaveBanner,
-  StyledTextArea, GentleNote, EmptyState, FilterPills, BookmarkCard
+  StyledTextArea, GentleNote, EmptyState, FilterPills
 } from '../components/SharedComponents';
-import { saveEntry, getEntriesByTool, toggleBookmark, deleteEntry } from '../utils/storage';
+import { saveEntry, getEntriesByTool, deleteEntry } from '../utils/storage';
 import { evidenceReflections } from '../data/reflections';
 import { formatShortDate } from '../utils/helpers';
 import styles from './FeatureScreen.module.css';
@@ -42,7 +42,6 @@ export const EvidenceShelf = () => {
   const [showSaved, setShowSaved] = useState(false);
   const [entries, setEntries] = useState([]);
   const [activeFilter, setActiveFilter] = useState('All');
-  const [selectedEntry, setSelectedEntry] = useState(null);
 
   useEffect(() => {
     loadEntries();
@@ -88,15 +87,9 @@ export const EvidenceShelf = () => {
     return allowed.some((a) => e.selectedEmotion?.includes(a) || e.userInput?.includes(a));
   });
 
-  const handleToggleBookmark = (id) => {
-    toggleBookmark(id);
-    loadEntries();
-  };
-
   const handleDelete = (id) => {
     deleteEntry(id);
     loadEntries();
-    setSelectedEntry(null);
   };
 
   // Visual shelf
@@ -129,7 +122,7 @@ export const EvidenceShelf = () => {
                 <button
                   key={entry.id}
                   className={`${styles.evidenceSpine} ${styles[`evidenceSpine_${entry.spineColor || 'navy'}`]}`}
-                  onClick={() => setSelectedEntry(entry)}
+                  onClick={() => {}}
                   title={entry.selectedEmotion || entry.userInput}
                 >
                   <span className={styles.evidenceSpineText}>

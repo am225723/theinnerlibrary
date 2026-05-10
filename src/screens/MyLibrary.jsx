@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   PageWrapper, PageHeader, FilterPills, BookmarkCard,
   EmptyState, Button, Modal, GentleNote, StyledTextArea
@@ -12,7 +11,6 @@ import { formatDate, formatRelative, ALL_CATEGORIES } from '../utils/helpers';
 import styles from './MyLibrary.module.css';
 
 export const MyLibrary = () => {
-  const navigate = useNavigate();
   const [entries, setEntries] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');

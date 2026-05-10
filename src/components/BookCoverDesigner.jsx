@@ -8,7 +8,6 @@ import styles from './BookCoverDesigner.module.css';
 export const BookCoverDesigner = ({ bookId, bookTitle, onClose, onSave }) => {
   const {
     cover,
-    isPreviewing,
     hasChanges,
     setMaterial,
     setCoverColor,
@@ -20,7 +19,6 @@ export const BookCoverDesigner = ({ bookId, bookTitle, onClose, onSave }) => {
     setWear,
     saveCover,
     resetCover,
-    togglePreview,
   } = useCoverDesigner(bookId);
 
   const [activeTab, setActiveTab] = useState('material');
@@ -29,14 +27,6 @@ export const BookCoverDesigner = ({ bookId, bookTitle, onClose, onSave }) => {
     saveCover();
     if (onSave) onSave(cover);
   }, [cover, onSave, saveCover]);
-
-  const handleClose = useCallback(() => {
-    if (hasChanges) {
-      const confirmed = window.confirm('You have unsaved changes. Are you sure you want to close?');
-      if (!confirmed) return;
-    }
-    if (onClose) onClose();
-  }, [hasChanges, onClose]);
 
   return (
     <div className={styles.designer}>

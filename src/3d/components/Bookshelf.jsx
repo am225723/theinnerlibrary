@@ -1,7 +1,6 @@
 // Bookshelf component for The Inner Library 3D Bookshelf
 
 import React, { useRef } from 'react';
-import * as THREE from 'three';
 import Book from './Book';
 import { SHELF_DIMENSIONS } from '../utils/bookGeometry';
 import { getTexture } from '../utils/textureGenerator';

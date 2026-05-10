@@ -6,7 +6,6 @@ import {
   GentleNote, SectionDivider, LoadingPage, StyledTextArea
 } from '../components/SharedComponents';
 import { getEntriesByDateRange, getEntriesByCustomRange, saveEntry } from '../utils/storage';
-import { formatDate } from '../utils/helpers';
 import styles from './FeatureScreen.module.css';
 
 const dateRangeOptions = ['Past 7 days', 'Past 14 days', 'Past 30 days', 'Custom range'];

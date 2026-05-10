@@ -26,10 +26,8 @@ export const OpenTodaysPage = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [feeling, setFeeling] = useState('');
-  const [help, setHelp] = useState('');
   const [showTransition, setShowTransition] = useState(false);
   const [showSaved, setShowSaved] = useState(false);
-  const [notes, setNotes] = useState('');
 
   const handleFeelingSelect = (f) => {
     setFeeling(f);
@@ -37,7 +35,6 @@ export const OpenTodaysPage = () => {
   };
 
   const handleHelpSelect = (option) => {
-    setHelp(option.label);
     setShowTransition(true);
 
     // Save entry
@@ -48,7 +45,6 @@ export const OpenTodaysPage = () => {
       selectedEmotion: feeling,
       generatedOutput: `Feeling: ${feeling} → ${option.label}`,
       userInput: feeling,
-      notes,
     });
 
     setShowSaved(true);

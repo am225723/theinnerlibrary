@@ -1,7 +1,7 @@
 // Cover designer hook for The Inner Library 3D Bookshelf
 
-import { useState, useCallback, useEffect } from 'react';
-import { MATERIAL_PRESETS, BOOK_COLORS, PATTERN_PRESETS, BORDER_PRESETS, WEAR_PRESETS } from '../utils/materialPresets';
+import { useState, useCallback } from 'react';
+import { MATERIAL_PRESETS, BOOK_COLORS } from '../utils/materialPresets';
 
 const COVER_STORAGE_KEY = 'inner_library_cover_designs';
 
