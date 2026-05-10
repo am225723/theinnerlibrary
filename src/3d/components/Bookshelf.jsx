@@ -35,10 +35,10 @@ const Bookshelf = ({
 
   return (
     <group>
-      {/* Background wall - warm cream with subtle texture */}
-      <mesh position={[0, -1.5, -1.2]} receiveShadow>
-        <planeGeometry args={[14, 12]} />
-        <meshStandardMaterial color="#F0EBE0" roughness={0.95} metalness={0} />
+      {/* Wall backing behind shelves - slightly darker panel */}
+      <mesh position={[0, -1.5, -0.95]} receiveShadow>
+        <planeGeometry args={[9.5, 6]} />
+        <meshStandardMaterial color="#E0D8C8" roughness={0.92} metalness={0} />
       </mesh>
 
       {/* Each shelf level */}

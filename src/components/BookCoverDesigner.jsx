@@ -1,4 +1,5 @@
 // Book Cover Designer for The Inner Library
+// Fixed: embossing toggle, accent color, font size, and proper save functionality
 
 import React, { useState, useCallback } from 'react';
 import { useCoverDesigner } from '../3d/hooks/useCoverDesigner';
@@ -12,11 +13,14 @@ export const BookCoverDesigner = ({ bookId, bookTitle, onClose, onSave }) => {
     setMaterial,
     setCoverColor,
     setCustomColor,
+    setAccentColor,
     setSpineText,
+    setSpineFontSize,
     setIcon,
     setBorderEnabled,
     setPattern,
     setWear,
+    setEmbossing,
     saveCover,
     resetCover,
   } = useCoverDesigner(bookId);
@@ -32,7 +36,8 @@ export const BookCoverDesigner = ({ bookId, bookTitle, onClose, onSave }) => {
     <div className={styles.designer}>
       {/* Header */}
       <div className={styles.header}>
-        <h2 className={styles.title}>🎨 Custom Book Cover</h2>
+        <button className={styles.closeBtn} onClick={onClose}>← Back</button>
+        <h2 className={styles.title}>🎨 Custom Cover</h2>
         <p className={styles.subtitle}>{bookTitle}</p>
       </div>
 
@@ -42,7 +47,7 @@ export const BookCoverDesigner = ({ bookId, bookTitle, onClose, onSave }) => {
           <div
             className={styles.previewSpine}
             style={{
-              backgroundColor: cover.colors.cover,
+              backgroundColor: cover.colors.spine,
               borderRight: cover.border.enabled ? `${cover.border.width}px solid ${cover.border.color}` : 'none',
             }}
           >
@@ -74,6 +79,9 @@ export const BookCoverDesigner = ({ bookId, bookTitle, onClose, onSave }) => {
               className={styles.previewAccent}
               style={{ backgroundColor: cover.colors.accent }}
             />
+            {cover.embossing?.enabled && (
+              <div className={styles.previewEmbossing}>Embossed</div>
+            )}
           </div>
         </div>
       </div>
@@ -152,13 +160,42 @@ export const BookCoverDesigner = ({ bookId, bookTitle, onClose, onSave }) => {
 
             <h3 className={styles.sectionTitle}>Accent Color</h3>
             <div className={styles.colorGrid}>
-              {['#B8922A', '#D4A845', '#CC3333', '#4A7AB5', '#2D5016', '#C0C0C0'].map((color) => (
+              {[
+                { color: '#B8922A', name: 'Gold' },
+                { color: '#D4A845', name: 'Light Gold' },
+                { color: '#CC3333', name: 'Red' },
+                { color: '#4A7AB5', name: 'Blue' },
+                { color: '#2D5016', name: 'Green' },
+                { color: '#C0C0C0', name: 'Silver' },
+                { color: '#E8C170', name: 'Cream' },
+                { color: '#F5E6B8', name: 'Pale Gold' },
+              ].map(({ color, name }) => (
                 <button
                   key={color}
                   className={`${styles.colorSwatch} ${cover.colors.accent === color ? styles.colorActive : ''}`}
                   style={{ backgroundColor: color }}
-                  onClick={() => setCoverColor('navy')} // Reset to default
-                  title={color}
+                  onClick={() => setAccentColor(color)}
+                  title={name}
+                />
+              ))}
+            </div>
+
+            <h3 className={styles.sectionTitle}>Text Color</h3>
+            <div className={styles.colorGrid}>
+              {[
+                { color: '#B8922A', name: 'Gold' },
+                { color: '#FFFFFF', name: 'White' },
+                { color: '#F5E6B8', name: 'Cream' },
+                { color: '#C0C0C0', name: 'Silver' },
+                { color: '#1B2A4A', name: 'Navy' },
+                { color: '#000000', name: 'Black' },
+              ].map(({ color, name }) => (
+                <button
+                  key={color}
+                  className={`${styles.colorSwatch} ${cover.colors.text === color ? styles.colorActive : ''}`}
+                  style={{ backgroundColor: color, border: color === '#FFFFFF' ? '1px solid #ccc' : 'none' }}
+                  onClick={() => setAccentColor(color, 'text')}
+                  title={name}
                 />
               ))}
             </div>
@@ -182,19 +219,20 @@ export const BookCoverDesigner = ({ bookId, bookTitle, onClose, onSave }) => {
                 <label className={styles.inputLabel}>Font Size</label>
                 <select
                   value={cover.spine.fontSize}
-                  onChange={(e) => setSpineText(cover.spine.text)}
+                  onChange={(e) => setSpineFontSize(parseInt(e.target.value, 10))}
                   className={styles.selectInput}
                 >
                   <option value={10}>Small</option>
                   <option value={14}>Medium</option>
                   <option value={18}>Large</option>
+                  <option value={22}>Extra Large</option>
                 </select>
               </div>
             </div>
 
             <h3 className={styles.sectionTitle}>Cover Icon</h3>
             <div className={styles.iconGrid}>
-              {['📖', '🌿', '🗣️', '✍️', '🏆', '🎭', '💌', '📋', '🕯️', '🪶', '💫', '🌙', '🔮', '🗝️', '🦋', '🌿'].map((emoji) => (
+              {['📖', '🌿', '🗣️', '✍️', '🏆', '🎭', '💌', '📋', '🕯️', '🦶', '💫', '🌙', '🔮', '🖋️', '🦋', '🍃'].map((emoji) => (
                 <button
                   key={emoji}
                   className={`${styles.iconButton} ${cover.icon.emoji === emoji ? styles.iconActive : ''}`}
@@ -254,13 +292,29 @@ export const BookCoverDesigner = ({ bookId, bookTitle, onClose, onSave }) => {
               <label className={styles.toggleLabel}>
                 <input
                   type="checkbox"
-                  checked={cover.embossing.enabled}
-                  onChange={(e) => setCoverColor('navy')} // Placeholder
+                  checked={cover.embossing?.enabled || false}
+                  onChange={(e) => setEmbossing({ enabled: e.target.checked, depth: 0.5, elements: [] })}
                   className={styles.toggleInput}
                 />
                 <span>Enable Embossing</span>
               </label>
             </div>
+            {cover.embossing?.enabled && (
+              <div className={styles.embossingOptions}>
+                <div className={styles.inputGroup}>
+                  <label className={styles.inputLabel}>Depth</label>
+                  <select
+                    value={cover.embossing.depth}
+                    onChange={(e) => setEmbossing({ ...cover.embossing, depth: parseFloat(e.target.value) })}
+                    className={styles.selectInput}
+                  >
+                    <option value={0.25}>Subtle</option>
+                    <option value={0.5}>Medium</option>
+                    <option value={1.0}>Deep</option>
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
