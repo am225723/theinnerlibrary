@@ -21,29 +21,24 @@ export const easings = {
     const s = 1.70158;
     return t * t * ((s + 1) * t - s);
   },
+  easeOutElastic: (t) => {
+    if (t === 0 || t === 1) return t;
+    return Math.pow(2, -10 * t) * Math.sin((t - 0.075) * (2 * Math.PI) / 0.3) + 1;
+  },
 };
 
 // Animation duration constants (ms)
 export const TIMINGS = {
   HOVER_LIFT: 200,
-  SELECTION_SLIDE: 400,
-  BOOK_OPEN: 600,
-  PAGE_FLIP: 300,
+  SELECTION_SLIDE: 500,
+  CENTER_MOVE: 800,
+  BOOK_OPEN: 700,
+  PAGE_FLIP: 400,
+  FLIP_PAUSE: 150,
   CONTENT_FADE: 200,
   BOOKMARK_SWAY: 3000,
-  RETURN_TO_SHELF: 400,
+  RETURN_TO_SHELF: 600,
   BREATHING_CYCLE: 3000,
-};
-
-// Animation easing presets
-export const EASING_PRESETS = {
-  HOVER_LIFT: 'easeOutQuad',
-  SELECTION_SLIDE: 'easeInOutCubic',
-  BOOK_OPEN: 'easeOutBack',
-  PAGE_FLIP: 'easeInOutSine',
-  CONTENT_FADE: 'easeOutQuad',
-  BOOKMARK_SWAY: 'easeInOutSine',
-  RETURN_TO_SHELF: 'easeInOutCubic',
 };
 
 // Book animation states
@@ -52,56 +47,16 @@ export const BOOK_STATES = {
   HOVER: 'hover',
   SELECTED: 'selected',
   CENTERED: 'centered',
-  OPENING: 'opening',
+  FLIPPING: 'flipping',
   OPEN: 'open',
   CLOSING: 'closing',
   RETURNING: 'returning',
 };
 
-// Spring configs for framer-motion/react-spring
+// Spring configs
 export const SPRING_CONFIGS = {
   gentle: { tension: 120, friction: 14, mass: 1 },
   snappy: { tension: 300, friction: 20, mass: 1 },
   slow: { tension: 80, friction: 20, mass: 1 },
   bouncy: { tension: 180, friction: 12, mass: 0.5 },
-};
-
-// Framer motion transition presets
-export const FRAMER_TRANSITIONS = {
-  hover: {
-    duration: TIMINGS.HOVER_LIFT / 1000,
-    ease: [0.25, 0.46, 0.45, 0.94], // easeOutQuad
-  },
-  selection: {
-    duration: TIMINGS.SELECTION_SLIDE / 1000,
-    ease: [0.645, 0.045, 0.355, 1], // easeInOutCubic
-  },
-  bookOpen: {
-    duration: TIMINGS.BOOK_OPEN / 1000,
-    ease: [0.34, 1.56, 0.64, 1], // easeOutBack
-  },
-  pageFlip: {
-    duration: TIMINGS.PAGE_FLIP / 1000,
-    ease: [0.37, 0, 0.63, 1], // easeInOutSine
-  },
-  contentFade: {
-    duration: TIMINGS.CONTENT_FADE / 1000,
-    ease: [0.25, 0.46, 0.45, 0.94], // easeOutQuad
-  },
-  returnShelf: {
-    duration: TIMINGS.RETURN_TO_SHELF / 1000,
-    ease: [0.645, 0.045, 0.355, 1], // easeInOutCubic
-  },
-  breathing: {
-    duration: TIMINGS.BREATHING_CYCLE / 1000,
-    ease: [0.37, 0, 0.63, 1], // easeInOutSine
-    repeat: Infinity,
-    repeatType: 'reverse',
-  },
-  bookmarkSway: {
-    duration: TIMINGS.BOOKMARK_SWAY / 1000,
-    ease: [0.37, 0, 0.63, 1], // easeInOutSine
-    repeat: Infinity,
-    repeatType: 'reverse',
-  },
 };

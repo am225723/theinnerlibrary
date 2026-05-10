@@ -1,110 +1,91 @@
 // Book geometry utilities for The Inner Library 3D Bookshelf
 
-// Book dimensions (in Three.js units, scaled for visual balance)
+// Each book has unique dimensions to look realistic and distinct
+export const BOOK_DIMENSIONS_MAP = {
+  daily_checkin: { width: 0.55, height: 1.8, depth: 1.2 },
+  needs_translator: { width: 0.4, height: 1.5, depth: 0.9 },
+  boundary_scripts: { width: 0.65, height: 2.0, depth: 1.4 },
+  cognitive_reframe: { width: 0.5, height: 1.6, depth: 1.1 },
+  evidence_shelf: { width: 0.45, height: 1.4, depth: 0.85 },
+  character_notes: { width: 0.6, height: 1.9, depth: 1.3 },
+  younger_self: { width: 0.5, height: 1.7, depth: 1.0 },
+  session_prep: { width: 0.55, height: 1.6, depth: 1.15 },
+};
+
+// Default dimensions
 export const BOOK_DIMENSIONS = {
-  width: 0.8,        // spine width
-  height: 2.4,       // book height
-  depth: 1.6,        // book depth when closed
-  spineRadius: 0.05, // rounded spine
-  coverThickness: 0.02,
+  width: 0.55,
+  height: 1.8,
+  depth: 1.2,
+  spineRadius: 0.05,
+  coverThickness: 0.03,
   pageThickness: 0.001,
   pageCount: 200,
 };
 
-// Book position presets (tall, medium, short)
-export const BOOK_POSITIONS = {
-  tall: { height: 2.4, spineWidth: 0.8 },
-  medium: { height: 2.0, spineWidth: 0.9 },
-  short: { height: 1.6, spineWidth: 0.85 },
-};
-
-// Shelf dimensions
+// Shelf dimensions - two shelves, 4 books each
 export const SHELF_DIMENSIONS = {
-  width: 12,
-  depth: 2,
-  height: 0.15,
-  shelfGap: 2.8, // vertical space between shelves
+  width: 8.5,
+  depth: 1.8,
+  height: 0.12,
+  shelfGap: 2.6,
   booksPerShelf: 4,
 };
 
-// Calculate book position on shelf
-export const calculateBookPosition = (index, shelfIndex, totalBooks) => {
-  const booksPerShelf = SHELF_DIMENSIONS.booksPerShelf;
-  const shelfWidth = SHELF_DIMENSIONS.width;
-  const bookSpacing = shelfWidth / booksPerShelf;
+// Get book dimensions by ID
+export const getBookDimensionsById = (bookId) => {
+  return BOOK_DIMENSIONS_MAP[bookId] || BOOK_DIMENSIONS;
+};
+
+// Calculate book position on shelf - snug side by side
+export const calculateBookPosition = (index, shelfIndex, books) => {
+  const booksOnShelf = books.slice(shelfIndex * SHELF_DIMENSIONS.booksPerShelf, (shelfIndex + 1) * SHELF_DIMENSIONS.booksPerShelf);
+  const posInShelf = index % SHELF_DIMENSIONS.booksPerShelf;
+  
+  // Calculate cumulative width for snug packing
+  let xOffset = 0;
+  for (let i = 0; i < posInShelf; i++) {
+    const dims = getBookDimensionsById(booksOnShelf[i]?.id);
+    xOffset += (dims?.width || 0.55) + 0.04; // small gap between books
+  }
   
   const shelfY = -shelfIndex * SHELF_DIMENSIONS.shelfGap;
-  const bookX = -shelfWidth / 2 + (index % booksPerShelf) * bookSpacing + bookSpacing / 2;
-  const bookZ = 0;
+  const totalBooksWidth = booksOnShelf.reduce((sum, b) => {
+    const dims = getBookDimensionsById(b?.id);
+    return sum + (dims?.width || 0.55) + 0.04;
+  }, -0.04);
   
-  return { x: bookX, y: shelfY, z: bookZ };
+  const startX = -totalBooksWidth / 2;
+  
+  return {
+    x: startX + xOffset,
+    y: shelfY,
+    z: 0,
+  };
 };
 
-// Get book dimensions by position type
+// Get book dimensions by position type (legacy support)
 export const getBookDimensions = (positionType) => {
-  return BOOK_POSITIONS[positionType] || BOOK_POSITIONS.medium;
-};
-
-// Calculate book cover vertices for rounded spine
-export const createBookCoverGeometry = (width, height, depth, spineRadius) => {
-  // This would create a custom geometry with rounded spine
-  // For now, we'll use a scaled box geometry
-  return {
-    width,
-    height,
-    depth,
+  const positions = {
+    tall: { width: 0.6, height: 2.0, depth: 1.3 },
+    medium: { width: 0.55, height: 1.7, depth: 1.1 },
+    short: { width: 0.45, height: 1.4, depth: 0.9 },
   };
+  return positions[positionType] || positions.medium;
 };
 
-// Page stack geometry
-export const createPageStackGeometry = (width, height, depth, pageCount) => {
-  const pageThickness = depth / pageCount;
-  return {
-    width: width - 0.1, // pages slightly smaller than cover
-    height: height - 0.1,
-    depth: depth - 0.05,
-    pageCount,
-    pageThickness,
-  };
-};
-
-// Bookmark dimensions
-export const BOOKMARK_DIMENSIONS = {
-  width: 0.08,
-  height: 0.6,
-  thickness: 0.005,
-  ribbonWidth: 0.04,
-};
-
-// Calculate bookmark position
-export const calculateBookmarkPosition = (bookHeight, bookDepth) => {
-  return {
-    x: 0,
-    y: bookHeight / 2 - 0.3,
-    z: bookDepth / 2 + 0.02,
-  };
-};
-
-// Camera positions for different views
+// Camera positions
 export const CAMERA_POSITIONS = {
-  library: { x: 0, y: 0, z: 8 },
-  bookSelected: { x: 0, y: 0, z: 5 },
-  bookOpen: { x: 0, y: 0, z: 4 },
+  library: { x: 0, y: -0.5, z: 7 },
+  bookSelected: { x: 0, y: 0, z: 4 },
+  bookOpen: { x: 0, y: 0, z: 3.5 },
 };
 
-// Camera targets for different views
+// Camera targets
 export const CAMERA_TARGETS = {
-  library: { x: 0, y: -1, z: 0 },
+  library: { x: 0, y: -0.5, z: 0 },
   bookSelected: { x: 0, y: 0, z: 0 },
   bookOpen: { x: 0, y: 0, z: 0 },
-};
-
-// Lighting positions
-export const LIGHTING_POSITIONS = {
-  ambient: { x: 0, y: 0, z: 0 },
-  directional: { x: -5, y: 10, z: 5 },
-  fill: { x: 5, y: 5, z: 5 },
-  rim: { x: 0, y: 5, z: -5 },
 };
 
 // Shadow properties
@@ -120,41 +101,4 @@ export const SHADOW_PROPS = {
   },
   bias: -0.0001,
   normalBias: 0.02,
-};
-
-// Animation keyframes
-export const ANIMATION_KEYFRAMES = {
-  hover: {
-    position: { y: [0, 0.1, 0] },
-    duration: 3,
-    repeat: Infinity,
-  },
-  selection: {
-    position: { z: [0, 2] },
-    rotation: { y: [0, Math.PI / 12] },
-    duration: 0.4,
-  },
-  open: {
-    rotation: { y: [Math.PI / 12, 0] },
-    duration: 0.6,
-  },
-  close: {
-    rotation: { y: [0, Math.PI / 12] },
-    position: { z: [2, 0] },
-    duration: 0.4,
-  },
-};
-
-// Scale factors for responsive design
-export const SCALE_FACTORS = {
-  mobile: 0.8,
-  tablet: 1.0,
-  desktop: 1.2,
-};
-
-// Get scale factor based on viewport
-export const getScaleFactor = (width) => {
-  if (width < 480) return SCALE_FACTORS.mobile;
-  if (width < 768) return SCALE_FACTORS.tablet;
-  return SCALE_FACTORS.desktop;
 };

@@ -1,0 +1,243 @@
+/* Login Screen Styles - The Inner Library */
+
+.login {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #2C1810 0%, #4A3728 50%, #6B4226 100%);
+  color: #F5F0E8;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  overflow-y: auto;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: #F5F0E8;
+  font-size: 16px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+  opacity: 0.8;
+}
+
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 1;
+}
+
+.spacer {
+  width: 80px;
+}
+
+/* Content */
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 28px 40px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* Icon */
+.iconWrapper {
+  width: 72px;
+  height: 72px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  backdrop-filter: blur(8px);
+}
+
+.bookIcon {
+  font-size: 36px;
+}
+
+/* Title */
+.title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0 0 8px 0;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 15px;
+  color: rgba(245, 240, 232, 0.7);
+  margin: 0 0 28px 0;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* Form */
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(245, 240, 232, 0.8);
+  letter-spacing: 0.3px;
+}
+
+.input {
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  color: #FFFFFF;
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+}
+
+.input::placeholder {
+  color: rgba(245, 240, 232, 0.4);
+}
+
+.input:focus {
+  border-color: #B8922A;
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 0 0 3px rgba(184, 146, 42, 0.15);
+}
+
+/* Error / Success */
+.error {
+  font-size: 14px;
+  color: #FF8A80;
+  margin: 0;
+  padding: 10px 14px;
+  background: rgba(255, 138, 128, 0.12);
+  border-radius: 10px;
+  border-left: 3px solid #FF8A80;
+}
+
+.success {
+  font-size: 14px;
+  color: #A5D6A7;
+  margin: 0;
+  padding: 10px 14px;
+  background: rgba(165, 214, 167, 0.12);
+  border-radius: 10px;
+  border-left: 3px solid #A5D6A7;
+}
+
+/* Submit Button */
+.submitBtn {
+  padding: 16px;
+  background: linear-gradient(135deg, #B8922A, #8B6914);
+  border: none;
+  border-radius: 12px;
+  color: #FFFFFF;
+  font-size: 16px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s;
+  box-shadow: 0 4px 16px rgba(184, 146, 42, 0.3);
+  margin-top: 4px;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submitBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(184, 146, 42, 0.4);
+}
+
+.submitBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Spinner */
+.spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #FFFFFF;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Switcher */
+.switcher {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.switchText {
+  font-size: 14px;
+  color: rgba(245, 240, 232, 0.6);
+  margin: 0 0 8px 0;
+}
+
+.switchBtn {
+  background: none;
+  border: none;
+  color: #B8922A;
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.switchBtn:hover {
+  color: #D4AA30;
+  text-decoration: underline;
+}
+
+/* Notice */
+.notice {
+  margin-top: 24px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+}
+
+.noticeText {
+  font-size: 13px;
+  color: rgba(245, 240, 232, 0.6);
+  margin: 0;
+  text-align: center;
+  line-height: 1.5;
+}

@@ -1,16 +1,16 @@
 // Bookshelf layout hook for The Inner Library 3D Bookshelf
 
 import { useMemo } from 'react';
-import { calculateBookPosition, getBookDimensions, SHELF_DIMENSIONS } from '../utils/bookGeometry';
+import { SHELF_DIMENSIONS } from '../utils/bookGeometry';
 
-// Core book definitions
+// Core book definitions - each with unique visual properties
 export const CORE_BOOKS = [
   {
     id: 'daily_checkin',
     path: '/open-todays-page',
     title: "Open Today's Page",
     subtitle: 'A gentle check-in for what feels present.',
-    spineLabel: "Today's\nPage",
+    spineLabel: "Today's Page",
     color: 'navy',
     icon: '📖',
     position: 'tall',
@@ -21,7 +21,7 @@ export const CORE_BOOKS = [
     path: '/reading-between-the-lines',
     title: 'Reading Between the Lines',
     subtitle: 'Notice what feels off and name the need underneath.',
-    spineLabel: 'Needs\nTranslator',
+    spineLabel: 'Needs Translator',
     color: 'forest',
     icon: '🌿',
     position: 'short',
@@ -32,8 +32,8 @@ export const CORE_BOOKS = [
     path: '/dialogue-practice',
     title: 'Dialogue Practice',
     subtitle: 'Practice words for boundaries, needs, and pauses.',
-    spineLabel: 'Dialogue\nPractice',
-    color: 'brown',
+    spineLabel: 'Dialogue Practice',
+    color: 'burgundy',
     icon: '🗣️',
     position: 'medium',
     isCore: true,
@@ -43,10 +43,10 @@ export const CORE_BOOKS = [
     path: '/rewrite-the-page',
     title: 'Rewrite the Page',
     subtitle: 'Turn painful thoughts into kinder, truer lines.',
-    spineLabel: 'Rewrite\nthe Page',
+    spineLabel: 'Rewrite the Page',
     color: 'gold',
     icon: '✍️',
-    position: 'tall',
+    position: 'medium',
     isCore: true,
   },
   {
@@ -54,8 +54,8 @@ export const CORE_BOOKS = [
     path: '/evidence-shelf',
     title: 'The Evidence Shelf',
     subtitle: 'Collect small moments of self-respect and worth.',
-    spineLabel: 'Evidence\nShelf',
-    color: 'forest',
+    spineLabel: 'Evidence Shelf',
+    color: 'teal',
     icon: '🏆',
     position: 'short',
     isCore: true,
@@ -65,10 +65,10 @@ export const CORE_BOOKS = [
     path: '/character-notes',
     title: 'Character Notes',
     subtitle: 'Understand the protective parts in your inner story.',
-    spineLabel: 'Character\nNotes',
-    color: 'navy',
+    spineLabel: 'Character Notes',
+    color: 'plum',
     icon: '🎭',
-    position: 'medium',
+    position: 'tall',
     isCore: true,
   },
   {
@@ -76,10 +76,10 @@ export const CORE_BOOKS = [
     path: '/letters-to-younger-self',
     title: 'Letters to the Younger Self',
     subtitle: 'Offer reassurance to younger parts who need care.',
-    spineLabel: 'Younger\nSelf',
-    color: 'warm',
+    spineLabel: 'Younger Self',
+    color: 'terracotta',
     icon: '💌',
-    position: 'tall',
+    position: 'medium',
     isCore: true,
   },
   {
@@ -87,8 +87,8 @@ export const CORE_BOOKS = [
     path: '/notes-for-next-chapter',
     title: 'Notes for My Next Chapter',
     subtitle: 'Gather reflections to bring into therapy.',
-    spineLabel: 'Next\nChapter',
-    color: 'gold',
+    spineLabel: 'Next Chapter',
+    color: 'brown',
     icon: '📋',
     position: 'medium',
     isCore: true,
@@ -97,97 +97,22 @@ export const CORE_BOOKS = [
 
 export const useBookshelfLayout = (savedEntries = []) => {
   const layout = useMemo(() => {
-    // Combine core books with saved entries
+    // Only core books on the shelf (no saved entries as books - they go in My Library)
     const allBooks = [...CORE_BOOKS];
-    
-    // Add saved entries as additional books (limit to 8 to avoid overcrowding)
-    const recentEntries = savedEntries.slice(0, 8);
-    recentEntries.forEach((entry, index) => {
-      allBooks.push({
-        id: entry.id,
-        path: `/my-library?entry=${entry.id}`,
-        title: entry.toolName || 'Saved Entry',
-        subtitle: new Date(entry.date).toLocaleDateString(),
-        spineLabel: entry.toolName?.substring(0, 10) || 'Saved',
-        color: 'navy',
-        icon: '📝',
-        position: 'medium',
-        isCore: false,
-        entryData: entry,
-      });
-    });
 
-    // Calculate positions for all books
-    const booksWithPositions = allBooks.map((book, index) => {
-      const shelfIndex = Math.floor(index / SHELF_DIMENSIONS.booksPerShelf);
-      const position = calculateBookPosition(index, shelfIndex, allBooks.length);
-      const dimensions = getBookDimensions(book.position);
-
-      return {
-        ...book,
-        position,
-        dimensions,
-        shelfIndex,
-      };
-    });
-
-    // Calculate shelf count
-    const shelfCount = Math.ceil(booksWithPositions.length / SHELF_DIMENSIONS.booksPerShelf);
+    const shelfCount = Math.ceil(allBooks.length / SHELF_DIMENSIONS.booksPerShelf);
 
     return {
-      books: booksWithPositions,
+      books: allBooks,
       shelfCount,
-      totalBooks: booksWithPositions.length,
+      totalBooks: allBooks.length,
     };
-  }, [savedEntries]);
+  }, []);
 
   return layout;
 };
 
-// Get book by ID (non-hook utility)
-export const getBookByIdUtil = (bookId, savedEntries = []) => {
-  const allBooks = [...CORE_BOOKS];
-  const recentEntries = savedEntries.slice(0, 8);
-  recentEntries.forEach((entry) => {
-    allBooks.push({
-      id: entry.id,
-      path: `/my-library?entry=${entry.id}`,
-      title: entry.toolName || 'Saved Entry',
-      subtitle: new Date(entry.date).toLocaleDateString(),
-      spineLabel: entry.toolName?.substring(0, 10) || 'Saved',
-      color: 'navy',
-      icon: '📝',
-      position: 'medium',
-      isCore: false,
-      entryData: entry,
-    });
-  });
-  return allBooks.find((book) => book.id === bookId);
-};
-
-// Get books by shelf (non-hook utility)
-export const getBooksByShelfUtil = (shelfIndex, savedEntries = []) => {
-  const allBooks = [...CORE_BOOKS];
-  const recentEntries = savedEntries.slice(0, 8);
-  recentEntries.forEach((entry) => {
-    allBooks.push({
-      id: entry.id,
-      path: `/my-library?entry=${entry.id}`,
-      title: entry.toolName || 'Saved Entry',
-      subtitle: new Date(entry.date).toLocaleDateString(),
-      spineLabel: entry.toolName?.substring(0, 10) || 'Saved',
-      color: 'navy',
-      icon: '📝',
-      position: 'medium',
-      isCore: false,
-      entryData: entry,
-    });
-  });
-  const booksPerShelf = SHELF_DIMENSIONS.booksPerShelf;
-  return allBooks.filter((_, index) => Math.floor(index / booksPerShelf) === shelfIndex);
-};
-
-// Calculate shelf Y position
-export const getShelfYPosition = (shelfIndex) => {
-  return -shelfIndex * SHELF_DIMENSIONS.shelfGap;
+// Get book by ID
+export const getBookByIdUtil = (bookId) => {
+  return CORE_BOOKS.find((book) => book.id === bookId);
 };
