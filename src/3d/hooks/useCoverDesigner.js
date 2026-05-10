@@ -1,4 +1,5 @@
 // Cover designer hook for The Inner Library 3D Bookshelf
+// Fixed: Added setAccentColor, setSpineFontSize, proper embossing support
 
 import { useState, useCallback } from 'react';
 import { MATERIAL_PRESETS, BOOK_COLORS } from '../utils/materialPresets';
@@ -48,7 +49,6 @@ const getDefaultCover = (bookId) => ({
 
 export const useCoverDesigner = (bookId) => {
   const [cover, setCover] = useState(() => {
-    // Try to load saved cover
     const saved = loadCoverFromStorage(bookId);
     return saved || getDefaultCover(bookId);
   });
@@ -60,25 +60,12 @@ export const useCoverDesigner = (bookId) => {
   const updateCover = useCallback((updates) => {
     setCover((prev) => {
       const updated = { ...prev, ...updates };
-      // Handle nested updates
-      if (updates.colors) {
-        updated.colors = { ...prev.colors, ...updates.colors };
-      }
-      if (updates.texture) {
-        updated.texture = { ...prev.texture, ...updates.texture };
-      }
-      if (updates.icon) {
-        updated.icon = { ...prev.icon, ...updates.icon };
-      }
-      if (updates.border) {
-        updated.border = { ...prev.border, ...updates.border };
-      }
-      if (updates.spine) {
-        updated.spine = { ...prev.spine, ...updates.spine };
-      }
-      if (updates.embossing) {
-        updated.embossing = { ...prev.embossing, ...updates.embossing };
-      }
+      if (updates.colors) updated.colors = { ...prev.colors, ...updates.colors };
+      if (updates.texture) updated.texture = { ...prev.texture, ...updates.texture };
+      if (updates.icon) updated.icon = { ...prev.icon, ...updates.icon };
+      if (updates.border) updated.border = { ...prev.border, ...updates.border };
+      if (updates.spine) updated.spine = { ...prev.spine, ...updates.spine };
+      if (updates.embossing) updated.embossing = { ...prev.embossing, ...updates.embossing };
       return updated;
     });
     setHasChanges(true);
@@ -91,69 +78,90 @@ export const useCoverDesigner = (bookId) => {
       updateCover({
         material,
         texture: {
-          ...cover.texture,
+          type: 'grainy',
           roughness: preset.roughness,
           metalness: preset.metalness,
         },
       });
     }
-  }, [cover.texture, updateCover]);
+  }, [updateCover]);
 
-  // Color selection
+  // Color selection (by named color key)
   const setCoverColor = useCallback((colorKey) => {
     const colorSet = BOOK_COLORS[colorKey];
     if (colorSet) {
       updateCover({
         colors: {
-          ...cover.colors,
           cover: colorSet.main,
           spine: colorSet.main,
           accent: colorSet.accent,
         },
       });
     }
-  }, [cover.colors, updateCover]);
+  }, [updateCover]);
 
   // Custom color
   const setCustomColor = useCallback((color) => {
     updateCover({
       colors: {
-        ...cover.colors,
         cover: color,
         spine: color,
       },
     });
-  }, [cover.colors, updateCover]);
+  }, [updateCover]);
+
+  // Accent color selection (direct hex value)
+  const setAccentColor = useCallback((color, target = 'accent') => {
+    if (target === 'text') {
+      updateCover({
+        colors: {
+          text: color,
+        },
+      });
+    } else {
+      updateCover({
+        colors: {
+          accent: color,
+        },
+      });
+    }
+  }, [updateCover]);
 
   // Spine text
   const setSpineText = useCallback((text) => {
     updateCover({
       spine: {
-        ...cover.spine,
         text,
       },
     });
-  }, [cover.spine, updateCover]);
+  }, [updateCover]);
+
+  // Spine font size
+  const setSpineFontSize = useCallback((fontSize) => {
+    setCover((prev) => ({
+      ...prev,
+      spine: { ...prev.spine, fontSize },
+    }));
+    setHasChanges(true);
+  }, []);
 
   // Icon selection
   const setIcon = useCallback((emoji) => {
     updateCover({
       icon: {
-        ...cover.icon,
         emoji,
       },
     });
-  }, [cover.icon, updateCover]);
+  }, [updateCover]);
 
   // Border toggle
   const setBorderEnabled = useCallback((enabled) => {
     updateCover({
       border: {
-        ...cover.border,
         enabled,
       },
     });
-  }, [cover.border, updateCover]);
+  }, [updateCover]);
 
   // Pattern selection
   const setPattern = useCallback((pattern) => {
@@ -168,14 +176,11 @@ export const useCoverDesigner = (bookId) => {
   // Embossing
   const setEmbossing = useCallback((embossing) => {
     updateCover({
-      embossing: {
-        ...cover.embossing,
-        ...embossing,
-      },
+      embossing,
     });
-  }, [cover.embossing, updateCover]);
+  }, [updateCover]);
 
-  // Save cover
+  // Save cover to localStorage
   const saveCover = useCallback(() => {
     saveCoverToStorage(cover);
     setHasChanges(false);
@@ -200,7 +205,9 @@ export const useCoverDesigner = (bookId) => {
     setMaterial,
     setCoverColor,
     setCustomColor,
+    setAccentColor,
     setSpineText,
+    setSpineFontSize,
     setIcon,
     setBorderEnabled,
     setPattern,

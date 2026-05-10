@@ -131,30 +131,6 @@ export const Library3D = () => {
         </ErrorBoundary>
       </div>
 
-      {/* Bottom controls */}
-      <div className={styles.controls} role="navigation" aria-label="Library controls">
-        <button className={styles.controlButton} onClick={handleToggleView} aria-label="Switch to classic view">
-          <span className={styles.controlIcon} aria-hidden="true">📱</span>
-          <span className={styles.controlLabel}>Classic</span>
-        </button>
-        <button
-          className={styles.controlButton}
-          onClick={() => navigate('/settings')}
-          aria-label="Settings and customization"
-        >
-          <span className={styles.controlIcon} aria-hidden="true">⚙️</span>
-          <span className={styles.controlLabel}>Settings</span>
-        </button>
-        <button
-          className={styles.controlButton}
-          onClick={() => navigate('/my-library')}
-          aria-label="View my saved pages"
-        >
-          <span className={styles.controlIcon} aria-hidden="true">📑</span>
-          <span className={styles.controlLabel}>My Pages</span>
-        </button>
-      </div>
-
       {/* Confirmation dialog */}
       {showConfirmation && selectedBook && (
         <BookConfirmationDialog
