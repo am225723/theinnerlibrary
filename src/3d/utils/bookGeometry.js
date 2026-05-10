@@ -1,22 +1,31 @@
 // Book geometry utilities for The Inner Library 3D Bookshelf
+//
+// Coordinate system:
+//   X = thickness (spine width, what you see on the shelf, ~0.4-0.8)
+//   Y = height (tall axis, vertical, ~0.9-1.2)
+//   Z = depth (page area, front-to-back, ~0.6-1.0)
+//
+// On shelf: spine is on the +Z face (narrow, thickness × height)
+// Front cover is on the +X face (wide, depth × height)
+// When selected: rotate group +π/2 around Y so front cover faces camera
 
-// Each book has unique dimensions to look realistic and distinct
+// Each book has unique dimensions
 export const BOOK_DIMENSIONS_MAP = {
-  daily_checkin: { width: 0.55, height: 1.8, depth: 1.2 },
-  needs_translator: { width: 0.4, height: 1.5, depth: 0.9 },
-  boundary_scripts: { width: 0.65, height: 2.0, depth: 1.4 },
-  cognitive_reframe: { width: 0.5, height: 1.6, depth: 1.1 },
-  evidence_shelf: { width: 0.45, height: 1.4, depth: 0.85 },
-  character_notes: { width: 0.6, height: 1.9, depth: 1.3 },
-  younger_self: { width: 0.5, height: 1.7, depth: 1.0 },
-  session_prep: { width: 0.55, height: 1.6, depth: 1.15 },
+  daily_checkin:    { thickness: 0.55, height: 1.05, depth: 0.72 },
+  needs_translator: { thickness: 0.40, height: 0.88, depth: 0.54 },
+  boundary_scripts: { thickness: 0.65, height: 1.15, depth: 0.84 },
+  cognitive_reframe:{ thickness: 0.50, height: 0.92, depth: 0.66 },
+  evidence_shelf:   { thickness: 0.38, height: 0.82, depth: 0.51 },
+  character_notes:  { thickness: 0.60, height: 1.10, depth: 0.78 },
+  younger_self:     { thickness: 0.48, height: 0.98, depth: 0.60 },
+  session_prep:     { thickness: 0.55, height: 0.92, depth: 0.69 },
 };
 
 // Default dimensions
 export const BOOK_DIMENSIONS = {
-  width: 0.55,
-  height: 1.8,
-  depth: 1.2,
+  thickness: 0.55,
+  height: 1.05,
+  depth: 0.72,
   spineRadius: 0.05,
   coverThickness: 0.03,
   pageThickness: 0.001,
@@ -42,17 +51,17 @@ export const calculateBookPosition = (index, shelfIndex, books) => {
   const booksOnShelf = books.slice(shelfIndex * SHELF_DIMENSIONS.booksPerShelf, (shelfIndex + 1) * SHELF_DIMENSIONS.booksPerShelf);
   const posInShelf = index % SHELF_DIMENSIONS.booksPerShelf;
   
-  // Calculate cumulative width for snug packing
+  // Calculate cumulative thickness (X axis = shelf spacing) for snug packing
   let xOffset = 0;
   for (let i = 0; i < posInShelf; i++) {
     const dims = getBookDimensionsById(booksOnShelf[i]?.id);
-    xOffset += (dims?.width || 0.55) + 0.04; // small gap between books
+    xOffset += (dims?.thickness || 0.55) + 0.04;
   }
   
   const shelfY = -shelfIndex * SHELF_DIMENSIONS.shelfGap;
   const totalBooksWidth = booksOnShelf.reduce((sum, b) => {
     const dims = getBookDimensionsById(b?.id);
-    return sum + (dims?.width || 0.55) + 0.04;
+    return sum + (dims?.thickness || 0.55) + 0.04;
   }, -0.04);
   
   const startX = -totalBooksWidth / 2;
@@ -67,9 +76,9 @@ export const calculateBookPosition = (index, shelfIndex, books) => {
 // Get book dimensions by position type (legacy support)
 export const getBookDimensions = (positionType) => {
   const positions = {
-    tall: { width: 0.6, height: 2.0, depth: 1.3 },
-    medium: { width: 0.55, height: 1.7, depth: 1.1 },
-    short: { width: 0.45, height: 1.4, depth: 0.9 },
+    tall: { thickness: 0.65, height: 1.15, depth: 0.84 },
+    medium: { thickness: 0.50, height: 0.98, depth: 0.66 },
+    short: { thickness: 0.38, height: 0.82, depth: 0.51 },
   };
   return positions[positionType] || positions.medium;
 };

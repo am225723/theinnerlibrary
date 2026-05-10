@@ -155,20 +155,21 @@ const SnugBookRow = ({
   bookmarks,
 }) => {
   // Calculate positions - books packed together snugly
+  // Use thickness (Z axis = shelf spacing dimension) for horizontal layout
   const bookPositions = useMemo(() => {
     let xOffset = 0;
     const positions = [];
-    const gap = 0.03;
+    const gap = 0.04;
 
-    // First pass: calculate total width
+    // First pass: calculate total width using thickness
     shelfBooks.forEach((book, i) => {
       const dims = getBookDimensionsById(book.id);
       positions.push({
         x: xOffset,
         book,
-        width: dims.width,
+        thickness: dims.thickness,
       });
-      xOffset += dims.width + gap;
+      xOffset += dims.thickness + gap;
     });
 
     // Center the row
@@ -176,21 +177,24 @@ const SnugBookRow = ({
     const startX = -totalWidth / 2;
     return positions.map((p) => ({
       ...p,
-      x: startX + p.x + p.width / 2,
+      x: startX + p.x + p.thickness / 2,
     }));
   }, [shelfBooks]);
 
   return (
     <>
-      {bookPositions.map(({ x, book, width }) => {
+      {bookPositions.map(({ x, book, thickness }) => {
         const dims = getBookDimensionsById(book.id);
         const bookY = shelfY + dims.height / 2 + 0.06;
+        // Z offset: push books forward so spine is at shelf front edge
+        // shelfDepth/2 = front edge, minus a small offset so spine is just behind the lip
+        const bookZ = 0.3;
 
         return (
           <Book
             key={book.id}
             book={book}
-            position={[x, bookY, 0.2]}
+            position={[x, bookY, bookZ]}
             onClick={onBookClick}
             onHover={onBookHover}
             onHoverEnd={onBookHoverEnd}
