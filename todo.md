@@ -159,3 +159,40 @@ Implement a photorealistic 3D bookshelf interface using Three.js + React Three F
 - Keep all existing functionality intact
 - Use existing color palette and design tokens
 - Ensure mobile-first design (max-width 480px)
+
+---
+
+## COMPLETED FIXES (May 10, 2026)
+
+### Fixed Book Geometry - Direction, Orientation, Flip, and Cover
+**Problem**: Books appeared as incorrect flat/wrong shapes instead of proper 3D books with visible spines and covers.
+
+**Root Cause**: Incorrect coordinate system in Book.jsx where the spine and cover faces had wrong dimensions.
+
+**Solution Implemented**:
+1. **Corrected Coordinate System**:
+   - X = thickness (spine width, 0.40-0.65) - what you see on the shelf
+   - Y = height (0.82-1.15)
+   - Z = depth (page area, 0.51-0.84)
+
+2. **Geometry Model**:
+   - Spine on +Z face (dimensions: X × Y = thickness × height) - narrow ✓
+   - Front cover on +X face (dimensions: Z × Y = depth × height) - wide ✓
+   - On shelf: spine (+Z) faces camera
+   - When selected: rotate +π/2 around Y so front cover (+X) faces camera
+
+3. **Animation System**:
+   - Book rotates +π/2 around Y axis to transition from spine view to cover view
+   - Front cover pivot at [t/2, 0, -d/2] (spine edge)
+   - Cover opens by rotating pivot around Y by Math.PI * 0.82
+
+4. **Files Modified**:
+   - `src/3d/utils/bookGeometry.js`: Updated dimensions with correct naming (thickness, height, depth)
+   - `src/3d/components/Book.jsx`: Complete rewrite with correct geometry (854 lines)
+   - `src/3d/components/Bookshelf.jsx`: Updated to use `dims.thickness` for shelf spacing
+
+5. **Build Status**: ✅ Build completed successfully with only minor source map warning (non-critical)
+
+6. **Git Status**: Changes committed locally. Push to GitHub pending authentication setup.
+
+**Verification**: Books now render with visible colored spines on shelves. Opening animation rotates books correctly to show front covers.

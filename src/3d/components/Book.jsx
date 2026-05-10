@@ -531,7 +531,7 @@ const Book = ({
     }
   }, [isSelected, animState]);
 
-  const isOpen = animState === BOOK_STATES.FLIPPING || animState === BOOK_STATES.OPEN;
+  const isOpen = animState === BOOK_STATES.SELECTED || animState === BOOK_STATES.CENTERED || animState === BOOK_STATES.FLIPPING || animState === BOOK_STATES.OPEN;
 
   // =====================================================================
   // 3D GEOMETRY
@@ -715,25 +715,29 @@ const Book = ({
         </mesh>
       </group>
 
-      {/* Inner pages visible on page block */}
-      <mesh position={[0, 0, -d / 2 + coverThick + 0.005]} rotation={[0, -Math.PI / 2, 0]}>
-        <planeGeometry args={[d - 0.06, h - 0.08]} />
-        <meshStandardMaterial
-          map={innerPageTexture}
-          roughness={0.9}
-          metalness={0}
-        />
-      </mesh>
+      {/* Inner pages visible on page block - only show when book is closed */}
+      {!isOpen && (
+        <mesh position={[0, 0, -d / 2 + coverThick + 0.005]} rotation={[0, -Math.PI / 2, 0]}>
+          <planeGeometry args={[d - 0.06, h - 0.08]} />
+          <meshStandardMaterial
+            map={innerPageTexture}
+            roughness={0.9}
+            metalness={0}
+          />
+        </mesh>
+      )}
 
-      {/* Back cover endpaper */}
-      <mesh position={[-t / 2 - coverThick - 0.003, 0, -d / 2]} rotation={[0, -Math.PI / 2, 0]}>
-        <planeGeometry args={[d - 0.04, h - 0.04]} />
-        <meshStandardMaterial
-          color="#E8DDD0"
-          roughness={0.7}
-          metalness={0}
-        />
-      </mesh>
+      {/* Back cover endpaper - only show when book is closed */}
+      {!isOpen && (
+        <mesh position={[-t / 2 - coverThick - 0.003, 0, -d / 2]} rotation={[0, -Math.PI / 2, 0]}>
+          <planeGeometry args={[d - 0.04, h - 0.04]} />
+          <meshStandardMaterial
+            color="#E8DDD0"
+            roughness={0.7}
+            metalness={0}
+          />
+        </mesh>
+      )}
 
       {/* Page edges - top */}
       <mesh position={[0, h / 2 - 0.01, -d / 2]}>
