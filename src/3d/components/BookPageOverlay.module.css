@@ -1,0 +1,304 @@
+/* Book Page Overlay Styles */
+
+.overlay {
+  position: fixed;
+  z-index: 100;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.pageContainer {
+  display: flex;
+  pointer-events: auto;
+  background: linear-gradient(135deg, #F5F0E8 0%, #EDE7D8 100%);
+  border-radius: 8px;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.3),
+    0 8px 20px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+  max-width: 90vw;
+  max-height: 80vh;
+}
+
+.pageLeft,
+.pageRight {
+  width: 280px;
+  min-height: 380px;
+  padding: 32px 24px;
+  position: relative;
+  background: #F8F4EC;
+}
+
+.pageLeft {
+  border-right: 2px solid #E0D8C8;
+}
+
+.pageRight {
+  background: #F5F0E8;
+}
+
+.pageDecoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #C8B89A;
+  opacity: 0.4;
+}
+
+.corner.topLeft {
+  top: 12px;
+  left: 12px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.corner.topRight {
+  top: 12px;
+  right: 12px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.corner.bottomLeft {
+  bottom: 12px;
+  left: 12px;
+  border-right: none;
+  border-top: none;
+}
+
+.corner.bottomRight {
+  bottom: 12px;
+  right: 12px;
+  border-left: none;
+  border-top: none;
+}
+
+.spineLine {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    #D0C8B8 20%,
+    #D0C8B8 80%,
+    transparent
+  );
+}
+
+.pageContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  height: 100%;
+  justify-content: center;
+}
+
+.bookIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1B2A4A;
+  margin: 0 0 12px;
+  line-height: 1.3;
+}
+
+.subtitle {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.95rem;
+  color: #6B4226;
+  margin: 0 0 20px;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.specialMessage {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1rem;
+  color: #8B4513;
+  margin: 0 0 20px;
+  line-height: 1.6;
+  padding: 16px;
+  background: rgba(184, 146, 42, 0.1);
+  border-left: 3px solid #B8922A;
+  border-radius: 4px;
+}
+
+.question {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #1B2A4A;
+  margin: 0 0 28px;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 220px;
+}
+
+.returnButton,
+.openButton {
+  padding: 14px 20px;
+  border: none;
+  border-radius: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.returnButton {
+  background: #E8DDD0;
+  color: #6B4226;
+}
+
+.returnButton:hover {
+  background: #D8CFC0;
+  transform: translateX(-2px);
+}
+
+.returnButton:active {
+  transform: translateX(0);
+}
+
+.openButton {
+  background: linear-gradient(135deg, #B8922A 0%, #9A7A22 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(184, 146, 42, 0.3);
+}
+
+.openButton:hover {
+  background: linear-gradient(135deg, #C8A030 0%, #A88A2A 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(184, 146, 42, 0.4);
+}
+
+.openButton:active {
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pageContainer {
+    flex-direction: column;
+    max-width: 85vw;
+  }
+
+  .pageLeft,
+  .pageRight {
+    width: 100%;
+    min-height: auto;
+  }
+
+  .pageLeft {
+    display: none; /* Hide decorative left page on mobile */
+  }
+
+  .pageRight {
+    padding: 24px 20px;
+    min-height: 400px;
+  }
+
+  .title {
+    font-size: 1.3rem;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+  }
+
+  .specialMessage {
+    font-size: 0.9rem;
+    padding: 12px;
+  }
+
+  .question {
+    font-size: 1rem;
+  }
+
+  .buttonGroup {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageRight {
+    padding: 20px 16px;
+    min-height: 360px;
+  }
+
+  .bookIcon {
+    font-size: 40px;
+  }
+
+  .title {
+    font-size: 1.15rem;
+  }
+
+  .subtitle {
+    font-size: 0.8rem;
+  }
+
+  .specialMessage {
+    font-size: 0.85rem;
+  }
+
+  .returnButton,
+  .openButton {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -45%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.overlay {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Print styles */
+@media print {
+  .overlay {
+    display: none;
+  }
+}

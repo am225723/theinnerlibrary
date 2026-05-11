@@ -63,6 +63,9 @@ const Bookshelf = ({
   onBookHoverEnd,
   selectedBookId,
   bookmarks = {},
+  onBookOpen,
+  onBookReturn,
+  returnToShelfId,
 }) => {
   const woodTex     = useMemo(() => buildWoodTexture('#8B6844'), []);
   const darkWoodTex = useMemo(() => buildWoodTexture('#5C3D20'), []);
@@ -98,6 +101,9 @@ const Bookshelf = ({
           onBookHoverEnd={onBookHoverEnd}
           selectedBookId={selectedBookId}
           bookmarks={bookmarks}
+          onBookOpen={onBookOpen}
+          onBookReturn={onBookReturn}
+          returnToShelfId={returnToShelfId}
         />
       ))}
 
@@ -122,6 +128,7 @@ const Bookshelf = ({
 const ShelfLevel = ({
   shelf, woodTex, darkWoodTex, edgeTex,
   onBookClick, onBookHover, onBookHoverEnd, selectedBookId, bookmarks,
+  onBookOpen, onBookReturn, returnToShelfId,
 }) => {
   const sy = shelf.y;
   const W  = SHELF_DIMENSIONS.width;
@@ -178,6 +185,9 @@ const ShelfLevel = ({
         onBookHoverEnd={onBookHoverEnd}
         selectedBookId={selectedBookId}
         bookmarks={bookmarks}
+        onBookOpen={onBookOpen}
+        onBookReturn={onBookReturn}
+        returnToShelfId={returnToShelfId}
       />
     </group>
   );
@@ -214,6 +224,7 @@ const WallBracket = ({ position, mirror = false }) => {
 const SnugBookRow = ({
   shelfBooks, shelfY,
   onBookClick, onBookHover, onBookHoverEnd, selectedBookId, bookmarks,
+  onBookOpen, onBookReturn, returnToShelfId,
 }) => {
   const positions = useMemo(() => {
     const gap = 0.03;
@@ -245,6 +256,9 @@ const SnugBookRow = ({
             isSelected={selectedBookId === book.id}
             showBookmark={!!bookmarks[book.id]}
             bookmarkCount={bookmarks[book.id] || 0}
+            onBookOpen={onBookOpen}
+            onBookReturn={onBookReturn}
+            returnToShelf={returnToShelfId === book.id}
           />
         );
       })}

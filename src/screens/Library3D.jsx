@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ErrorBoundary from '../components/ErrorBoundary';
-import { BookConfirmationDialog } from '../components/BookConfirmationDialog';
+import { BookPageOverlay } from '../3d/components/BookPageOverlay';
 import styles from './Library3D.module.css';
 
 const LibraryScene = React.lazy(() => import('../3d/scenes/LibraryScene'));
@@ -11,7 +11,8 @@ const LibraryScene = React.lazy(() => import('../3d/scenes/LibraryScene'));
 export const Library3D = () => {
   const navigate = useNavigate();
   const [selectedBook, setSelectedBook] = useState(null);
-  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showPageOverlay, setShowPageOverlay] = useState(false);
+  const [returnToShelfId, setReturnToShelfId] = useState(null);
   const [showFallback, setShowFallback] = useState(false);
 
   useEffect(() => {
@@ -28,34 +29,51 @@ export const Library3D = () => {
     if (!checkWebGL()) setShowFallback(true);
   }, []);
 
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        if (showConfirmation) {
-          setShowConfirmation(false);
-          setSelectedBook(null);
-        }
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showConfirmation]);
-
-  const handleBookSelect = useCallback((book) => {
-    setSelectedBook(book);
-    setShowConfirmation(true);
-  }, []);
-
-  const handleConfirmOpen = useCallback(() => {
-    setShowConfirmation(false);
+  // Navigate to the tool page
+  const handleOpenPage = useCallback(() => {
+    setShowPageOverlay(false);
     if (selectedBook?.path) {
       navigate(selectedBook.path);
     }
   }, [selectedBook, navigate]);
 
-  const handleCancelOpen = useCallback(() => {
-    setShowConfirmation(false);
-    setSelectedBook(null);
+  // Return book to shelf with animation
+  const handleReturnToShelf = useCallback(() => {
+    setShowPageOverlay(false);
+    setReturnToShelfId(selectedBook?.id);
+    // Clear the return trigger after animation completes
+    setTimeout(() => {
+      setReturnToShelfId(null);
+      setSelectedBook(null);
+    }, 800);
+  }, [selectedBook]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (showPageOverlay && selectedBook) {
+          handleReturnToShelf();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showPageOverlay, selectedBook, handleReturnToShelf]);
+
+  // Called when the book reaches OPEN state in the 3D scene
+  const handleBookOpen = useCallback((book) => {
+    setSelectedBook(book);
+    setShowPageOverlay(true);
+  }, []);
+
+  // Called when book is selected (clicked on shelf) - no longer shows popup
+  const handleBookSelect = useCallback((book) => {
+    // Book animation handles everything now - the overlay shows after book opens
+  }, []);
+
+  // Called when book has returned to shelf in the 3D scene
+  const handleBookReturn = useCallback((bookId) => {
+    // Book has completed its return animation
   }, []);
 
   const handleToggleView = useCallback(() => {
@@ -126,19 +144,23 @@ export const Library3D = () => {
               <p>Loading your library...</p>
             </div>
           }>
-            <LibraryScene onBookSelect={handleBookSelect} />
+            <LibraryScene
+              onBookSelect={handleBookSelect}
+              onBookOpen={handleBookOpen}
+              onBookReturn={handleBookReturn}
+              returnToShelfId={returnToShelfId}
+            />
           </Suspense>
         </ErrorBoundary>
       </div>
 
-      {/* Confirmation dialog */}
-      {showConfirmation && selectedBook && (
-        <BookConfirmationDialog
-          book={selectedBook}
-          onConfirm={handleConfirmOpen}
-          onCancel={handleCancelOpen}
-        />
-      )}
+      {/* Book page overlay (replaces popup dialog) */}
+      <BookPageOverlay
+        book={selectedBook}
+        visible={showPageOverlay}
+        onOpenPage={handleOpenPage}
+        onReturnToShelf={handleReturnToShelf}
+      />
     </div>
   );
 };

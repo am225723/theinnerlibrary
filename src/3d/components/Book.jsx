@@ -269,6 +269,9 @@ const Book = ({
   isSelected = false,
   showBookmark = false,
   bookmarkCount = 0,
+  onBookOpen,
+  onBookReturn,
+  returnToShelf = false,
 }) => {
   const groupRef            = useRef();
   const frontCoverPivotRef  = useRef();
@@ -382,12 +385,12 @@ const Book = ({
       return;
     }
 
-    // FLIPPING – cover swings open
+    // FLIPPING – cover swings open (negative rotation to open left-to-right)
     if (animState === BOOK_STATES.FLIPPING) {
       animProgress.current = Math.min(1, animProgress.current + delta / (TIMINGS.BOOK_OPEN / 1000));
       const p = easeOutCubic(animProgress.current);
       g.rotation.set(0, -Math.PI / 2 + 0.06, 0);
-      if (cvr) cvr.rotation.y = THREE.MathUtils.lerp(0, Math.PI * 0.80, p);
+      if (cvr) cvr.rotation.y = THREE.MathUtils.lerp(0, -Math.PI * 0.80, p);
       return;
     }
 
@@ -406,7 +409,7 @@ const Book = ({
       g.position.z = THREE.MathUtils.lerp(snapPos.current.z, position[2], p);
       g.rotation.y = THREE.MathUtils.lerp(-Math.PI / 2, 0, p);
       g.rotation.x = 0; g.rotation.z = 0;
-      if (cvr) cvr.rotation.y = THREE.MathUtils.lerp(Math.PI * 0.80, 0, p);
+      if (cvr) cvr.rotation.y = THREE.MathUtils.lerp(-Math.PI * 0.80, 0, p);
       return;
     }
   });
@@ -449,17 +452,29 @@ const Book = ({
         startState(BOOK_STATES.FLIPPING);
         setTimeout(() => {
           setAnimState(BOOK_STATES.OPEN);
+          if (onBookOpen) onBookOpen(book);
           if (onClick) onClick(book);
         }, TIMINGS.BOOK_OPEN);
       }, TIMINGS.CENTER_MOVE);
     }, TIMINGS.SELECTION_SLIDE);
-  }, [animState, book, onClick, startState]);
+  }, [animState, book, onClick, onBookOpen, startState]);
 
   useEffect(() => {
     if (isSelected && (animState === BOOK_STATES.IDLE || animState === BOOK_STATES.HOVER)) {
       startState(BOOK_STATES.SELECTED);
     }
   }, [isSelected, animState, startState]);
+
+  // ─── handle returnToShelf prop ───
+  useEffect(() => {
+    if (returnToShelf && animState === BOOK_STATES.OPEN) {
+      startState(BOOK_STATES.RETURNING);
+      setTimeout(() => {
+        startState(BOOK_STATES.IDLE);
+        if (onBookReturn) onBookReturn(book.id);
+      }, TIMINGS.RETURN_TO_SHELF);
+    }
+  }, [returnToShelf, animState, startState, onBookReturn, book.id]);
 
   // ── geometry ──────────────────────────────────────────────────────────────
   return (

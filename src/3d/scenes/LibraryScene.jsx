@@ -273,7 +273,7 @@ const Wainscoting = () => {
 };
 
 // ─── SceneContent ─────────────────────────────────────────────────────────────
-const LibrarySceneContent = ({ onBookSelect }) => {
+const LibrarySceneContent = ({ onBookSelect, onBookOpen, onBookReturn, returnToShelfId }) => {
   const [selectedBookId, setSelectedBookId] = useState(null);
   const [, setHoveredBookId] = useState(null);
 
@@ -290,8 +290,16 @@ const LibrarySceneContent = ({ onBookSelect }) => {
 
   const handleBookClick = useCallback((book) => {
     setSelectedBookId(book.id);
-    if (onBookSelect) setTimeout(() => onBookSelect(book), 2200);
-  }, [onBookSelect]);
+  }, []);
+
+  const handleBookOpen = useCallback((book) => {
+    if (onBookOpen) onBookOpen(book);
+  }, [onBookOpen]);
+
+  const handleBookReturn = useCallback((bookId) => {
+    setSelectedBookId(null);
+    if (onBookReturn) onBookReturn(bookId);
+  }, [onBookReturn]);
 
   return (
     <>
@@ -391,6 +399,9 @@ const LibrarySceneContent = ({ onBookSelect }) => {
           onBookHoverEnd={() => setHoveredBookId(null)}
           selectedBookId={selectedBookId}
           bookmarks={bookmarks}
+          onBookOpen={handleBookOpen}
+          onBookReturn={handleBookReturn}
+          returnToShelfId={returnToShelfId}
         />
 
         {/* Bookends */}
@@ -398,6 +409,36 @@ const LibrarySceneContent = ({ onBookSelect }) => {
         <Bookend position={[ 4.1, 0.07, 0.22]} mirror />
         <Bookend position={[-3.9, -2.51, 0.22]} />
         <Bookend position={[ 3.9, -2.51, 0.22]} mirror />
+
+        {/* ── Wall decorations ── */}
+        {/* Painting on right wall */}
+        <Painting position={[6.8, 1.2, 1.5]} />
+        <Painting position={[6.8, 1.2, 4.0]} width={1.0} height={1.2} />
+        {/* Painting on left wall (near window) */}
+        <Painting position={[-6.8, 1.5, 5.0]} width={1.2} height={0.8} />
+
+        {/* Mirror on right wall */}
+        <HangingMirror position={[6.8, 1.0, 3.0]} />
+
+        {/* Wall clock on back wall */}
+        <WallClock position={[4.5, 2.5, -1.42]} />
+
+        {/* ── Floor decorations ── */}
+        {/* Side table with book */}
+        <SideTable position={[-5.5, -5.08, 3.5]} />
+
+        {/* Floor plant */}
+        <FloorPlant position={[5.0, -5.08, 4.0]} />
+
+        {/* Second plant near window */}
+        <FloorPlant position={[-5.0, -5.08, 1.0]} />
+
+        {/* Decorative globe on shelf */}
+        <DecorativeGlobe position={[3.2, 0.10, 0.30]} />
+
+        {/* Stacked books on shelf */}
+        <StackedBooks position={[-3.5, -2.44, 0.30]} />
+        <StackedBooks position={[3.5, 0.07, 0.35]} />
 
         <DustParticles />
       </Suspense>
@@ -419,6 +460,284 @@ const LibrarySceneContent = ({ onBookSelect }) => {
   );
 };
 
+// ─── Wall Painting ──────────────────────────────────────────────
+const Painting = ({ position, width = 1.4, height = 1.0 }) => {
+  const paintTex = useMemo(() => {
+    const W = 256, H = Math.round(256 * (height / width));
+    const canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    // Sky-like abstract
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#87CEEB');
+    sky.addColorStop(0.4, '#B0D4E8');
+    sky.addColorStop(0.6, '#E8D5A0');
+    sky.addColorStop(1, '#C8A060');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+
+    // Abstract landscape hills
+    ctx.fillStyle = '#6B8E5A';
+    ctx.beginPath();
+    ctx.moveTo(0, H * 0.7);
+    ctx.quadraticCurveTo(W * 0.25, H * 0.55, W * 0.5, H * 0.65);
+    ctx.quadraticCurveTo(W * 0.75, H * 0.75, W, H * 0.6);
+    ctx.lineTo(W, H); ctx.lineTo(0, H);
+    ctx.fill();
+
+    ctx.fillStyle = '#5A7D4A';
+    ctx.beginPath();
+    ctx.moveTo(0, H * 0.8);
+    ctx.quadraticCurveTo(W * 0.3, H * 0.68, W * 0.6, H * 0.78);
+    ctx.quadraticCurveTo(W * 0.85, H * 0.85, W, H * 0.75);
+    ctx.lineTo(W, H); ctx.lineTo(0, H);
+    ctx.fill();
+
+    // Soft aging
+    ctx.fillStyle = 'rgba(240, 230, 210, 0.08)';
+    ctx.fillRect(0, 0, W, H);
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.anisotropy = 4;
+    return tex;
+  }, [width, height]);
+
+  return (
+    <group position={position}>
+      {/* Gilt frame */}
+      <mesh castShadow>
+        <boxGeometry args={[width + 0.14, height + 0.14, 0.06]} />
+        <meshStandardMaterial color="#8B7228" roughness={0.35} metalness={0.65} />
+      </mesh>
+      {/* Inner frame bevel */}
+      <mesh position={[0, 0, 0.031]}>
+        <boxGeometry args={[width + 0.04, height + 0.04, 0.01]} />
+        <meshStandardMaterial color="#B8922A" roughness={0.30} metalness={0.70} />
+      </mesh>
+      {/* Canvas */}
+      <mesh position={[0, 0, 0.037]}>
+        <planeGeometry args={[width, height]} />
+        <meshStandardMaterial map={paintTex} roughness={0.85} metalness={0} />
+      </mesh>
+    </group>
+  );
+};
+
+// ─── Hanging Mirror ─────────────────────────────────────────────
+const HangingMirror = ({ position }) => (
+  <group position={position}>
+    {/* Ornate frame */}
+    <mesh castShadow>
+      <boxGeometry args={[0.95, 1.3, 0.05]} />
+      <meshStandardMaterial color="#7A6520" roughness={0.32} metalness={0.70} />
+    </mesh>
+    {/* Inner bevel */}
+    <mesh position={[0, 0, 0.027]}>
+      <boxGeometry args={[0.82, 1.17, 0.01]} />
+      <meshStandardMaterial color="#B8922A" roughness={0.28} metalness={0.72} />
+    </mesh>
+    {/* Mirror surface */}
+    <mesh position={[0, 0, 0.033]}>
+      <planeGeometry args={[0.76, 1.11]} />
+      <meshStandardMaterial
+        color="#C8D0D8"
+        roughness={0.05}
+        metalness={0.92}
+        envMapIntensity={0.6}
+      />
+    </mesh>
+    {/* Chain */}
+    <mesh position={[0, 0.72, 0]}>
+      <cylinderGeometry args={[0.008, 0.008, 0.4, 6]} />
+      <meshStandardMaterial color="#8B7228" roughness={0.30} metalness={0.75} />
+    </mesh>
+  </group>
+);
+
+// ─── Wall Clock ─────────────────────────────────────────────────
+const WallClock = ({ position }) => {
+  const handRef = useRef();
+  useFrame(({ clock }) => {
+    if (!handRef.current) return;
+    handRef.current.rotation.z = -(clock.getElapsedTime() * 0.1) % (Math.PI * 2);
+  });
+
+  return (
+    <group position={position}>
+      {/* Wooden case */}
+      <mesh castShadow>
+        <cylinderGeometry args={[0.38, 0.38, 0.08, 32]} />
+        <meshStandardMaterial color="#5C3D20" roughness={0.55} metalness={0.05} />
+      </mesh>
+      {/* Face */}
+      <mesh rotation={[0, 0, 0]} position={[0, 0, 0.042]}>
+        <circleGeometry args={[0.32, 32]} />
+        <meshStandardMaterial color="#F5F0E8" roughness={0.90} metalness={0} />
+      </mesh>
+      {/* Hour marks */}
+      {Array.from({ length: 12 }).map((_, i) => (
+        <mesh
+          key={i}
+          position={[
+            Math.sin(i * Math.PI / 6) * 0.27,
+            Math.cos(i * Math.PI / 6) * 0.27,
+            0.045,
+          ]}
+        >
+          <boxGeometry args={[0.012, 0.035, 0.004]} />
+          <meshStandardMaterial color="#1B2A4A" roughness={0.50} metalness={0.10} />
+        </mesh>
+      ))}
+      {/* Hour hand */}
+      <mesh position={[0, 0.08, 0.048]}>
+        <boxGeometry args={[0.014, 0.14, 0.003]} />
+        <meshStandardMaterial color="#1B2A4A" roughness={0.50} metalness={0.10} />
+      </mesh>
+      {/* Minute hand */}
+      <group ref={handRef} position={[0, 0, 0.050]}>
+        <mesh position={[0, 0.12, 0]}>
+          <boxGeometry args={[0.010, 0.20, 0.002]} />
+          <meshStandardMaterial color="#2A3A5A" roughness={0.50} metalness={0.10} />
+        </mesh>
+      </group>
+      {/* Center pin */}
+      <mesh position={[0, 0, 0.052]}>
+        <sphereGeometry args={[0.015, 12, 12]} />
+        <meshStandardMaterial color="#B8922A" roughness={0.30} metalness={0.70} />
+      </mesh>
+    </group>
+  );
+};
+
+// ─── Side Table ──────────────────────────────────────────────────
+const SideTable = ({ position }) => (
+  <group position={position}>
+    {/* Table top */}
+    <mesh position={[0, 0.55, 0]} castShadow receiveShadow>
+      <cylinderGeometry args={[0.38, 0.38, 0.04, 24]} />
+      <meshStandardMaterial color="#6B4226" roughness={0.60} metalness={0.05} />
+    </mesh>
+    {/* Leg */}
+    <mesh position={[0, 0.27, 0]} castShadow>
+      <cylinderGeometry args={[0.04, 0.05, 0.50, 12]} />
+      <meshStandardMaterial color="#5C3D20" roughness={0.65} metalness={0.05} />
+    </mesh>
+    {/* Base */}
+    <mesh position={[0, 0.03, 0]} receiveShadow>
+      <cylinderGeometry args={[0.28, 0.30, 0.04, 24]} />
+      <meshStandardMaterial color="#5C3D20" roughness={0.65} metalness={0.05} />
+    </mesh>
+    {/* Small book on table */}
+    <mesh position={[0.05, 0.59, 0.02]} castShadow rotation={[0, 0.3, 0]}>
+      <boxGeometry args={[0.22, 0.03, 0.16]} />
+      <meshStandardMaterial color="#8B2020" roughness={0.70} metalness={0.03} />
+    </mesh>
+  </group>
+);
+
+// ─── Floor Plant ─────────────────────────────────────────────────
+const FloorPlant = ({ position }) => {
+  const leafRef = useRef();
+  useFrame(({ clock }) => {
+    if (!leafRef.current) return;
+    const t = clock.getElapsedTime();
+    leafRef.current.rotation.z = Math.sin(t * 0.4) * 0.02;
+  });
+
+  return (
+    <group position={position}>
+      {/* Terracotta pot */}
+      <mesh position={[0, 0.22, 0]} castShadow>
+        <cylinderGeometry args={[0.18, 0.14, 0.42, 16]} />
+        <meshStandardMaterial color="#C8703A" roughness={0.82} metalness={0} />
+      </mesh>
+      {/* Pot rim */}
+      <mesh position={[0, 0.43, 0]} castShadow>
+        <cylinderGeometry args={[0.20, 0.18, 0.05, 16]} />
+        <meshStandardMaterial color="#B86030" roughness={0.80} metalness={0} />
+      </mesh>
+      {/* Soil */}
+      <mesh position={[0, 0.44, 0]}>
+        <cylinderGeometry args={[0.16, 0.16, 0.02, 16]} />
+        <meshStandardMaterial color="#3A2510" roughness={0.95} metalness={0} />
+      </mesh>
+      {/* Leaves */}
+      <group ref={leafRef} position={[0, 0.70, 0]}>
+        {Array.from({ length: 7 }).map((_, i) => {
+          const angle = (i / 7) * Math.PI * 2;
+          const lean = 0.3 + Math.random() * 0.3;
+          return (
+            <mesh
+              key={i}
+              position={[
+                Math.sin(angle) * 0.08,
+                0.15 + Math.random() * 0.15,
+                Math.cos(angle) * 0.08,
+              ]}
+              rotation={[lean * Math.cos(angle), 0, -lean * Math.sin(angle)]}
+            >
+              <boxGeometry args={[0.06, 0.28, 0.008]} />
+              <meshStandardMaterial
+                color={i % 2 === 0 ? '#4A7A3A' : '#3A6A2A'}
+                roughness={0.75}
+                metalness={0}
+                side={THREE.DoubleSide}
+              />
+            </mesh>
+          );
+        })}
+      </group>
+    </group>
+  );
+};
+
+// ─── Decorative Globe ───────────────────────────────────────────
+const DecorativeGlobe = ({ position }) => (
+  <group position={position}>
+    {/* Stand base */}
+    <mesh position={[0, 0, 0]} castShadow>
+      <cylinderGeometry args={[0.08, 0.10, 0.03, 16]} />
+      <meshStandardMaterial color="#5C3D20" roughness={0.55} metalness={0.05} />
+    </mesh>
+    {/* Stand pillar */}
+    <mesh position={[0, 0.08, 0]} castShadow>
+      <cylinderGeometry args={[0.02, 0.025, 0.14, 8]} />
+      <meshStandardMaterial color="#8B7228" roughness={0.35} metalness={0.65} />
+    </mesh>
+    {/* Meridian ring */}
+    <mesh position={[0, 0.22, 0]} rotation={[0, 0, 0]}>
+      <torusGeometry args={[0.12, 0.006, 8, 32]} />
+      <meshStandardMaterial color="#B8922A" roughness={0.30} metalness={0.70} />
+    </mesh>
+    {/* Globe sphere */}
+    <mesh position={[0, 0.22, 0]} castShadow>
+      <sphereGeometry args={[0.11, 24, 24]} />
+      <meshStandardMaterial color="#4A6A8A" roughness={0.65} metalness={0.08} />
+    </mesh>
+  </group>
+);
+
+// ─── Stacked Books (horizontal decoration) ───────────────────────
+const StackedBooks = ({ position }) => (
+  <group position={position}>
+    {/* Bottom book */}
+    <mesh position={[0, 0.02, 0]} castShadow rotation={[0, 0.15, 0]}>
+      <boxGeometry args={[0.30, 0.04, 0.20]} />
+      <meshStandardMaterial color="#1B3A5A" roughness={0.65} metalness={0.03} />
+    </mesh>
+    {/* Middle book */}
+    <mesh position={[0.02, 0.06, 0]} castShadow rotation={[0, -0.08, 0]}>
+      <boxGeometry args={[0.28, 0.035, 0.18]} />
+      <meshStandardMaterial color="#5A1A1A" roughness={0.70} metalness={0.03} />
+    </mesh>
+    {/* Top book */}
+    <mesh position={[-0.01, 0.095, 0]} castShadow rotation={[0, 0.22, 0]}>
+      <boxGeometry args={[0.26, 0.03, 0.17]} />
+      <meshStandardMaterial color="#2A5A2A" roughness={0.68} metalness={0.03} />
+    </mesh>
+  </group>
+);
+
 // ─── Bookend ─────────────────────────────────────────────────────────────────
 const Bookend = ({ position, mirror = false }) => (
   <group position={position} scale={[mirror ? -1 : 1, 1, 1]}>
@@ -438,7 +757,7 @@ const Bookend = ({ position, mirror = false }) => (
 );
 
 // ─── LibraryScene (Canvas wrapper) ───────────────────────────────────────────
-const LibraryScene = ({ onBookSelect }) => (
+const LibraryScene = ({ onBookSelect, onBookOpen, onBookReturn, returnToShelfId }) => (
   <Canvas
     shadows
     camera={{ position: [0, -0.2, 8], fov: 42, near: 0.1, far: 55 }}
@@ -457,7 +776,12 @@ const LibraryScene = ({ onBookSelect }) => (
     }}
     dpr={[1, 2]}
   >
-    <LibrarySceneContent onBookSelect={onBookSelect} />
+    <LibrarySceneContent
+      onBookSelect={onBookSelect}
+      onBookOpen={onBookOpen}
+      onBookReturn={onBookReturn}
+      returnToShelfId={returnToShelfId}
+    />
   </Canvas>
 );
 

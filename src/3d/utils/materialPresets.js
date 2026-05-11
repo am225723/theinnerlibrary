@@ -19,6 +19,19 @@ export const BOOK_COLORS = {
   moss: { main: '#4A6741', light: '#5A7B51', dark: '#2D4225', accent: '#E8C170' },
   crimson: { main: '#8B1A1A', light: '#A82E2E', dark: '#5C1010', accent: '#F5E6B8' },
   olive: { main: '#6B6B3A', light: '#8B8B4A', dark: '#4A4A25', accent: '#E8C170' },
+  // New colors
+  chocolate: { main: '#3E2723', light: '#5D4037', dark: '#1B0F0A', accent: '#FFB74D' },
+  indigo: { main: '#283593', light: '#3949AB', dark: '#1A237E', accent: '#FFD54F' },
+  emerald: { main: '#1B5E20', light: '#2E7D32', dark: '#0D3B12', accent: '#FDD835' },
+  maroon: { main: '#4A0E0E', light: '#6D1B1B', dark: '#2D0808', accent: '#EF9A9A' },
+  copper: { main: '#795548', light: '#8D6E63', dark: '#4E342E', accent: '#FFAB91' },
+  aubergine: { main: '#4A148C', light: '#6A1B9A', dark: '#300070', accent: '#CE93D8' },
+  denim: { main: '#1565C0', light: '#1E88E5', dark: '#0D47A1', accent: '#90CAF9' },
+  charcoal: { main: '#37474F', light: '#455A64', dark: '#263238', accent: '#B0BEC5' },
+  mahogany: { main: '#4E342E', light: '#6D4C41', dark: '#3E2723', accent: '#BCAAA4' },
+  rosewood: { main: '#5D4037', light: '#795548', dark: '#3E2723', accent: '#D7CCC8' },
+  parchment: { main: '#D7CCC8', light: '#EFEBE9', dark: '#BCAAA4', accent: '#8D6E63' },
+  ivory: { main: '#F5F0E8', light: '#FFFEF5', dark: '#E0D8C8', accent: '#B8922A' },
 };
 
 // Material presets with visual properties
@@ -65,6 +78,49 @@ export const MATERIAL_PRESETS = {
     bumpScale: 0.012,
     description: 'Natural linen texture',
   },
+  // New material presets
+  vellum: {
+    name: 'Vellum',
+    roughness: 0.72,
+    metalness: 0.02,
+    bumpScale: 0.008,
+    description: 'Soft animal skin parchment',
+  },
+  silk: {
+    name: 'Silk',
+    roughness: 0.35,
+    metalness: 0.08,
+    bumpScale: 0.004,
+    description: 'Lustrous silk fabric',
+  },
+  canvas: {
+    name: 'Canvas',
+    roughness: 0.90,
+    metalness: 0.0,
+    bumpScale: 0.018,
+    description: 'Textured canvas wrap',
+  },
+  patent: {
+    name: 'Patent Leather',
+    roughness: 0.12,
+    metalness: 0.25,
+    bumpScale: 0.002,
+    description: 'High-gloss patent leather',
+  },
+  suede: {
+    name: 'Suede',
+    roughness: 0.98,
+    metalness: 0.0,
+    bumpScale: 0.015,
+    description: 'Soft napped suede',
+  },
+  metallic: {
+    name: 'Metallic',
+    roughness: 0.20,
+    metalness: 0.60,
+    bumpScale: 0.003,
+    description: 'Shimmering metallic finish',
+  },
 };
 
 // Texture pattern presets
@@ -74,6 +130,16 @@ export const PATTERN_PRESETS = {
   floral: { name: 'Floral', description: 'Floral motif' },
   striped: { name: 'Striped', description: 'Classic stripes' },
   damask: { name: 'Damask', description: 'Traditional damask' },
+  // New patterns
+  stars: { name: 'Stars', description: 'Celestial stars' },
+  dots: { name: 'Polka Dots', description: 'Playful dots' },
+  herringbone: { name: 'Herringbone', description: 'Classic weave' },
+  chevron: { name: 'Chevron', description: 'V-shaped pattern' },
+  paisley: { name: 'Paisley', description: 'Ornate paisley' },
+  art_deco: { name: 'Art Deco', description: '1920s geometric' },
+  celtic: { name: 'Celtic Knot', description: 'Interwoven design' },
+  mosaic: { name: 'Mosaic', description: 'Tile pattern' },
+  marbled: { name: 'Marbled', description: 'Swirling marble' },
 };
 
 // Border style presets
@@ -83,6 +149,32 @@ export const BORDER_PRESETS = {
   thick: { name: 'Thick', width: 2 },
   gold: { name: 'Gold Border', width: 1.5, color: '#B8922A' },
   silver: { name: 'Silver Border', width: 1.5, color: '#C0C0C0' },
+  // New border styles
+  double: { name: 'Double Line', width: 2, color: '#B8922A' },
+  ornate: { name: 'Ornate', width: 3, color: '#D4A845' },
+  corner: { name: 'Corner Only', width: 2, color: '#B8922A' },
+  embossed: { name: 'Embossed', width: 2, color: '#8B6F1F' },
+  rope: { name: 'Rope Pattern', width: 2, color: '#B8922A' },
+};
+
+// Corner decoration presets
+export const CORNER_PRESETS = {
+  none: { name: 'None' },
+  simple: { name: 'Simple', style: 'line' },
+  ornate: { name: 'Ornate', style: 'scroll' },
+  fleur: { name: 'Fleur-de-lis', style: 'fleur' },
+  diamond: { name: 'Diamond', style: 'diamond' },
+  star: { name: 'Star', style: 'star' },
+};
+
+// Font presets for spine and cover text
+export const FONT_PRESETS = {
+  serif: { name: 'Serif', family: 'Georgia, serif' },
+  sans: { name: 'Sans Serif', family: 'Arial, sans-serif' },
+  script: { name: 'Script', family: 'Brush Script MT, cursive' },
+  display: { name: 'Display', family: 'Impact, sans-serif' },
+  classic: { name: 'Classic', family: 'Times New Roman, serif' },
+  modern: { name: 'Modern', family: 'Helvetica, sans-serif' },
 };
 
 // Wear level presets
