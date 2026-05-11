@@ -196,3 +196,31 @@ Implement a photorealistic 3D bookshelf interface using Three.js + React Three F
 6. **Git Status**: Changes committed locally. Push to GitHub pending authentication setup.
 
 **Verification**: Books now render with visible colored spines on shelves. Opening animation rotates books correctly to show front covers.
+
+---
+
+## COMPLETED FIXES (May 10, 2026 - Part 2)
+
+### Fixed Large White Page Visible When Book is Opened
+**Problem**: A giant white rectangle appeared when the book was opened, facing the camera.
+
+**Root Cause**: Two large planeGeometry meshes were always visible regardless of book state:
+1. "Inner pages visible on page block" at line 719-726
+2. "Back cover endpaper" at line 729-736
+
+These planes had rotation `[0, -Math.PI / 2, 0]` which made them face the camera when the book group rotated by `+Math.PI / 2` during the SELECTED, CENTERED, FLIPPING, and OPEN animation states.
+
+**Solution Implemented**:
+1. Modified `isOpen` variable to include SELECTED, CENTERED, FLIPPING, and OPEN states (previously only FLIPPING and OPEN)
+2. Wrapped "inner pages visible on page block" in `{!isOpen && (...)}` conditional
+3. Wrapped "back cover endpaper" in `{!isOpen && (...)}` conditional
+4. These planes are now only visible when the book is closed (IDLE or HOVER states)
+
+**Files Modified**:
+- `src/3d/components/Book.jsx`
+
+**Build Status**: ✅ Build completed successfully with only minor source map warning (non-critical)
+
+**Git Status**: Changes pushed to GitHub successfully.
+
+**Verification**: Large white page no longer appears when book is opened. Books now open cleanly without facing the camera incorrectly.

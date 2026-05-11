@@ -1,7 +1,7 @@
-// Library Scene for The Inner Library 3D Bookshelf
-// Warm, inviting atmosphere with realistic lighting and room environment
+// LibraryScene.jsx – The Inner Library
+// Rich Victorian-style private library environment with warm lighting
 
-import React, { useState, useCallback, Suspense, useMemo } from 'react';
+import React, { useState, useCallback, Suspense, useMemo, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import * as THREE from 'three';
@@ -9,399 +9,456 @@ import Bookshelf from '../components/Bookshelf';
 import { useBookshelfLayout } from '../hooks/useBookshelfLayout';
 import { getEntries } from '../../utils/storage';
 
-// Wallpaper texture generator - warm damask pattern
-const WallpaperTexture = () => {
-  const texture = useMemo(() => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 512;
-    const ctx = canvas.getContext('2d');
+// ─── wallpaper texture ────────────────────────────────────────────────────────
+function buildWallpaperTexture() {
+  const W = 512, H = 512;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
 
-    // Base warm cream with slight green undertone
-    ctx.fillStyle = '#E8E0D0';
-    ctx.fillRect(0, 0, 512, 512);
+  // warm cream base
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0,   '#EDE4D2');
+  bg.addColorStop(0.5, '#E8DDC8');
+  bg.addColorStop(1,   '#E2D6BE');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
 
-    // Subtle damask diamond pattern
-    ctx.globalAlpha = 0.04;
-    for (let row = 0; row < 8; row++) {
-      for (let col = 0; col < 8; col++) {
-        const cx = col * 64 + 32;
-        const cy = row * 64 + 32;
-        const offset = (row % 2) * 32;
+  // damask-style diamond grid
+  ctx.globalAlpha = 0.055;
+  const cell = 64;
+  for (let row = 0; row < W / cell + 1; row++) {
+    for (let col = 0; col < H / cell + 1; col++) {
+      const cx = col * cell + (row % 2) * cell * 0.5;
+      const cy = row * cell;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(Math.PI / 4);
+      ctx.strokeStyle = '#8B7040';
+      ctx.lineWidth = 1.2;
+      ctx.strokeRect(-14, -14, 28, 28);
+      ctx.strokeRect(-9,  -9,  18, 18);
+      ctx.restore();
+    }
+  }
+  ctx.globalAlpha = 1;
 
-        // Diamond shape
-        ctx.save();
-        ctx.translate(cx + offset, cy);
-        ctx.rotate(Math.PI / 4);
-        ctx.strokeStyle = '#8B7355';
-        ctx.lineWidth = 1.5;
-        ctx.strokeRect(-12, -12, 24, 24);
-        // Inner diamond
-        ctx.strokeRect(-6, -6, 12, 12);
-        ctx.restore();
+  // light aging wash
+  for (let i = 0; i < 12; i++) {
+    const x = Math.random() * W, y = Math.random() * H, r = 70 + Math.random() * 130;
+    const gr = ctx.createRadialGradient(x, y, 0, x, y, r);
+    gr.addColorStop(0,   'rgba(160,130,90,0.028)');
+    gr.addColorStop(0.6, 'rgba(140,110,70,0.012)');
+    gr.addColorStop(1,   'rgba(120,90,50,0)');
+    ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  }
 
-        // Small dots at intersections
-        ctx.fillStyle = '#8B7355';
-        ctx.beginPath();
-        ctx.arc(cx + offset, cy, 2, 0, Math.PI * 2);
-        ctx.fill();
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(3.5, 2.5);
+  tex.anisotropy = 8;
+  return tex;
+}
+
+// ─── wood floor texture ───────────────────────────────────────────────────────
+function buildFloorTexture() {
+  const W = 512, H = 256;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  const plankH = H / 4;
+  const colors = ['#B8956A', '#AD8A60', '#C29E74', '#A87E54'];
+
+  for (let row = 0; row < 4; row++) {
+    const offset = (row % 2) * 128;
+    const y = row * plankH;
+    for (let col = 0; col < 6; col++) {
+      const x = col * 100 - offset;
+      ctx.fillStyle = colors[col % colors.length];
+      ctx.fillRect(x, y, 98, plankH - 1);
+      // grain
+      for (let g = 0; g < 30; g++) {
+        const gx = x + Math.random() * 98;
+        const gy = y + Math.random() * (plankH - 1);
+        ctx.fillStyle = `rgba(0,0,0,${0.02 + Math.random() * 0.04})`;
+        ctx.fillRect(gx, gy, 1 + Math.random() * 3, 0.5);
       }
     }
-    ctx.globalAlpha = 1;
+    // plank gap
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.fillRect(0, y + plankH - 1, W, 1);
+  }
 
-    // Warm aging/watercolor wash
-    for (let i = 0; i < 15; i++) {
-      const x = Math.random() * 512;
-      const y = Math.random() * 512;
-      const r = 60 + Math.random() * 120;
-      const gradient = ctx.createRadialGradient(x, y, 0, x, y, r);
-      gradient.addColorStop(0, 'rgba(180, 160, 130, 0.03)');
-      gradient.addColorStop(0.5, 'rgba(160, 140, 110, 0.015)');
-      gradient.addColorStop(1, 'rgba(140, 120, 90, 0)');
-      ctx.fillStyle = gradient;
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fill();
-    }
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(5, 4);
+  tex.anisotropy = 8;
+  return tex;
+}
 
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.wrapS = THREE.RepeatWrapping;
-    tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(3, 2);
-    return tex;
-  }, []);
+// ─── Ornate window ────────────────────────────────────────────────────────────
+const Window = ({ position }) => (
+  <group position={position}>
+    {/* Dark wood outer frame */}
+    <mesh castShadow>
+      <boxGeometry args={[2.1, 3.0, 0.14]} />
+      <meshStandardMaterial color="#3A2810" roughness={0.65} metalness={0.06} />
+    </mesh>
+    {/* Warm glass */}
+    <mesh position={[0, 0, 0.074]}>
+      <planeGeometry args={[1.72, 2.62]} />
+      <meshStandardMaterial
+        color="#FFF6E0"
+        emissive="#FFCC70"
+        emissiveIntensity={0.55}
+        transparent
+        opacity={0.82}
+        roughness={0.08}
+        metalness={0.04}
+      />
+    </mesh>
+    {/* Glazing bars */}
+    <mesh position={[0, 0, 0.082]}>
+      <boxGeometry args={[1.74, 0.05, 0.025]} />
+      <meshStandardMaterial color="#3A2810" roughness={0.65} metalness={0.05} />
+    </mesh>
+    <mesh position={[0, 0, 0.082]}>
+      <boxGeometry args={[0.05, 2.64, 0.025]} />
+      <meshStandardMaterial color="#3A2810" roughness={0.65} metalness={0.05} />
+    </mesh>
+    {/* Horizontal divider */}
+    <mesh position={[0, 0.22, 0.082]}>
+      <boxGeometry args={[1.74, 0.04, 0.025]} />
+      <meshStandardMaterial color="#3A2810" roughness={0.65} metalness={0.05} />
+    </mesh>
+    {/* Sill */}
+    <mesh position={[0, -1.45, 0.11]} castShadow>
+      <boxGeometry args={[2.3, 0.07, 0.28]} />
+      <meshStandardMaterial color="#4A3018" roughness={0.62} metalness={0.05} />
+    </mesh>
+    {/* Window light */}
+    <pointLight position={[0, 0, 1.8]} color="#FFE0A0" intensity={1.4} distance={9} decay={2} />
+  </group>
+);
 
-  return texture;
-};
-
-// Window with warm light streaming in
-const Window = ({ position }) => {
+// ─── Ceiling lamp ─────────────────────────────────────────────────────────────
+const CeilingLamp = ({ position }) => {
+  const shadeRef = useRef();
+  useFrame(({ clock }) => {
+    if (!shadeRef.current) return;
+    shadeRef.current.material.emissiveIntensity = 0.4 + Math.sin(clock.getElapsedTime() * 0.8) * 0.03;
+  });
   return (
     <group position={position}>
-      {/* Window frame - dark wood */}
-      <mesh castShadow>
-        <boxGeometry args={[2.2, 2.8, 0.15]} />
-        <meshStandardMaterial color="#4A3828" roughness={0.7} metalness={0.05} />
+      {/* Chain */}
+      <mesh>
+        <cylinderGeometry args={[0.005, 0.005, 0.35, 6]} />
+        <meshStandardMaterial color="#8B7228" roughness={0.30} metalness={0.75} />
       </mesh>
-
-      {/* Window glass - warm light */}
-      <mesh position={[0, 0, 0.08]}>
-        <planeGeometry args={[1.8, 2.4]} />
+      {/* Brass collar */}
+      <mesh position={[0, -0.175, 0]}>
+        <cylinderGeometry args={[0.055, 0.040, 0.055, 16]} />
+        <meshStandardMaterial color="#B8922A" roughness={0.28} metalness={0.72} />
+      </mesh>
+      {/* Shade */}
+      <mesh ref={shadeRef} position={[0, -0.34, 0]}>
+        <coneGeometry args={[0.28, 0.30, 24, 1, true]} />
         <meshStandardMaterial
-          color="#FFF8E8"
-          emissive="#FFE8C0"
-          emissiveIntensity={0.6}
-          transparent
-          opacity={0.85}
-          roughness={0.1}
-          metalness={0}
+          color="#C8A850"
+          roughness={0.55}
+          metalness={0.12}
+          emissive="#D4A020"
+          emissiveIntensity={0.40}
+          side={THREE.DoubleSide}
         />
       </mesh>
-
-      {/* Window cross bar - horizontal */}
-      <mesh position={[0, 0, 0.09]}>
-        <boxGeometry args={[1.8, 0.06, 0.03]} />
-        <meshStandardMaterial color="#4A3828" roughness={0.7} metalness={0.05} />
-      </mesh>
-
-      {/* Window cross bar - vertical */}
-      <mesh position={[0, 0, 0.09]}>
-        <boxGeometry args={[0.06, 2.4, 0.03]} />
-        <meshStandardMaterial color="#4A3828" roughness={0.7} metalness={0.05} />
-      </mesh>
-
-      {/* Window sill */}
-      <mesh position={[0, -1.35, 0.12]} castShadow>
-        <boxGeometry args={[2.4, 0.08, 0.3]} />
-        <meshStandardMaterial color="#5C4033" roughness={0.7} metalness={0.05} />
-      </mesh>
-
-      {/* Light streaming from window */}
-      <pointLight position={[0, 0, 1.5]} color="#FFE8C0" intensity={1.2} distance={8} decay={2} />
+      <pointLight position={[0, -0.38, 0]} color="#FFD070" intensity={1.1} distance={7} decay={2} />
     </group>
   );
 };
 
-// Bookend decoration
-const Bookend = ({ position, variant = 'horse' }) => {
-  return (
-    <group position={position}>
-      {/* Bookend base */}
-      <mesh castShadow receiveShadow>
-        <boxGeometry args={[0.15, 0.04, 0.25]} />
-        <meshStandardMaterial color="#2A2A2A" roughness={0.3} metalness={0.7} />
-      </mesh>
-      {/* Bookend vertical */}
-      <mesh position={[0, 0.12, 0]} castShadow>
-        <boxGeometry args={[0.03, 0.22, 0.2]} />
-        <meshStandardMaterial color="#1A1A1A" roughness={0.3} metalness={0.7} />
-      </mesh>
-      {/* Decorative top - L-shape */}
-      <mesh position={[0.04, 0.22, 0]} castShadow>
-        <boxGeometry args={[0.1, 0.03, 0.18]} />
-        <meshStandardMaterial color="#2A2A2A" roughness={0.3} metalness={0.7} />
-      </mesh>
-    </group>
-  );
-};
-
-// Rug on floor
-const Rug = ({ position }) => {
-  return (
-    <mesh position={position} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-      <planeGeometry args={[5, 3.5]} />
-      <meshStandardMaterial color="#8B4513" roughness={0.95} metalness={0} />
+// ─── Rug ─────────────────────────────────────────────────────────────────────
+const Rug = ({ position }) => (
+  <group position={position}>
+    <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+      <planeGeometry args={[5.5, 3.8]} />
+      <meshStandardMaterial color="#8B2020" roughness={0.96} metalness={0} />
     </mesh>
-  );
-};
+    {/* Border */}
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0.001]}>
+      <planeGeometry args={[5.1, 3.4]} />
+      <meshStandardMaterial color="#C8A820" roughness={0.96} metalness={0} transparent opacity={0.25} />
+    </mesh>
+  </group>
+);
 
-// Floating dust particles
+// ─── Dust particles ───────────────────────────────────────────────────────────
 const DustParticles = () => {
-  const particlesRef = React.useRef();
-  const count = 40;
-
-  const particles = useMemo(() => {
-    const positions = new Float32Array(count * 3);
+  const ref   = useRef();
+  const count = 50;
+  const positions = useMemo(() => {
+    const arr = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 8;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 4 - 0.5;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 6;
+      arr[i * 3]     = (Math.random() - 0.5) * 9;
+      arr[i * 3 + 1] = (Math.random() - 0.5) * 4;
+      arr[i * 3 + 2] = (Math.random() - 0.5) * 7;
     }
-    return positions;
+    return arr;
   }, []);
 
-  useFrame((state) => {
-    if (!particlesRef.current) return;
-    const time = state.clock.getElapsedTime();
-    const positions = particlesRef.current.geometry.attributes.position.array;
+  useFrame(({ clock }) => {
+    if (!ref.current) return;
+    const t   = clock.getElapsedTime();
+    const pos = ref.current.geometry.attributes.position.array;
     for (let i = 0; i < count; i++) {
-      positions[i * 3] += Math.sin(time * 0.3 + i) * 0.0005;
-      positions[i * 3 + 1] += Math.cos(time * 0.2 + i * 0.5) * 0.0003;
-      positions[i * 3 + 2] += Math.sin(time * 0.25 + i * 0.3) * 0.0004;
+      pos[i * 3]     += Math.sin(t * 0.28 + i) * 0.00045;
+      pos[i * 3 + 1] += Math.cos(t * 0.19 + i * 0.4) * 0.00030;
+      pos[i * 3 + 2] += Math.sin(t * 0.23 + i * 0.6) * 0.00038;
     }
-    particlesRef.current.geometry.attributes.position.needsUpdate = true;
+    ref.current.geometry.attributes.position.needsUpdate = true;
   });
 
   return (
-    <points ref={particlesRef}>
+    <points ref={ref}>
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          array={particles}
+          array={positions}
           count={count}
           itemSize={3}
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.015}
+        size={0.013}
         color="#FFE8C0"
         transparent
-        opacity={0.4}
+        opacity={0.45}
         sizeAttenuation
       />
     </points>
   );
 };
 
+// ─── Wainscoting panels ───────────────────────────────────────────────────────
+const Wainscoting = () => {
+  const panels = [-3.5, -2.1, -0.7, 0.7, 2.1, 3.5];
+  return (
+    <group>
+      {/* Horizontal rail */}
+      <mesh position={[0, -2.55, -1.34]} castShadow>
+        <boxGeometry args={[11, 0.08, 0.065]} />
+        <meshStandardMaterial color="#C8B89A" roughness={0.70} metalness={0.04} />
+      </mesh>
+      {/* Top cap rail */}
+      <mesh position={[0, -2.50, -1.30]}>
+        <boxGeometry args={[11, 0.03, 0.09]} />
+        <meshStandardMaterial color="#D8C8A8" roughness={0.65} metalness={0.05} />
+      </mesh>
+      {/* Vertical stiles */}
+      {panels.map((x, i) => (
+        <mesh key={i} position={[x, -3.25, -1.34]}>
+          <boxGeometry args={[0.055, 1.45, 0.05]} />
+          <meshStandardMaterial color="#C0B090" roughness={0.72} metalness={0.03} />
+        </mesh>
+      ))}
+      {/* Panel insets */}
+      {panels.slice(0, -1).map((x, i) => (
+        <mesh key={i} position={[x + 0.7, -3.25, -1.32]}>
+          <planeGeometry args={[1.2, 1.3]} />
+          <meshStandardMaterial color="#C8BA9C" roughness={0.88} metalness={0} />
+        </mesh>
+      ))}
+    </group>
+  );
+};
+
+// ─── SceneContent ─────────────────────────────────────────────────────────────
 const LibrarySceneContent = ({ onBookSelect }) => {
   const [selectedBookId, setSelectedBookId] = useState(null);
   const [, setHoveredBookId] = useState(null);
 
-  const entries = getEntries();
+  const entries   = getEntries();
   const { books } = useBookshelfLayout(entries.slice(0, 8));
-  const wallpaperTexture = WallpaperTexture();
 
-  // Calculate bookmarks from entries
+  const wallpaperTex = useMemo(() => buildWallpaperTexture(), []);
+  const floorTex     = useMemo(() => buildFloorTexture(),     []);
+
   const bookmarks = {};
-  entries.forEach((entry) => {
-    if (entry.toolId) {
-      bookmarks[entry.toolId] = (bookmarks[entry.toolId] || 0) + 1;
-    }
+  entries.forEach((e) => {
+    if (e.toolId) bookmarks[e.toolId] = (bookmarks[e.toolId] || 0) + 1;
   });
 
   const handleBookClick = useCallback((book) => {
     setSelectedBookId(book.id);
-    if (onBookSelect) {
-      // Delay to allow animation to play
-      setTimeout(() => {
-        onBookSelect(book);
-      }, 2200);
-    }
+    if (onBookSelect) setTimeout(() => onBookSelect(book), 2200);
   }, [onBookSelect]);
-
-  const handleBookHover = useCallback((bookId) => {
-    setHoveredBookId(bookId);
-  }, []);
-
-  const handleBookHoverEnd = useCallback(() => {
-    setHoveredBookId(null);
-  }, []);
 
   return (
     <>
-      {/* Fog for depth - warm tones */}
-      <fog attach="fog" args={['#E8E0D0', 10, 22]} />
-
-      {/* Background color */}
-      <color attach="background" args={['#E8E0D0']} />
+      <fog attach="fog" args={['#E8DDD0', 11, 24]} />
+      <color attach="background" args={['#E8DDD0']} />
 
       <Suspense fallback={null}>
-        {/* Environment lighting for realistic reflections */}
         <Environment preset="apartment" />
 
-        {/* Main directional light - warm sunlight streaming from window */}
+        {/* ── Lights ── */}
+        {/* Primary warm sun from upper-right */}
         <directionalLight
-          position={[5, 8, 5]}
-          intensity={1.4}
-          color="#FFF5E6"
+          position={[6, 9, 5]}
+          intensity={1.6}
+          color="#FFF4E0"
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
-          shadow-camera-far={20}
-          shadow-camera-left={-10}
-          shadow-camera-right={10}
-          shadow-camera-top={10}
-          shadow-camera-bottom={-10}
-          shadow-bias={-0.0001}
+          shadow-camera-far={22}
+          shadow-camera-left={-11}
+          shadow-camera-right={11}
+          shadow-camera-top={11}
+          shadow-camera-bottom={-11}
+          shadow-bias={-0.00015}
         />
+        {/* Soft fill */}
+        <ambientLight intensity={0.38} color="#FFF6EC" />
+        {/* Back-rim bounce */}
+        <directionalLight position={[-4, 4, -4]} intensity={0.28} color="#FFE5CC" />
+        {/* Left-side window spill */}
+        <pointLight position={[-5, 1.5, 2]} intensity={0.65} color="#FFD8A0" distance={9} decay={2} />
+        {/* Overhead warm fill */}
+        <pointLight position={[0, 5, 0.5]} intensity={0.45} color="#FFF0CC" distance={7} decay={2} />
 
-        {/* Fill light - soft ambient */}
-        <ambientLight intensity={0.3} color="#FFF8F0" />
+        {/* ── Room shell ── */}
 
-        {/* Rim light from behind */}
-        <directionalLight position={[-3, 5, -3]} intensity={0.25} color="#FFE8CC" />
-
-        {/* Warm accent from left - window light */}
-        <pointLight position={[-4, 2, 2]} intensity={0.5} color="#FFD4A0" distance={8} decay={2} />
-
-        {/* Ceiling light - overhead reading lamp */}
-        <pointLight position={[0, 4, 1]} intensity={0.3} color="#FFF0D0" distance={6} decay={2} />
-
-        {/* === ROOM ENVIRONMENT === */}
-
-        {/* Back wall - warm wallpaper */}
-        <mesh position={[0, -0.5, -1.4]} receiveShadow>
-          <planeGeometry args={[14, 12]} />
-          <meshStandardMaterial
-            map={wallpaperTexture}
-            roughness={0.92}
-            metalness={0}
-          />
+        {/* Back wall */}
+        <mesh position={[0, -0.5, -1.5]} receiveShadow>
+          <planeGeometry args={[15, 13]} />
+          <meshStandardMaterial map={wallpaperTex} roughness={0.94} metalness={0} />
         </mesh>
 
         {/* Left wall */}
-        <mesh position={[-7, -0.5, 4]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
-          <planeGeometry args={[12, 12]} />
-          <meshStandardMaterial color="#DDD5C5" roughness={0.9} metalness={0} />
+        <mesh position={[-7.5, -0.5, 4]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
+          <planeGeometry args={[13, 13]} />
+          <meshStandardMaterial color="#DDD5C3" roughness={0.92} metalness={0} />
         </mesh>
 
         {/* Right wall */}
-        <mesh position={[7, -0.5, 4]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
-          <planeGeometry args={[12, 12]} />
-          <meshStandardMaterial color="#DDD5C5" roughness={0.9} metalness={0} />
+        <mesh position={[7.5, -0.5, 4]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
+          <planeGeometry args={[13, 13]} />
+          <meshStandardMaterial color="#DDD5C3" roughness={0.92} metalness={0} />
         </mesh>
 
         {/* Ceiling */}
-        <mesh position={[0, 5, 4]} rotation={[Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[14, 12]} />
-          <meshStandardMaterial color="#F0E8D8" roughness={0.95} metalness={0} />
+        <mesh position={[0, 5.5, 4]} rotation={[Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[16, 13]} />
+          <meshStandardMaterial color="#EEE8DC" roughness={0.96} metalness={0} />
         </mesh>
 
-        {/* Window on left wall */}
-        <Window position={[-6.8, 0.5, 2]} />
-
-        {/* Baseboard along back wall */}
-        <mesh position={[0, -5.6, -1.3]} castShadow>
-          <boxGeometry args={[14, 0.25, 0.08]} />
-          <meshStandardMaterial color="#5C4033" roughness={0.7} metalness={0.05} />
+        {/* Floor */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -5.1, 4]} receiveShadow>
+          <planeGeometry args={[22, 16]} />
+          <meshStandardMaterial map={floorTex} color="#B08850" roughness={0.80} metalness={0.02} />
         </mesh>
 
-        {/* Crown molding along back wall */}
-        <mesh position={[0, 4.9, -1.3]}>
-          <boxGeometry args={[14, 0.15, 0.1]} />
-          <meshStandardMaterial color="#F5F0E8" roughness={0.8} metalness={0} />
+        {/* Crown moulding */}
+        <mesh position={[0, 5.30, -1.38]}>
+          <boxGeometry args={[15, 0.18, 0.12]} />
+          <meshStandardMaterial color="#EDE5D8" roughness={0.80} metalness={0} />
         </mesh>
 
-        {/* Rug on floor in front of bookshelf */}
-        <Rug position={[0, -4.95, 3]} />
-
-        {/* Floor - hardwood */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -5, 4]} receiveShadow>
-          <planeGeometry args={[20, 20]} />
-          <meshStandardMaterial color="#C4A872" roughness={0.85} metalness={0} />
+        {/* Baseboard */}
+        <mesh position={[0, -4.98, -1.38]} castShadow>
+          <boxGeometry args={[15, 0.22, 0.08]} />
+          <meshStandardMaterial color="#6A5040" roughness={0.68} metalness={0.04} />
         </mesh>
 
-        {/* Floor - wood plank lines */}
-        {[0, 1.5, 3, 4.5, 6].map((x, i) => (
-          <mesh key={`plank-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[-5 + x * 2, -4.98, 4]}>
-            <planeGeometry args={[0.02, 20]} />
-            <meshStandardMaterial color="#A08050" roughness={0.9} metalness={0} />
-          </mesh>
-        ))}
+        {/* Wainscoting */}
+        <Wainscoting />
 
-        {/* === BOOKSHELF === */}
+        {/* Window */}
+        <Window position={[-7.3, 0.8, 2.2]} />
+
+        {/* Ceiling lamps */}
+        <CeilingLamp position={[-2.5, 4.8, 0.5]} />
+        <CeilingLamp position={[ 2.5, 4.8, 0.5]} />
+
+        {/* Rug */}
+        <Rug position={[0, -5.07, 3.2]} />
+
+        {/* ── Bookshelf ── */}
         <Bookshelf
           books={books}
           onBookClick={handleBookClick}
-          onBookHover={handleBookHover}
-          onBookHoverEnd={handleBookHoverEnd}
+          onBookHover={setHoveredBookId}
+          onBookHoverEnd={() => setHoveredBookId(null)}
           selectedBookId={selectedBookId}
           bookmarks={bookmarks}
         />
 
-        {/* Bookends on shelves */}
-        <Bookend position={[-4.0, 0.06, 0.2]} />
-        <Bookend position={[4.0, 0.06, 0.2]} variant="shield" />
-        <Bookend position={[-3.8, -2.54, 0.2]} />
-        <Bookend position={[3.8, -2.54, 0.2]} />
+        {/* Bookends */}
+        <Bookend position={[-4.1, 0.07, 0.22]} />
+        <Bookend position={[ 4.1, 0.07, 0.22]} mirror />
+        <Bookend position={[-3.9, -2.51, 0.22]} />
+        <Bookend position={[ 3.9, -2.51, 0.22]} mirror />
 
-        {/* Floating dust particles in light */}
         <DustParticles />
       </Suspense>
 
-      {/* Orbit controls - gentle rotation only */}
       <OrbitControls
         enablePan={false}
-        enableZoom={true}
-        minDistance={5}
-        maxDistance={12}
+        enableZoom
+        minDistance={4.5}
+        maxDistance={11}
         minPolarAngle={Math.PI / 6}
-        maxPolarAngle={Math.PI / 2.2}
-        minAzimuthAngle={-Math.PI / 6}
-        maxAzimuthAngle={Math.PI / 6}
-        target={[0, -0.3, 0]}
+        maxPolarAngle={Math.PI / 2.1}
+        minAzimuthAngle={-Math.PI / 5}
+        maxAzimuthAngle={Math.PI / 5}
+        target={[0, -0.2, 0]}
         enableDamping
-        dampingFactor={0.05}
+        dampingFactor={0.06}
       />
     </>
   );
 };
 
-const LibraryScene = ({ onBookSelect }) => {
-  return (
-    <Canvas
-      shadows
-      camera={{ position: [0, -0.3, 7], fov: 45, near: 0.1, far: 50 }}
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        display: 'block',
-      }}
-      gl={{
-        antialias: true,
-        alpha: false,
-        powerPreference: 'high-performance',
-        failIfMajorPerformanceCaveat: false,
-        version: 1,
-      }}
-      dpr={[1, 2]}
-    >
-      <LibrarySceneContent onBookSelect={onBookSelect} />
-    </Canvas>
-  );
-};
+// ─── Bookend ─────────────────────────────────────────────────────────────────
+const Bookend = ({ position, mirror = false }) => (
+  <group position={position} scale={[mirror ? -1 : 1, 1, 1]}>
+    <mesh castShadow receiveShadow>
+      <boxGeometry args={[0.14, 0.038, 0.24]} />
+      <meshStandardMaterial color="#1E1E1E" roughness={0.28} metalness={0.72} />
+    </mesh>
+    <mesh position={[0, 0.13, -0.06]} castShadow>
+      <boxGeometry args={[0.028, 0.24, 0.18]} />
+      <meshStandardMaterial color="#1A1A1A" roughness={0.28} metalness={0.72} />
+    </mesh>
+    <mesh position={[0, 0.24, -0.04]} castShadow>
+      <boxGeometry args={[0.095, 0.028, 0.16]} />
+      <meshStandardMaterial color="#252525" roughness={0.28} metalness={0.72} />
+    </mesh>
+  </group>
+);
+
+// ─── LibraryScene (Canvas wrapper) ───────────────────────────────────────────
+const LibraryScene = ({ onBookSelect }) => (
+  <Canvas
+    shadows
+    camera={{ position: [0, -0.2, 8], fov: 42, near: 0.1, far: 55 }}
+    style={{
+      position: 'absolute',
+      top: 0, left: 0,
+      width: '100%', height: '100%',
+      display: 'block',
+    }}
+    gl={{
+      antialias:    true,
+      alpha:        false,
+      powerPreference: 'high-performance',
+      failIfMajorPerformanceCaveat: false,
+      version: 1,
+    }}
+    dpr={[1, 2]}
+  >
+    <LibrarySceneContent onBookSelect={onBookSelect} />
+  </Canvas>
+);
 
 export default LibraryScene;

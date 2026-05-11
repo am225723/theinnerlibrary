@@ -29,16 +29,16 @@ export const easings = {
 
 // Animation duration constants (ms)
 export const TIMINGS = {
-  HOVER_LIFT: 200,
-  SELECTION_SLIDE: 500,
-  CENTER_MOVE: 800,
-  BOOK_OPEN: 700,
-  PAGE_FLIP: 400,
-  FLIP_PAUSE: 150,
+  HOVER_LIFT: 180,
+  SELECTION_SLIDE: 620,   // book slides forward + rotates 90°
+  CENTER_MOVE: 750,       // book glides to screen centre
+  BOOK_OPEN: 680,         // cover swings open
+  PAGE_FLIP: 380,
+  FLIP_PAUSE: 120,
   CONTENT_FADE: 200,
   BOOKMARK_SWAY: 3000,
-  RETURN_TO_SHELF: 600,
-  BREATHING_CYCLE: 3000,
+  RETURN_TO_SHELF: 700,
+  BREATHING_CYCLE: 3200,
 };
 
 // Book animation states

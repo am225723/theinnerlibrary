@@ -11,14 +11,14 @@
 
 // Each book has unique dimensions
 export const BOOK_DIMENSIONS_MAP = {
-  daily_checkin:    { thickness: 0.55, height: 1.05, depth: 0.72 },
-  needs_translator: { thickness: 0.40, height: 0.88, depth: 0.54 },
-  boundary_scripts: { thickness: 0.65, height: 1.15, depth: 0.84 },
-  cognitive_reframe:{ thickness: 0.50, height: 0.92, depth: 0.66 },
-  evidence_shelf:   { thickness: 0.38, height: 0.82, depth: 0.51 },
-  character_notes:  { thickness: 0.60, height: 1.10, depth: 0.78 },
-  younger_self:     { thickness: 0.48, height: 0.98, depth: 0.60 },
-  session_prep:     { thickness: 0.55, height: 0.92, depth: 0.69 },
+  daily_checkin:    { thickness: 0.60, height: 1.05, depth: 0.72 },
+  needs_translator: { thickness: 0.45, height: 0.88, depth: 0.54 },
+  boundary_scripts: { thickness: 0.70, height: 1.15, depth: 0.84 },
+  cognitive_reframe:{ thickness: 0.55, height: 0.92, depth: 0.66 },
+  evidence_shelf:   { thickness: 0.42, height: 0.82, depth: 0.51 },
+  character_notes:  { thickness: 0.65, height: 1.10, depth: 0.78 },
+  younger_self:     { thickness: 0.52, height: 0.98, depth: 0.60 },
+  session_prep:     { thickness: 0.60, height: 0.92, depth: 0.69 },
 };
 
 // Default dimensions
