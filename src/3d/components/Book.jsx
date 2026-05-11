@@ -7,8 +7,8 @@
 //   Z  = book depth       (pages run front-to-back when on shelf)
 //
 //  On shelf the spine (+Z face) faces the camera.
-//  On click the whole group rotates +90° around Y so the front cover
-//  (+X face) swings to face the camera, then the cover opens.
+//  On click the whole group rotates -90° around Y so the front cover
+//  (+X face) faces the camera, then the cover opens from the spine hinge.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, {
@@ -358,7 +358,7 @@ const Book = ({
       return;
     }
 
-    // SELECTED – slide forward + rotate 90° so cover faces camera
+    // SELECTED – slide forward + rotate -90° so the +X front cover faces camera
     if (animState === BOOK_STATES.SELECTED) {
       animProgress.current = Math.min(1, animProgress.current + delta / (TIMINGS.SELECTION_SLIDE / 1000));
       const p = easeInOutCubic(animProgress.current);
@@ -366,7 +366,7 @@ const Book = ({
       g.position.y = THREE.MathUtils.lerp(snapPos.current.y, position[1] + 0.12, p);
       g.position.z = THREE.MathUtils.lerp(snapPos.current.z, position[2] + 2.0,  p);
       g.rotation.x = THREE.MathUtils.lerp(snapRot.current.x, 0,            p);
-      g.rotation.y = THREE.MathUtils.lerp(snapRot.current.y, Math.PI / 2,  p);
+      g.rotation.y = THREE.MathUtils.lerp(snapRot.current.y, -Math.PI / 2,  p);
       g.rotation.z = THREE.MathUtils.lerp(snapRot.current.z, 0,            p);
       return;
     }
@@ -378,7 +378,7 @@ const Book = ({
       g.position.x = THREE.MathUtils.lerp(snapPos.current.x, 0,   p);
       g.position.y = THREE.MathUtils.lerp(snapPos.current.y, 0.4, p);
       g.position.z = THREE.MathUtils.lerp(snapPos.current.z, 4.8, p);
-      g.rotation.set(0, Math.PI / 2, 0);
+      g.rotation.set(0, -Math.PI / 2, 0);
       return;
     }
 
@@ -386,7 +386,7 @@ const Book = ({
     if (animState === BOOK_STATES.FLIPPING) {
       animProgress.current = Math.min(1, animProgress.current + delta / (TIMINGS.BOOK_OPEN / 1000));
       const p = easeOutCubic(animProgress.current);
-      g.rotation.set(0, Math.PI / 2 - 0.06, 0);
+      g.rotation.set(0, -Math.PI / 2 + 0.06, 0);
       if (cvr) cvr.rotation.y = THREE.MathUtils.lerp(0, Math.PI * 0.80, p);
       return;
     }
@@ -404,7 +404,7 @@ const Book = ({
       g.position.x = THREE.MathUtils.lerp(snapPos.current.x, position[0], p);
       g.position.y = THREE.MathUtils.lerp(snapPos.current.y, position[1], p);
       g.position.z = THREE.MathUtils.lerp(snapPos.current.z, position[2], p);
-      g.rotation.y = THREE.MathUtils.lerp(Math.PI / 2, 0, p);
+      g.rotation.y = THREE.MathUtils.lerp(-Math.PI / 2, 0, p);
       g.rotation.x = 0; g.rotation.z = 0;
       if (cvr) cvr.rotation.y = THREE.MathUtils.lerp(Math.PI * 0.80, 0, p);
       return;
@@ -549,11 +549,12 @@ const Book = ({
         <meshStandardMaterial color="#EDE7D8" roughness={0.92} metalness={0} />
       </mesh>
 
-      {/* ══ FRONT COVER – pivots open at spine edge ══
-          Pivot sits at world position [+t/2, 0, -d/2]
-          which is the hinge between spine and front cover. */}
-      <group ref={frontCoverPivotRef} position={[t / 2, 0, -d / 2]}>
-        {/* Board centre is half a depth away from the pivot */}
+      {/* ══ FRONT COVER – pivots open at the SPINE edge ══
+          The book spine is the +Z face, so the cover hinge must sit at z=0,
+          not at the middle of the page block. The cover then extends backward
+          along -Z from this hinge, exactly like a real hardback cover. */}
+      <group ref={frontCoverPivotRef} position={[t / 2, 0, 0]}>
+        {/* Board centre: slightly outside the page block on +X, halfway back along -Z */}
         <group position={[cT / 2, 0, -d / 2]}>
           {/* Cover board */}
           <mesh castShadow receiveShadow>
@@ -565,7 +566,7 @@ const Book = ({
             />
           </mesh>
 
-          {/* Outer face artwork (faces +X → camera after 90° rotation) */}
+          {/* Outer face artwork (faces +X → camera after -90° book rotation) */}
           <mesh position={[cT / 2 + 0.001, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
             <planeGeometry args={[d - 0.008, h - 0.008]} />
             <meshStandardMaterial
