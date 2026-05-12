@@ -779,7 +779,7 @@ const Book = ({
       g.position.y = THREE.MathUtils.lerp(snapPos.current.y, 0.3, p);
       g.position.z = THREE.MathUtils.lerp(snapPos.current.z, 4.5, p);
       g.rotation.set(0, -Math.PI / 2, 0);
-      const s = THREE.MathUtils.lerp(1, 2.2, p);
+      const s = THREE.MathUtils.lerp(1, 1.6, p);
       g.scale.set(s, s, s);
       return;
     }
@@ -789,7 +789,7 @@ const Book = ({
       animProgress.current = Math.min(1, animProgress.current + delta / (TIMINGS.BOOK_OPEN / 1000));
       const p = easeOutCubic(animProgress.current);
       g.rotation.set(0, -Math.PI / 2 + 0.06, 0);
-      g.scale.set(2.2, 2.2, 2.2);
+      g.scale.set(1.6, 1.6, 1.6);
       if (cvr) cvr.rotation.y = THREE.MathUtils.lerp(0, -Math.PI * 0.80, p);
       return;
     }
@@ -797,7 +797,7 @@ const Book = ({
     // OPEN – gentle float + scale up to fill screen
     if (animState === BOOK_STATES.OPEN) {
       g.position.y = 0.3 + Math.sin(time * 1.4) * 0.004;
-      g.scale.set(2.2, 2.2, 2.2);
+      g.scale.set(1.6, 1.6, 1.6);
       return;
     }
 
@@ -810,7 +810,7 @@ const Book = ({
       g.position.z = THREE.MathUtils.lerp(snapPos.current.z, position[2], p);
       g.rotation.y = THREE.MathUtils.lerp(-Math.PI / 2, 0, p);
       g.rotation.x = 0; g.rotation.z = 0;
-      const s = THREE.MathUtils.lerp(2.2, 1, p);
+      const s = THREE.MathUtils.lerp(1.6, 1, p);
       g.scale.set(s, s, s);
       if (cvr) cvr.rotation.y = THREE.MathUtils.lerp(-Math.PI * 0.80, 0, p);
       return;
@@ -1049,39 +1049,30 @@ const Book = ({
         </mesh>
       )}
 
-      {/* ── Open book: two-page spread ── */}
+      {/* ── Open book: page content facing camera ── */}
       {animState === BOOK_STATES.OPEN && (
-        <group position={[0, 0, -d / 2]}>
-          {/* After -90° Y rotation the +X face of the page block faces the camera.
-              We render two page planes on the +X side of where the page block was.
-              Each plane faces +X (rotation Math.PI/2 around Y) so after the group
-              rotation they face +Z (toward camera).  DoubleSide ensures visibility. */}
+        <>
+          {/* Single full page facing the camera directly.
+              When the book group rotates -90° around Y, its local +X faces camera.
+              We place a plane at local position [0.04, 0, -d/2] facing +X
+              (rotation Math.PI/2 around Y). After the group rotation,
+              this plane faces +Z = toward camera. DoubleSide for safety. */}
 
-          {/* Full parchment background spanning both pages */}
-          <mesh position={[0.02, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
-            <planeGeometry args={[d - 0.01, h - 0.02]} />
-            <meshStandardMaterial color="#FAF6EE" roughness={0.90} metalness={0} side={THREE.DoubleSide} />
+          {/* Full parchment background */}
+          <mesh position={[0.04, 0, -d / 2]} rotation={[0, Math.PI / 2, 0]}>
+            <planeGeometry args={[d + 0.05, h + 0.05]} />
+            <meshStandardMaterial color="#FAF6EE" roughness={0.92} metalness={0} side={THREE.DoubleSide} />
           </mesh>
 
-          {/* Left decorative page (closer to spine in local Z = +d/4) */}
-          <mesh position={[0.025, 0, d / 4]} rotation={[0, Math.PI / 2, 0]}>
-            <planeGeometry args={[d / 2 - 0.005, h - 0.01]} />
-            <meshStandardMaterial map={leftPageTex} roughness={0.90} metalness={0} side={THREE.DoubleSide} />
-          </mesh>
-
-          {/* Right content page (farther from spine in local Z = -d/4) */}
-          <mesh position={[0.025, 0, -d / 4]} rotation={[0, Math.PI / 2, 0]}>
-            <planeGeometry args={[d / 2 - 0.005, h - 0.01]} />
+          {/* Content page with title, icon, buttons */}
+          <mesh position={[0.045, 0, -d / 2]} rotation={[0, Math.PI / 2, 0]}>
+            <planeGeometry args={[d - 0.01, h - 0.01]} />
             <meshStandardMaterial map={openPageTex} roughness={0.90} metalness={0} side={THREE.DoubleSide} />
           </mesh>
-
-          {/* Gutter shadow line */}
-          <mesh position={[0.024, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
-            <planeGeometry args={[0.006, h - 0.01]} />
-            <meshStandardMaterial color="#000000" transparent opacity={0.10} roughness={1} metalness={0} side={THREE.DoubleSide} />
-          </mesh>
-        </group>
+        </>
       )}
+
+            )}
 
 
       {/* Hover glow shell */}

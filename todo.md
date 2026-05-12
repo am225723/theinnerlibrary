@@ -19,10 +19,10 @@
 - [x] Render two-page spread as separate plane meshes with DoubleSide material
 - [x] Position planes on +X face at proper offset from page block center
 - [x] Build successfully
-- [ ] Verify page content is visible when book opens (needs user testing)
-- [ ] Push to GitHub (auth token expired - needs user to reset)
+- [x] Scale up open book to fill screen (2.2x scale with smooth transitions)
+- [x] Push to GitHub (commit 9a6792c)
 
-## Phase 4: Polish
-- [ ] Fine-tune page content layout (left/right page positioning)
+## Phase 4: Polish (awaiting user feedback)
+- [ ] Fine-tune page content layout and sizing
 - [ ] Ensure click detection works on open book pages
 - [ ] Test on mobile device
