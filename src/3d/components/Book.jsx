@@ -191,6 +191,177 @@ function buildCoverTexture(mat, title) {
     ctx.fillRect(55, 55, W-110, 1.5);
     ctx.fillRect(55, H-55, W-110, 1.5);
     ctx.globalAlpha = 1;
+  } else if (mat.coverStyle === 'art_deco') {
+    // Art Deco style – bold geometric lines, sunburst, zigzag
+    ctx.strokeStyle = ac; ctx.lineWidth = 2;
+    ctx.strokeRect(20, 20, W-40, H-40);
+    ctx.lineWidth = 1;
+    ctx.strokeRect(28, 28, W-56, H-56);
+    // Sunburst rays from top center
+    ctx.save(); ctx.translate(W/2, 0);
+    for (let i = 0; i < 16; i++) {
+      const a = (i / 16) * Math.PI * 0.6 - Math.PI * 0.3;
+      ctx.strokeStyle = ac; ctx.globalAlpha = 0.3;
+      ctx.beginPath(); ctx.moveTo(0, 28);
+      ctx.lineTo(Math.cos(a) * 300, Math.sin(a) * 300 + 28);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1; ctx.restore();
+    // Zigzag border at bottom
+    ctx.strokeStyle = ac; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let x = 28; x < W - 28; x += 18) {
+      const zigY = H - 80 + ((x / 18) % 2 === 0 ? 0 : 12);
+      if (x === 28) ctx.moveTo(x, zigY);
+      else ctx.lineTo(x, zigY);
+    }
+    ctx.stroke();
+    // Corner chevrons
+    [[40, 40], [W-40, 40], [40, H-40], [W-40, H-40]].forEach(([cx, cy]) => {
+      ctx.save(); ctx.translate(cx, cy);
+      ctx.strokeStyle = ac; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(0, -8); ctx.lineTo(8, 0); ctx.stroke();
+      ctx.restore();
+    });
+  } else if (mat.coverStyle === 'ornate') {
+    // Ornate Victorian style – elaborate scrollwork, double borders, corner flourishes
+    ctx.strokeStyle = ac; ctx.lineWidth = 2.5;
+    ctx.strokeRect(18, 18, W-36, H-36);
+    ctx.lineWidth = 1;
+    ctx.strokeRect(26, 26, W-52, H-52);
+    // Inner decorative frame
+    ctx.lineWidth = 0.8;
+    ctx.strokeRect(38, 38, W-76, H-76);
+    // Corner flourishes
+    [[32, 32, 1, 1], [W-32, 32, -1, 1], [32, H-32, 1, -1], [W-32, H-32, -1, -1]].forEach(([cx, cy, dx, dy]) => {
+      ctx.save(); ctx.translate(cx, cy);
+      ctx.strokeStyle = ac; ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(0, dy * 30); ctx.bezierCurveTo(0, 0, dx * 30, 0, dx * 30, dy * 5);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(dx * 5, 0); ctx.bezierCurveTo(dx * 10, dy * 10, dx * 20, dy * 5, dx * 30, 0);
+      ctx.stroke();
+      ctx.restore();
+    });
+    // Central oval medallion
+    ctx.strokeStyle = ac; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.ellipse(W/2, H*0.38, 75, 55, 0, 0, Math.PI*2); ctx.stroke();
+    ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.ellipse(W/2, H*0.38, 65, 45, 0, 0, Math.PI*2); ctx.stroke();
+  } else if (mat.coverStyle === 'floral_vine') {
+    // Floral vine – organic botanical illustration
+    ctx.strokeStyle = ac; ctx.lineWidth = 1.2;
+    // Vine from bottom-left
+    ctx.beginPath();
+    ctx.moveTo(40, H - 40);
+    ctx.bezierCurveTo(80, H - 120, 60, H - 200, 120, H * 0.55);
+    ctx.bezierCurveTo(140, H * 0.45, 100, H * 0.35, 160, H * 0.3);
+    ctx.stroke();
+    // Leaves along vine
+    for (let i = 0; i < 6; i++) {
+      const t = 0.15 + i * 0.14;
+      const lx = 40 + (120 - 40) * t + Math.sin(t * 4) * 20;
+      const ly = (H - 40) - ((H - 40) - H * 0.3) * t;
+      ctx.save(); ctx.translate(lx, ly); ctx.rotate(-0.3 + i * 0.15);
+      ctx.fillStyle = ac; ctx.globalAlpha = 0.25;
+      ctx.beginPath(); ctx.ellipse(0, 0, 18, 8, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1; ctx.restore();
+    }
+    // Small flower buds
+    [[100, H * 0.65], [140, H * 0.45], [80, H * 0.55]].forEach(([fx, fy]) => {
+      ctx.strokeStyle = ac; ctx.lineWidth = 1;
+      for (let p = 0; p < 5; p++) {
+        const a = (p / 5) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.ellipse(fx + Math.cos(a) * 6, fy + Math.sin(a) * 6, 5, 3, a, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    });
+    // Simple border
+    ctx.strokeStyle = ac; ctx.lineWidth = 1;
+    ctx.strokeRect(30, 30, W-60, H-60);
+  } else if (mat.coverStyle === 'geometric_modern') {
+    // Modern geometric – overlapping shapes, clean lines
+    ctx.strokeStyle = ac; ctx.lineWidth = 1;
+    // Overlapping circles
+    ctx.globalAlpha = 0.12;
+    [[W*0.3, H*0.3, 80], [W*0.6, H*0.25, 60], [W*0.5, H*0.5, 90], [W*0.35, H*0.6, 50]].forEach(([cx, cy, r]) => {
+      ctx.fillStyle = ac;
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    // Thin geometric lines
+    ctx.strokeStyle = ac; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(40, H * 0.15); ctx.lineTo(W - 40, H * 0.15); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(40, H * 0.85); ctx.lineTo(W - 40, H * 0.85); ctx.stroke();
+    // Small square accent
+    ctx.strokeStyle = ac; ctx.lineWidth = 1.5;
+    ctx.strokeRect(W/2 - 20, H*0.35 - 20, 40, 40);
+  } else if (mat.coverStyle === 'typographic') {
+    // Typographic style – decorative text treatment, large initial letter
+    // Large decorative initial
+    ctx.fillStyle = ac; ctx.globalAlpha = 0.12;
+    ctx.font = 'bold 280px Georgia, serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const initial = (title || 'B').charAt(0).toUpperCase();
+    ctx.fillText(initial, W/2, H * 0.35);
+    ctx.globalAlpha = 1;
+    // Double rule
+    ctx.strokeStyle = ac; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(60, H * 0.6); ctx.lineTo(W - 60, H * 0.6); ctx.stroke();
+    ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.moveTo(70, H * 0.62); ctx.lineTo(W - 70, H * 0.62); ctx.stroke();
+    // Small decorative dot
+    ctx.fillStyle = ac;
+    ctx.beginPath(); ctx.arc(W/2, H * 0.64, 4, 0, Math.PI * 2); ctx.fill();
+  } else if (mat.coverStyle === 'stars') {
+    // Celestial stars pattern
+    ctx.fillStyle = ac; ctx.globalAlpha = 0.35;
+    for (let i = 0; i < 30; i++) {
+      const sx = 30 + Math.random() * (W - 60);
+      const sy = 30 + Math.random() * (H - 100);
+      const sr = 2 + Math.random() * 5;
+      // Draw 5-pointed star
+      ctx.beginPath();
+      for (let j = 0; j < 10; j++) {
+        const a = (j / 10) * Math.PI * 2 - Math.PI / 2;
+        const r2 = j % 2 === 0 ? sr : sr * 0.4;
+        if (j === 0) ctx.moveTo(sx + Math.cos(a) * r2, sy + Math.sin(a) * r2);
+        else ctx.lineTo(sx + Math.cos(a) * r2, sy + Math.sin(a) * r2);
+      }
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    // Crescent moon
+    ctx.strokeStyle = ac; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.4;
+    ctx.beginPath(); ctx.arc(W/2, H*0.3, 35, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(W/2 + 12, H*0.3 - 5, 30, 0, Math.PI*2); ctx.stroke();
+    ctx.globalAlpha = 1;
+    // Border
+    ctx.strokeStyle = ac; ctx.lineWidth = 1;
+    ctx.strokeRect(25, 25, W-50, H-50);
+  } else if (mat.coverStyle === 'marbled') {
+    // Marbled paper effect
+    for (let i = 0; i < 20; i++) {
+      const mx = Math.random() * W;
+      const my = Math.random() * H;
+      const mr = 30 + Math.random() * 80;
+      const mg = ctx.createRadialGradient(mx, my, 0, mx + mr * 0.3, my + mr * 0.2, mr);
+      mg.addColorStop(0, ac + '30');
+      mg.addColorStop(0.3, ac + '18');
+      mg.addColorStop(0.6, lighten(mat.coverColor, 30) + '15');
+      mg.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = mg;
+      ctx.beginPath();
+      // Wavy shape
+      ctx.moveTo(mx, my - mr);
+      for (let a = 0; a < Math.PI * 2; a += 0.1) {
+        const wave = Math.sin(a * 3 + i) * mr * 0.2;
+        ctx.lineTo(mx + Math.cos(a) * (mr + wave), my + Math.sin(a) * (mr + wave));
+      }
+      ctx.closePath(); ctx.fill();
+    }
   }
 
   // title text
@@ -259,6 +430,226 @@ function buildInnerPageTexture() {
   return tex;
 }
 
+
+// ──── open-page content texture (right page when book is open) ────────────
+function buildOpenPageContentTexture(book, mat) {
+  const W = 512, H = 768;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Warm parchment background
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#FDFAF4');
+  bg.addColorStop(0.5, '#FAF6EE');
+  bg.addColorStop(1, '#F5F0E8');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Subtle ruled lines
+  ctx.strokeStyle = 'rgba(180,160,130,0.12)';
+  ctx.lineWidth = 0.5;
+  for (let y = 80; y < H - 60; y += 24) {
+    ctx.beginPath(); ctx.moveTo(60, y); ctx.lineTo(W - 50, y); ctx.stroke();
+  }
+
+  // Red margin line
+  ctx.strokeStyle = 'rgba(200,140,140,0.15)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(80, 50); ctx.lineTo(80, H - 50); ctx.stroke();
+
+  // Page aging speckles
+  for (let i = 0; i < 1500; i++) {
+    ctx.fillStyle = `rgba(0,0,0,${0.002 + Math.random() * 0.005})`;
+    ctx.fillRect(Math.random() * W, Math.random() * H, 1, 1);
+  }
+
+  // Decorative corner brackets
+  ctx.strokeStyle = 'rgba(160,140,110,0.25)';
+  ctx.lineWidth = 1.5;
+  const cm = 25, cs = 35;
+  ctx.beginPath(); ctx.moveTo(cm, cm + cs); ctx.lineTo(cm, cm); ctx.lineTo(cm + cs, cm); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W - cm - cs, cm); ctx.lineTo(W - cm, cm); ctx.lineTo(W - cm, cm + cs); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cm, H - cm - cs); ctx.lineTo(cm, H - cm); ctx.lineTo(cm + cs, H - cm); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W - cm - cs, H - cm); ctx.lineTo(W - cm, H - cm); ctx.lineTo(W - cm, H - cm - cs); ctx.stroke();
+
+  // Thin ornamental rule under icon area
+  ctx.strokeStyle = mat.accentColor;
+  ctx.globalAlpha = 0.3;
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(W * 0.2, 235); ctx.lineTo(W * 0.8, 235); ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // Book icon/emoji
+  const iconEmoji = book.icon || '\ud83d\udcd6';
+  ctx.font = '52px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(iconEmoji, W / 2, 160);
+
+  // Title
+  ctx.fillStyle = '#1B2A4A';
+  ctx.shadowColor = 'rgba(0,0,0,0.08)';
+  ctx.shadowBlur = 2;
+  ctx.font = 'bold 30px Georgia, serif';
+  ctx.textAlign = 'center';
+
+  const titleText = book.title || '';
+  const titleWords = titleText.split(' ');
+  if (titleWords.length > 3) {
+    const half = Math.ceil(titleWords.length / 2);
+    ctx.fillText(titleWords.slice(0, half).join(' '), W / 2, 275);
+    ctx.fillText(titleWords.slice(half).join(' '), W / 2, 312);
+  } else {
+    ctx.fillText(titleText, W / 2, 290);
+  }
+  ctx.shadowBlur = 0;
+
+  // Subtitle / description
+  ctx.fillStyle = '#6B4226';
+  ctx.font = 'italic 18px Georgia, serif';
+  const subtitleText = book.subtitle || '';
+  if (subtitleText.length > 40) {
+    const mid = subtitleText.lastIndexOf(' ', 40);
+    ctx.fillText(subtitleText.slice(0, mid), W / 2, 370);
+    ctx.fillText(subtitleText.slice(mid + 1), W / 2, 396);
+  } else {
+    ctx.fillText(subtitleText, W / 2, 380);
+  }
+
+  // Question text
+  ctx.fillStyle = '#1B2A4A';
+  ctx.font = '500 20px Georgia, serif';
+  ctx.fillText('Would you like to open this page?', W / 2, 470);
+
+  // Return button (left side)
+  const btnY = 540;
+  const btnW = 170;
+  const btnH = 48;
+  const leftBtnX = W / 2 - btnW - 15;
+
+  ctx.fillStyle = '#E8DDD0';
+  ctx.beginPath();
+  ctx.roundRect(leftBtnX, btnY, btnW, btnH, 8);
+  ctx.fill();
+  ctx.strokeStyle = '#D0C4B0';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  ctx.fillStyle = '#6B4226';
+  ctx.font = '600 17px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('\u2190 Return', leftBtnX + btnW / 2, btnY + btnH / 2 + 6);
+
+  // Open button (right side)
+  const rightBtnX = W / 2 + 15;
+
+  const openGrad = ctx.createLinearGradient(rightBtnX, btnY, rightBtnX + btnW, btnY + btnH);
+  openGrad.addColorStop(0, '#B8922A');
+  openGrad.addColorStop(1, '#9A7A22');
+  ctx.fillStyle = openGrad;
+  ctx.beginPath();
+  ctx.roundRect(rightBtnX, btnY, btnW, btnH, 8);
+  ctx.fill();
+
+  ctx.shadowColor = 'rgba(184,146,42,0.3)';
+  ctx.shadowBlur = 8;
+  ctx.shadowOffsetY = 3;
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = '600 17px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Open Page \u2192', rightBtnX + btnW / 2, btnY + btnH / 2 + 6);
+
+  // Decorative flourish at bottom
+  ctx.strokeStyle = mat.accentColor;
+  ctx.globalAlpha = 0.25;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(W * 0.3, H - 70);
+  ctx.bezierCurveTo(W * 0.4, H - 80, W * 0.6, H - 80, W * 0.7, H - 70);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(W * 0.35, H - 65);
+  ctx.bezierCurveTo(W * 0.45, H - 73, W * 0.55, H - 73, W * 0.65, H - 65);
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+  tex.anisotropy = 8;
+  return tex;
+}
+
+// ──── left-page decorative texture (when book is open) ────────────────────
+function buildLeftPageTexture(mat) {
+  const W = 512, H = 768;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Slightly different warm tone for left page
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#FAF6EE');
+  bg.addColorStop(0.5, '#F8F3E8');
+  bg.addColorStop(1, '#F5F0E5');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Ruled lines
+  ctx.strokeStyle = 'rgba(180,160,130,0.10)';
+  ctx.lineWidth = 0.5;
+  for (let y = 80; y < H - 60; y += 24) {
+    ctx.beginPath(); ctx.moveTo(60, y); ctx.lineTo(W - 50, y); ctx.stroke();
+  }
+
+  // Red margin line
+  ctx.strokeStyle = 'rgba(200,140,140,0.12)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(80, 50); ctx.lineTo(80, H - 50); ctx.stroke();
+
+  // Decorative corner brackets
+  ctx.strokeStyle = 'rgba(160,140,110,0.20)';
+  ctx.lineWidth = 1.5;
+  const cm = 25, cs = 35;
+  ctx.beginPath(); ctx.moveTo(cm, cm + cs); ctx.lineTo(cm, cm); ctx.lineTo(cm + cs, cm); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W - cm - cs, cm); ctx.lineTo(W - cm, cm); ctx.lineTo(W - cm, cm + cs); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cm, H - cm - cs); ctx.lineTo(cm, H - cm); ctx.lineTo(cm + cs, H - cm); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W - cm - cs, H - cm); ctx.lineTo(W - cm, H - cm); ctx.lineTo(W - cm, H - cm - cs); ctx.stroke();
+
+  // Center decorative ornament
+  ctx.strokeStyle = mat.accentColor;
+  ctx.globalAlpha = 0.18;
+  ctx.lineWidth = 1;
+  ctx.save();
+  ctx.translate(W / 2, H / 2);
+  ctx.rotate(Math.PI / 4);
+  ctx.strokeRect(-30, -30, 60, 60);
+  ctx.strokeRect(-20, -20, 40, 40);
+  ctx.restore();
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.arc(W / 2 + Math.cos(a) * 55, H / 2 + Math.sin(a) * 55, 3, 0, Math.PI * 2);
+    ctx.fillStyle = mat.accentColor;
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // Aging speckles
+  for (let i = 0; i < 1000; i++) {
+    ctx.fillStyle = `rgba(0,0,0,${0.002 + Math.random() * 0.004})`;
+    ctx.fillRect(Math.random() * W, Math.random() * H, 1, 1);
+  }
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+  tex.anisotropy = 8;
+  return tex;
+}
 // ─── main component ───────────────────────────────────────────────────────────
 const Book = ({
   book,
@@ -320,10 +711,12 @@ const Book = ({
   const cT = 0.022;            // cover board thickness
 
   // ── textures ────────────────────────────────────────────────────────────────
-  const spineTex     = useMemo(() => buildSpineTexture(mat),            [mat]);
-  const coverTex     = useMemo(() => buildCoverTexture(mat, book.title), [mat, book.title]);
-  const pageEdgeTex  = useMemo(() => buildPageEdgeTexture(),            []);
-  const innerPageTex = useMemo(() => buildInnerPageTexture(),           []);
+  const spineTex          = useMemo(() => buildSpineTexture(mat),            [mat]);
+  const coverTex          = useMemo(() => buildCoverTexture(mat, book.title), [mat, book.title]);
+  const pageEdgeTex       = useMemo(() => buildPageEdgeTexture(),            []);
+  const innerPageTex      = useMemo(() => buildInnerPageTexture(),           []);
+  const openPageTex       = useMemo(() => buildOpenPageContentTexture(book, mat), [book, mat]);
+  const leftPageTex       = useMemo(() => buildLeftPageTexture(mat),         [mat]);
 
   // ── per-preset surface props ────────────────────────────────────────────────
   const coverRough = mat.preset === 'leather' ? 0.50 : mat.preset === 'modern' ? 0.18 : 0.70;
@@ -444,6 +837,22 @@ const Book = ({
 
   const handleClick = useCallback((e) => {
     e.stopPropagation();
+    if (animState === BOOK_STATES.OPEN) {
+      // When book is open, detect which side was clicked
+      // Left side = return, Right side = open page
+      if (e.point) {
+        const localX = e.point.x - (groupRef.current?.position.x || 0);
+        if (localX < 0) {
+          // Clicked left side – return to shelf
+          if (onBookReturn) onBookReturn(book.id);
+        } else {
+          // Clicked right side – open the page
+          if (onBookOpen) onBookOpen(book);
+          if (onClick) onClick(book);
+        }
+      }
+      return;
+    }
     if (animState !== BOOK_STATES.IDLE && animState !== BOOK_STATES.HOVER) return;
     startState(BOOK_STATES.SELECTED);
     setTimeout(() => {
@@ -453,12 +862,11 @@ const Book = ({
         startState(BOOK_STATES.FLIPPING);
         setTimeout(() => {
           setAnimState(BOOK_STATES.OPEN);
-          if (onBookOpen) onBookOpen(book);
-          if (onClick) onClick(book);
+          // Don't call onBookOpen here – we show the in-book UI first
         }, TIMINGS.BOOK_OPEN);
       }, TIMINGS.CENTER_MOVE);
     }, TIMINGS.SELECTION_SLIDE);
-  }, [animState, book, onClick, onBookOpen, startState]);
+  }, [animState, book, onClick, onBookOpen, onBookReturn, startState]);
 
   useEffect(() => {
     if (isSelected && (animState === BOOK_STATES.IDLE || animState === BOOK_STATES.HOVER)) {
@@ -616,7 +1024,7 @@ const Book = ({
       </group>
 
       {/* Inner pages visible from front (only when closed) */}
-      {!isMoving && (
+      {!isMoving && animState !== BOOK_STATES.OPEN && (
         <mesh
           position={[0, 0, -d / 2 + cT + 0.004]}
           rotation={[0, -Math.PI / 2, 0]}
@@ -628,6 +1036,63 @@ const Book = ({
             metalness={0}
           />
         </mesh>
+      )}
+
+      {/* ── Open book: two-page spread ── */}
+      {animState === BOOK_STATES.OPEN && (
+        <>
+          {/* Left page (decorative) – positioned on -X side after -90° rotation */}
+          <mesh
+            position={[-d / 4 - 0.01, 0, -d / 2 + 0.005]}
+            rotation={[0, -Math.PI / 2, 0]}
+          >
+            <planeGeometry args={[d / 2 - 0.02, h - 0.04]} />
+            <meshStandardMaterial
+              map={leftPageTex}
+              roughness={0.90}
+              metalness={0}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+
+          {/* Right page (content with buttons) – positioned on +X side after -90° rotation */}
+          <mesh
+            position={[d / 4 + 0.01, 0, -d / 2 + 0.005]}
+            rotation={[0, -Math.PI / 2, 0]}
+          >
+            <planeGeometry args={[d / 2 - 0.02, h - 0.04]} />
+            <meshStandardMaterial
+              map={openPageTex}
+              roughness={0.90}
+              metalness={0}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+
+          {/* Second inner page leaf (slight offset for depth) */}
+          <mesh
+            position={[-d / 4 - 0.01, 0, -d / 2 - 0.008]}
+            rotation={[0, -Math.PI / 2, 0]}
+          >
+            <planeGeometry args={[d / 2 - 0.04, h - 0.06]} />
+            <meshStandardMaterial
+              color="#F8F3E8"
+              roughness={0.92}
+              metalness={0}
+            />
+          </mesh>
+          <mesh
+            position={[d / 4 + 0.01, 0, -d / 2 - 0.008]}
+            rotation={[0, -Math.PI / 2, 0]}
+          >
+            <planeGeometry args={[d / 2 - 0.04, h - 0.06]} />
+            <meshStandardMaterial
+              color="#F8F3E8"
+              roughness={0.92}
+              metalness={0}
+            />
+          </mesh>
+        </>
       )}
 
       {/* Hover glow shell */}

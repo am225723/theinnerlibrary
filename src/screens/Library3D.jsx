@@ -3,16 +3,14 @@
 import React, { useState, useCallback, useEffect, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ErrorBoundary from '../components/ErrorBoundary';
-import { BookPageOverlay } from '../3d/components/BookPageOverlay';
 import styles from './Library3D.module.css';
 
 const LibraryScene = React.lazy(() => import('../3d/scenes/LibraryScene'));
 
 export const Library3D = () => {
   const navigate = useNavigate();
-  const [selectedBook, setSelectedBook] = useState(null);
-  const [showPageOverlay, setShowPageOverlay] = useState(false);
   const [returnToShelfId, setReturnToShelfId] = useState(null);
+  const [openBookId, setOpenBookId] = useState(null);
   const [showFallback, setShowFallback] = useState(false);
 
   useEffect(() => {
@@ -29,51 +27,40 @@ export const Library3D = () => {
     if (!checkWebGL()) setShowFallback(true);
   }, []);
 
-  // Navigate to the tool page
-  const handleOpenPage = useCallback(() => {
-    setShowPageOverlay(false);
-    if (selectedBook?.path) {
-      navigate(selectedBook.path);
+  // Navigate to the tool page – called when user clicks right side of open book
+  const handleOpenPage = useCallback((book) => {
+    if (book?.path) {
+      navigate(book.path);
     }
-  }, [selectedBook, navigate]);
+  }, [navigate]);
 
-  // Return book to shelf with animation
-  const handleReturnToShelf = useCallback(() => {
-    setShowPageOverlay(false);
-    setReturnToShelfId(selectedBook?.id);
+  // Return book to shelf with animation – called when user clicks left side of open book
+  const handleReturnToShelf = useCallback((bookId) => {
+    setReturnToShelfId(bookId);
     // Clear the return trigger after animation completes
     setTimeout(() => {
       setReturnToShelfId(null);
-      setSelectedBook(null);
     }, 800);
-  }, [selectedBook]);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        if (showPageOverlay && selectedBook) {
-          handleReturnToShelf();
-        }
+      if (e.key === 'Escape' && openBookId) {
+        handleReturnToShelf(openBookId);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showPageOverlay, selectedBook, handleReturnToShelf]);
+  }, [openBookId, handleReturnToShelf]);
 
-  // Called when the book reaches OPEN state in the 3D scene
-  const handleBookOpen = useCallback((book) => {
-    setSelectedBook(book);
-    setShowPageOverlay(true);
-  }, []);
-
-  // Called when book is selected (clicked on shelf) - no longer shows popup
+  // Called when book is selected (clicked on shelf) - track for Escape key
   const handleBookSelect = useCallback((book) => {
-    // Book animation handles everything now - the overlay shows after book opens
+    setOpenBookId(book.id);
   }, []);
 
   // Called when book has returned to shelf in the 3D scene
   const handleBookReturn = useCallback((bookId) => {
-    // Book has completed its return animation
+    setOpenBookId(null);
   }, []);
 
   const handleToggleView = useCallback(() => {
@@ -146,21 +133,13 @@ export const Library3D = () => {
           }>
             <LibraryScene
               onBookSelect={handleBookSelect}
-              onBookOpen={handleBookOpen}
+              onBookOpen={handleOpenPage}
               onBookReturn={handleBookReturn}
               returnToShelfId={returnToShelfId}
             />
           </Suspense>
         </ErrorBoundary>
       </div>
-
-      {/* Book page overlay (replaces popup dialog) */}
-      <BookPageOverlay
-        book={selectedBook}
-        visible={showPageOverlay}
-        onOpenPage={handleOpenPage}
-        onReturnToShelf={handleReturnToShelf}
-      />
     </div>
   );
 };

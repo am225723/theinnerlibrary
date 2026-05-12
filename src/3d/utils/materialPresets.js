@@ -217,8 +217,8 @@ export const getBookMaterial = (bookId) => {
     daily_checkin: {
       preset: 'leather',
       color: BOOK_COLORS.navy,
-      spineStyle: 'raised_bands',  // Classic raised spine bands
-      coverStyle: 'gilt_border',   // Gold border frame on cover
+      spineStyle: 'raised_bands',
+      coverStyle: 'ornate',          // Victorian ornate with medallion
       pageColor: '#F8F4EC',
       ribbonColor: '#B8922A',
     },
@@ -226,7 +226,7 @@ export const getBookMaterial = (bookId) => {
       preset: 'cloth',
       color: BOOK_COLORS.forest,
       spineStyle: 'flat',
-      coverStyle: 'minimal',
+      coverStyle: 'floral_vine',     // Botanical vine illustration
       pageColor: '#F5F0E8',
       ribbonColor: '#8BC34A',
     },
@@ -234,7 +234,7 @@ export const getBookMaterial = (bookId) => {
       preset: 'leather',
       color: BOOK_COLORS.burgundy,
       spineStyle: 'raised_bands',
-      coverStyle: 'gilt_center',   // Gold center ornament
+      coverStyle: 'gilt_center',     // Gold center ornament
       pageColor: '#FAF6EE',
       ribbonColor: '#E8C170',
     },
@@ -242,7 +242,7 @@ export const getBookMaterial = (bookId) => {
       preset: 'modern',
       color: BOOK_COLORS.gold,
       spineStyle: 'flat',
-      coverStyle: 'modern_title',  // Modern typography cover
+      coverStyle: 'geometric_modern', // Modern overlapping shapes
       pageColor: '#FFFFFF',
       ribbonColor: '#D4A845',
     },
@@ -250,7 +250,7 @@ export const getBookMaterial = (bookId) => {
       preset: 'cloth',
       color: BOOK_COLORS.teal,
       spineStyle: 'flat',
-      coverStyle: 'embossed',
+      coverStyle: 'art_deco',        // Bold Art Deco sunburst
       pageColor: '#F5F0E8',
       ribbonColor: '#D4A845',
     },
@@ -258,7 +258,7 @@ export const getBookMaterial = (bookId) => {
       preset: 'velvet',
       color: BOOK_COLORS.plum,
       spineStyle: 'raised_bands',
-      coverStyle: 'gilt_border',
+      coverStyle: 'stars',           // Celestial stars & moon
       pageColor: '#FAF0E6',
       ribbonColor: '#D4A845',
     },
@@ -266,7 +266,7 @@ export const getBookMaterial = (bookId) => {
       preset: 'linen',
       color: BOOK_COLORS.terracotta,
       spineStyle: 'flat',
-      coverStyle: 'watercolor',    // Soft artistic cover
+      coverStyle: 'watercolor',      // Soft artistic washes
       pageColor: '#FFF8F0',
       ribbonColor: '#F5E6B8',
     },
@@ -274,7 +274,7 @@ export const getBookMaterial = (bookId) => {
       preset: 'leather',
       color: BOOK_COLORS.brown,
       spineStyle: 'raised_bands',
-      coverStyle: 'gilt_center',
+      coverStyle: 'gilt_border',     // Classic gilt border frame
       pageColor: '#F8F4EC',
       ribbonColor: '#D4A845',
     },

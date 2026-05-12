@@ -380,7 +380,8 @@ const LibrarySceneContent = ({ onBookSelect, onBookOpen, onBookReturn, returnToS
 
   const handleBookClick = useCallback((book) => {
     setSelectedBookId(book.id);
-  }, []);
+    if (onBookSelect) onBookSelect(book);
+  }, [onBookSelect]);
 
   const handleBookOpen = useCallback((book) => {
     if (onBookOpen) onBookOpen(book);
