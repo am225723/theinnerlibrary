@@ -16,41 +16,131 @@ function buildWallpaperTexture() {
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
 
-  // warm cream base
+  // warm cream with subtle variation
   const bg = ctx.createLinearGradient(0, 0, W, H);
-  bg.addColorStop(0,   '#EDE4D2');
-  bg.addColorStop(0.5, '#E8DDC8');
-  bg.addColorStop(1,   '#E2D6BE');
-  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  bg.addColorStop(0,   '#E8E0D0');
+  bg.addColorStop(0.3, '#E5DBC8');
+  bg.addColorStop(0.6, '#E8E3D4');
+  bg.addColorStop(1,   '#E0D5C0');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
 
-  // damask-style diamond grid
-  ctx.globalAlpha = 0.055;
-  const cell = 64;
-  for (let row = 0; row < W / cell + 1; row++) {
-    for (let col = 0; col < H / cell + 1; col++) {
+  // fine paper grain
+  ctx.globalAlpha = 0.04;
+  for (let i = 0; i < 8000; i++) {
+    const x = Math.random() * W;
+    const y = Math.random() * H;
+    ctx.fillStyle = Math.random() > 0.5 ? '#C4B090' : '#F5F0E5';
+    ctx.fillRect(x, y, 1.5, 1.5);
+  }
+  ctx.globalAlpha = 1;
+
+  // elegant damask pattern with better detail
+  ctx.globalAlpha = 0.08;
+  const cell = 96;
+  for (let row = -1; row < H / cell + 1; row++) {
+    for (let col = -1; col < W / cell + 1; col++) {
       const cx = col * cell + (row % 2) * cell * 0.5;
-      const cy = row * cell;
+      const cy = row * cell * 0.866;
+      
       ctx.save();
       ctx.translate(cx, cy);
       ctx.rotate(Math.PI / 4);
+      
+      // outer border
       ctx.strokeStyle = '#8B7040';
-      ctx.lineWidth = 1.2;
-      ctx.strokeRect(-14, -14, 28, 28);
-      ctx.strokeRect(-9,  -9,  18, 18);
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(-18, -18, 36, 36);
+      
+      // inner detail
+      ctx.strokeStyle = '#A08050';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(-12, -12, 24, 24);
+      
+      // center flourish
+      ctx.beginPath();
+      ctx.moveTo(-6, 0);
+      ctx.bezierCurveTo(-6, -8, 0, -8, 0, 0);
+      ctx.bezierCurveTo(0, 8, 6, 8, 6, 0);
+      ctx.stroke();
+      
+      // diagonal accents
+      ctx.strokeStyle = '#9A7848';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(-14, -14);
+      ctx.lineTo(-8, -8);
+      ctx.moveTo(14, 14);
+      ctx.lineTo(8, 8);
+      ctx.stroke();
+      
       ctx.restore();
     }
   }
   ctx.globalAlpha = 1;
 
-  // light aging wash
-  for (let i = 0; i < 12; i++) {
-    const x = Math.random() * W, y = Math.random() * H, r = 70 + Math.random() * 130;
+  // corner flourishes
+  ctx.globalAlpha = 0.06;
+  const corners = [[0, 0], [W, 0], [0, H], [W, H]];
+  corners.forEach(([bx, by]) => {
+    ctx.save();
+    ctx.translate(bx, by);
+    if (bx === W) ctx.scale(-1, 1);
+    if (by === H) ctx.scale(1, -1);
+    
+    ctx.strokeStyle = '#7A6030';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(0, 80);
+    ctx.quadraticCurveTo(0, 0, 80, 0);
+    ctx.stroke();
+    
+    // ornamental scroll
+    ctx.beginPath();
+    ctx.moveTo(25, 0);
+    ctx.bezierCurveTo(25, 15, 15, 25, 0, 25);
+    ctx.moveTo(0, 25);
+    ctx.bezierCurveTo(10, 25, 20, 35, 20, 0);
+    ctx.stroke();
+    
+    ctx.restore();
+  });
+  ctx.globalAlpha = 1;
+
+  // aging effects with more variety
+  for (let i = 0; i < 18; i++) {
+    const x = Math.random() * W;
+    const y = Math.random() * H;
+    const r = 50 + Math.random() * 180;
+    
     const gr = ctx.createRadialGradient(x, y, 0, x, y, r);
-    gr.addColorStop(0,   'rgba(160,130,90,0.028)');
-    gr.addColorStop(0.6, 'rgba(140,110,70,0.012)');
-    gr.addColorStop(1,   'rgba(120,90,50,0)');
-    ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    const shade = Math.random() > 0.5;
+    gr.addColorStop(0, shade ? 'rgba(150,120,80,0.035)' : 'rgba(200,190,170,0.025)');
+    gr.addColorStop(0.5, shade ? 'rgba(130,100,60,0.02)' : 'rgba(180,170,150,0.015)');
+    gr.addColorStop(1, 'rgba(0,0,0,0)');
+    
+    ctx.fillStyle = gr;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
   }
+
+  // subtle texture scratches
+  ctx.globalAlpha = 0.03;
+  for (let i = 0; i < 40; i++) {
+    const x = Math.random() * W;
+    const y = Math.random() * H;
+    const len = 5 + Math.random() * 25;
+    const angle = Math.random() * Math.PI * 2;
+    
+    ctx.strokeStyle = '#5A4020';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + Math.cos(angle) * len, y + Math.sin(angle) * len);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;

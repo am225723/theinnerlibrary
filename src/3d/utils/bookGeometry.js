@@ -9,27 +9,28 @@
 // Front cover is on the +X face (wide, depth × height)
 // When selected: rotate group +π/2 around Y so front cover faces camera
 
-// Each book has unique dimensions
+// Each book has unique dimensions - thinner, more realistic spines
 export const BOOK_DIMENSIONS_MAP = {
-  daily_checkin:    { thickness: 0.60, height: 1.05, depth: 0.72 },
-  needs_translator: { thickness: 0.45, height: 0.88, depth: 0.54 },
-  boundary_scripts: { thickness: 0.70, height: 1.15, depth: 0.84 },
-  cognitive_reframe:{ thickness: 0.55, height: 0.92, depth: 0.66 },
-  evidence_shelf:   { thickness: 0.42, height: 0.82, depth: 0.51 },
-  character_notes:  { thickness: 0.65, height: 1.10, depth: 0.78 },
-  younger_self:     { thickness: 0.52, height: 0.98, depth: 0.60 },
-  session_prep:     { thickness: 0.60, height: 0.92, depth: 0.69 },
+  daily_checkin:    { thickness: 0.38, height: 1.08, depth: 0.65, spineAngle: -0.02 },
+  needs_translator: { thickness: 0.32, height: 0.95, depth: 0.52, spineAngle: 0.03 },
+  boundary_scripts: { thickness: 0.45, height: 1.15, depth: 0.72, spineAngle: -0.01 },
+  cognitive_reframe:{ thickness: 0.35, height: 1.00, depth: 0.58, spineAngle: 0.02 },
+  evidence_shelf:   { thickness: 0.30, height: 0.88, depth: 0.48, spineAngle: -0.03 },
+  character_notes:  { thickness: 0.42, height: 1.12, depth: 0.68, spineAngle: 0.01 },
+  younger_self:     { thickness: 0.34, height: 1.02, depth: 0.55, spineAngle: -0.02 },
+  session_prep:     { thickness: 0.38, height: 0.98, depth: 0.62, spineAngle: 0.04 },
 };
 
 // Default dimensions
 export const BOOK_DIMENSIONS = {
-  thickness: 0.55,
+  thickness: 0.36,
   height: 1.05,
-  depth: 0.72,
-  spineRadius: 0.05,
-  coverThickness: 0.03,
+  depth: 0.62,
+  spineRadius: 0.04,
+  coverThickness: 0.025,
   pageThickness: 0.001,
   pageCount: 200,
+  spineAngle: 0, // Small angle variation for realism
 };
 
 // Shelf dimensions - two shelves, 4 books each
@@ -50,26 +51,28 @@ export const getBookDimensionsById = (bookId) => {
 export const calculateBookPosition = (index, shelfIndex, books) => {
   const booksOnShelf = books.slice(shelfIndex * SHELF_DIMENSIONS.booksPerShelf, (shelfIndex + 1) * SHELF_DIMENSIONS.booksPerShelf);
   const posInShelf = index % SHELF_DIMENSIONS.booksPerShelf;
-  
+
   // Calculate cumulative thickness (X axis = shelf spacing) for snug packing
   let xOffset = 0;
   for (let i = 0; i < posInShelf; i++) {
     const dims = getBookDimensionsById(booksOnShelf[i]?.id);
-    xOffset += (dims?.thickness || 0.55) + 0.04;
+    xOffset += (dims?.thickness || 0.36) + 0.03;
   }
-  
+
   const shelfY = -shelfIndex * SHELF_DIMENSIONS.shelfGap;
   const totalBooksWidth = booksOnShelf.reduce((sum, b) => {
     const dims = getBookDimensionsById(b?.id);
-    return sum + (dims?.thickness || 0.55) + 0.04;
-  }, -0.04);
-  
+    return sum + (dims?.thickness || 0.36) + 0.03;
+  }, -0.03);
+
   const startX = -totalBooksWidth / 2;
-  
+  const bookDims = getBookDimensionsById(booksOnShelf[posInShelf]?.id);
+
   return {
     x: startX + xOffset,
     y: shelfY,
     z: 0,
+    rotation: bookDims?.spineAngle || 0,
   };
 };
 

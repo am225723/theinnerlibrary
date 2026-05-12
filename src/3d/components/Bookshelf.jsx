@@ -237,12 +237,16 @@ const SnugBookRow = ({
     });
     const totalW = xOff - gap;
     const startX = -totalW / 2;
-    return raw.map((p) => ({ ...p, x: startX + p.x + p.dims.thickness / 2 }));
+    return raw.map((p) => ({ 
+      ...p, 
+      x: startX + p.x + p.dims.thickness / 2,
+      rotation: p.dims.spineAngle || 0 
+    }));
   }, [shelfBooks]);
 
   return (
     <>
-      {positions.map(({ x, book, dims }) => {
+      {positions.map(({ x, book, dims, rotation }) => {
         const bookY = shelfY + dims.height / 2 + 0.052;
         const bookZ = 0.28; // slight forward of shelf centre so spine is near front lip
         return (
@@ -250,6 +254,7 @@ const SnugBookRow = ({
             key={book.id}
             book={book}
             position={[x, bookY, bookZ]}
+            rotation={[0, rotation, 0]}
             onClick={onBookClick}
             onHover={onBookHover}
             onHoverEnd={onBookHoverEnd}

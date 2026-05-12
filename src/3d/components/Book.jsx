@@ -263,6 +263,7 @@ function buildInnerPageTexture() {
 const Book = ({
   book,
   position = [0, 0, 0],
+  rotation = [0, 0, 0],
   onClick,
   onHover,
   onHoverEnd,
@@ -347,7 +348,7 @@ const Book = ({
     if (animState === BOOK_STATES.IDLE) {
       const breathe = Math.sin(time * 2.1) * 0.006;
       g.position.set(position[0], position[1] + breathe, position[2]);
-      g.rotation.set(0, 0, 0);
+      g.rotation.set(rotation[0], rotation[1], rotation[2]);
       if (cvr) cvr.rotation.y = 0;
       return;
     }
