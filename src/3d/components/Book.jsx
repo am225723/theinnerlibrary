@@ -894,16 +894,18 @@ const Book = ({
       onPointerOut={handlePointerOut}
       onClick={handleClick}
     >
-      {/* ══ PAGE BLOCK ══ */}
-      <mesh position={[0, 0, -d / 2]} castShadow receiveShadow>
-        <boxGeometry args={[t - 0.018, h - 0.03, d - 0.016]} />
-        <meshStandardMaterial
-          map={pageEdgeTex}
-          color="#F0EAD8"
-          roughness={0.88}
-          metalness={0}
-        />
-      </mesh>
+      {/* ═══ PAGE BLOCK (hidden when open) ═══ */}
+      {animState !== BOOK_STATES.OPEN && (
+        <mesh position={[0, 0, -d / 2]} castShadow receiveShadow>
+          <boxGeometry args={[t - 0.018, h - 0.03, d - 0.016]} />
+          <meshStandardMaterial
+            map={pageEdgeTex}
+            color="#F0EAD8"
+            roughness={0.88}
+            metalness={0}
+          />
+        </mesh>
+      )}
 
       {/* ══ BACK COVER ══ */}
       <mesh position={[-t / 2 - cT / 2, 0, -d / 2]} castShadow receiveShadow>
@@ -1040,60 +1042,38 @@ const Book = ({
 
       {/* ── Open book: two-page spread ── */}
       {animState === BOOK_STATES.OPEN && (
-        <>
-          {/* Left page (decorative) – positioned on -X side after -90° rotation */}
-          <mesh
-            position={[-d / 4 - 0.01, 0, -d / 2 + 0.005]}
-            rotation={[0, -Math.PI / 2, 0]}
-          >
-            <planeGeometry args={[d / 2 - 0.02, h - 0.04]} />
-            <meshStandardMaterial
-              map={leftPageTex}
-              roughness={0.90}
-              metalness={0}
-              side={THREE.DoubleSide}
-            />
+        <group position={[0, 0, -d / 2]}>
+          {/* After -90° Y rotation the +X face of the page block faces the camera.
+              We render two page planes on the +X side of where the page block was.
+              Each plane faces +X (rotation Math.PI/2 around Y) so after the group
+              rotation they face +Z (toward camera).  DoubleSide ensures visibility. */}
+
+          {/* Full parchment background spanning both pages */}
+          <mesh position={[0.02, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+            <planeGeometry args={[d - 0.01, h - 0.02]} />
+            <meshStandardMaterial color="#FAF6EE" roughness={0.90} metalness={0} side={THREE.DoubleSide} />
           </mesh>
 
-          {/* Right page (content with buttons) – positioned on +X side after -90° rotation */}
-          <mesh
-            position={[d / 4 + 0.01, 0, -d / 2 + 0.005]}
-            rotation={[0, -Math.PI / 2, 0]}
-          >
-            <planeGeometry args={[d / 2 - 0.02, h - 0.04]} />
-            <meshStandardMaterial
-              map={openPageTex}
-              roughness={0.90}
-              metalness={0}
-              side={THREE.DoubleSide}
-            />
+          {/* Left decorative page (closer to spine in local Z = +d/4) */}
+          <mesh position={[0.025, 0, d / 4]} rotation={[0, Math.PI / 2, 0]}>
+            <planeGeometry args={[d / 2 - 0.015, h - 0.03]} />
+            <meshStandardMaterial map={leftPageTex} roughness={0.90} metalness={0} side={THREE.DoubleSide} />
           </mesh>
 
-          {/* Second inner page leaf (slight offset for depth) */}
-          <mesh
-            position={[-d / 4 - 0.01, 0, -d / 2 - 0.008]}
-            rotation={[0, -Math.PI / 2, 0]}
-          >
-            <planeGeometry args={[d / 2 - 0.04, h - 0.06]} />
-            <meshStandardMaterial
-              color="#F8F3E8"
-              roughness={0.92}
-              metalness={0}
-            />
+          {/* Right content page (farther from spine in local Z = -d/4) */}
+          <mesh position={[0.025, 0, -d / 4]} rotation={[0, Math.PI / 2, 0]}>
+            <planeGeometry args={[d / 2 - 0.015, h - 0.03]} />
+            <meshStandardMaterial map={openPageTex} roughness={0.90} metalness={0} side={THREE.DoubleSide} />
           </mesh>
-          <mesh
-            position={[d / 4 + 0.01, 0, -d / 2 - 0.008]}
-            rotation={[0, -Math.PI / 2, 0]}
-          >
-            <planeGeometry args={[d / 2 - 0.04, h - 0.06]} />
-            <meshStandardMaterial
-              color="#F8F3E8"
-              roughness={0.92}
-              metalness={0}
-            />
+
+          {/* Gutter shadow line */}
+          <mesh position={[0.024, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+            <planeGeometry args={[0.006, h - 0.03]} />
+            <meshStandardMaterial color="#000000" transparent opacity={0.10} roughness={1} metalness={0} side={THREE.DoubleSide} />
           </mesh>
-        </>
+        </group>
       )}
+
 
       {/* Hover glow shell */}
       {hovered && !isMoving && (
