@@ -379,8 +379,8 @@ const Book = ({
       animProgress.current = Math.min(1, animProgress.current + delta / (TIMINGS.CENTER_MOVE / 1000));
       const p = easeOutBack(Math.min(animProgress.current, 0.98));
       g.position.x = THREE.MathUtils.lerp(snapPos.current.x, 0,   p);
-      g.position.y = THREE.MathUtils.lerp(snapPos.current.y, 0.8, p);
-      g.position.z = THREE.MathUtils.lerp(snapPos.current.z, 5.2, p);
+      g.position.y = THREE.MathUtils.lerp(snapPos.current.y, 0.3, p);
+      g.position.z = THREE.MathUtils.lerp(snapPos.current.z, 4.5, p);
       g.rotation.set(0, -Math.PI / 2, 0);
       return;
     }
@@ -396,7 +396,7 @@ const Book = ({
 
     // OPEN – gentle float
     if (animState === BOOK_STATES.OPEN) {
-      g.position.y = 0.8 + Math.sin(time * 1.4) * 0.004;
+      g.position.y = 0.3 + Math.sin(time * 1.4) * 0.004;
       return;
     }
 
