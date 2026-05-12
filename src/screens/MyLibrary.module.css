@@ -1,0 +1,120 @@
+.myLibraryPage {
+  gap: var(--space-md);
+}
+
+/* ===== SEARCH BAR ===== */
+.searchBar {
+  position: relative;
+}
+.searchInput {
+  width: 100%;
+  padding: var(--space-sm) var(--space-lg) var(--space-sm) var(--space-md);
+  background: var(--color-paper);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+  transition: border-color var(--transition-fast);
+}
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-gold);
+}
+.searchInput::placeholder { color: var(--color-text-light); font-style: italic; }
+.searchClear {
+  position: absolute;
+  right: var(--space-md);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--color-text-light);
+  line-height: 1;
+}
+.searchClear:hover { color: var(--color-navy); }
+
+/* ===== STATS ===== */
+.libraryStats {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-xs);
+}
+.statItem {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+.statDot { color: var(--color-border); }
+
+/* ===== ENTRY GRID ===== */
+.entryGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* ===== BOOKMARKED SECTION ===== */
+.bookmarkedSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border-light);
+}
+.bookmarkedTitle {
+  font-family: var(--font-heading);
+  font-size: 0.875rem;
+  color: var(--color-navy);
+  font-style: italic;
+}
+
+/* ===== MODAL ENTRY DETAIL ===== */
+.modalEntryDetail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+.modalDate {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+  font-style: italic;
+}
+.modalField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.modalFieldLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-light);
+  font-family: var(--font-body);
+}
+.modalFieldValue {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  color: var(--color-navy);
+  font-style: italic;
+}
+.modalFieldText {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  background: var(--color-cream);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--color-border);
+}
+.modalActions {
+  display: flex;
+  gap: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-border-light);
+}

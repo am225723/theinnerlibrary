@@ -1,0 +1,348 @@
+/* Admin/Therapist Dashboard Styles - The Inner Library */
+
+.admin {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #1A0F0A 0%, #2C1810 100%);
+  color: #F5F0E8;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  overflow-y: auto;
+  padding-bottom: 40px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: rgba(245, 240, 232, 0.7);
+  font-size: 16px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.backBtn:hover {
+  color: #F5F0E8;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.heading {
+  font-size: 18px;
+  font-weight: 700;
+  color: #F5F0E8;
+  margin: 0;
+}
+
+.signOutBtn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: rgba(245, 240, 232, 0.7);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 6px 14px;
+  transition: all 0.2s;
+}
+
+.signOutBtn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #F5F0E8;
+}
+
+/* Therapist Info */
+.therapistInfo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #B8922A, #8B6914);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.therapistDetails {
+  flex: 1;
+  min-width: 0;
+}
+
+.therapistName {
+  font-size: 15px;
+  font-weight: 600;
+  color: #F5F0E8;
+  margin: 0 0 2px 0;
+}
+
+.therapistEmail {
+  font-size: 13px;
+  color: rgba(245, 240, 232, 0.5);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 12px 20px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.tab {
+  flex: 1;
+  padding: 10px 8px;
+  border: none;
+  background: transparent;
+  color: rgba(245, 240, 232, 0.5);
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.25s ease;
+}
+
+.tab:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(245, 240, 232, 0.7);
+}
+
+.tabActive {
+  background: rgba(184, 146, 42, 0.15);
+  color: #B8922A;
+  font-weight: 700;
+}
+
+/* Section */
+.section {
+  padding: 20px;
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.statCard {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 20px 16px;
+  text-align: center;
+}
+
+.statNumber {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  color: #B8922A;
+  margin-bottom: 4px;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: rgba(245, 240, 232, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Notice */
+.notice {
+  padding: 14px 16px;
+  background: rgba(184, 146, 42, 0.08);
+  border: 1px solid rgba(184, 146, 42, 0.15);
+  border-radius: 12px;
+}
+
+.noticeText {
+  font-size: 13px;
+  color: rgba(245, 240, 232, 0.6);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Client List */
+.clientList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.clientCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  transition: background 0.2s;
+}
+
+.clientCard:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.clientAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(184, 146, 42, 0.2);
+  color: #B8922A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.clientInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.clientName {
+  font-size: 15px;
+  font-weight: 600;
+  color: #F5F0E8;
+  margin: 0 0 2px 0;
+}
+
+.clientMeta {
+  font-size: 12px;
+  color: rgba(245, 240, 232, 0.4);
+  margin: 0;
+}
+
+.viewBtn {
+  padding: 6px 16px;
+  background: rgba(184, 146, 42, 0.15);
+  border: 1px solid rgba(184, 146, 42, 0.25);
+  border-radius: 8px;
+  color: #B8922A;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.viewBtn:hover {
+  background: rgba(184, 146, 42, 0.25);
+}
+
+/* Activity List */
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.activityItem {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.activityItem:last-child {
+  border-bottom: none;
+}
+
+.activityDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #B8922A;
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.activityContent {
+  flex: 1;
+}
+
+.activityText {
+  font-size: 14px;
+  color: rgba(245, 240, 232, 0.8);
+  margin: 0 0 2px 0;
+  line-height: 1.4;
+}
+
+.activityText strong {
+  color: #F5F0E8;
+}
+
+.activityTime {
+  font-size: 12px;
+  color: rgba(245, 240, 232, 0.35);
+  margin: 0;
+}
+
+/* Config Notice */
+.configNotice {
+  margin: 20px;
+  padding: 24px 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+}
+
+.configTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #B8922A;
+  margin: 0 0 12px 0;
+}
+
+.configText {
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(245, 240, 232, 0.6);
+  margin: 0 0 12px 0;
+}
+
+.configCode {
+  display: block;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #B8922A;
+  margin: 0 0 12px 0;
+  line-height: 1.6;
+  overflow-x: auto;
+}
