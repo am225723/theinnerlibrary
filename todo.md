@@ -13,6 +13,16 @@
 - [x] Support custom icon rendering on covers via the texture generator
 - [x] Make border styles render visually on the cover texture
 
-## Phase 3: Build, Test & Push
-- [x] Run build to verify no errors
-- [x] Commit and push to GitHub via gh CLI
+## Phase 3: Fix Page Content Visibility
+- [x] Diagnose page planes not showing in OPEN state
+- [x] Hide page block mesh when book is OPEN (was occluding page content)
+- [x] Render two-page spread as separate plane meshes with DoubleSide material
+- [x] Position planes on +X face at proper offset from page block center
+- [x] Build successfully
+- [ ] Verify page content is visible when book opens (needs user testing)
+- [ ] Push to GitHub (auth token expired - needs user to reset)
+
+## Phase 4: Polish
+- [ ] Fine-tune page content layout (left/right page positioning)
+- [ ] Ensure click detection works on open book pages
+- [ ] Test on mobile device
