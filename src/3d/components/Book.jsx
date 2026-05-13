@@ -540,86 +540,111 @@ function buildOpenPageContentTexture(book, mat) {
   ctx.fillRect(0, 0, W, H);
 
   // Subtle ruled lines
-  ctx.strokeStyle = 'rgba(180,160,130,0.12)';
+  ctx.strokeStyle = 'rgba(180,160,130,0.10)';
   ctx.lineWidth = 0.5;
-  for (let y = 80; y < H - 60; y += 24) {
-    ctx.beginPath(); ctx.moveTo(60, y); ctx.lineTo(W - 50, y); ctx.stroke();
+  for (let y = 90; y < H - 70; y += 26) {
+    ctx.beginPath(); ctx.moveTo(55, y); ctx.lineTo(W - 55, y); ctx.stroke();
   }
 
   // Red margin line
-  ctx.strokeStyle = 'rgba(200,140,140,0.15)';
+  ctx.strokeStyle = 'rgba(200,140,140,0.12)';
   ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(80, 50); ctx.lineTo(80, H - 50); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(75, 45); ctx.lineTo(75, H - 45); ctx.stroke();
+
+  // Spine gutter shadow at center
+  const gutterGrad = ctx.createLinearGradient(W / 2 - 15, 0, W / 2 + 15, 0);
+  gutterGrad.addColorStop(0, 'rgba(0,0,0,0)');
+  gutterGrad.addColorStop(0.4, 'rgba(0,0,0,0.04)');
+  gutterGrad.addColorStop(0.5, 'rgba(0,0,0,0.06)');
+  gutterGrad.addColorStop(0.6, 'rgba(0,0,0,0.04)');
+  gutterGrad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = gutterGrad;
+  ctx.fillRect(W / 2 - 15, 0, 30, H);
 
   // Page aging speckles
-  for (let i = 0; i < 1500; i++) {
-    ctx.fillStyle = `rgba(0,0,0,${0.002 + Math.random() * 0.005})`;
+  for (let i = 0; i < 1200; i++) {
+    ctx.fillStyle = `rgba(0,0,0,${0.002 + Math.random() * 0.004})`;
     ctx.fillRect(Math.random() * W, Math.random() * H, 1, 1);
   }
 
   // Decorative corner brackets
-  ctx.strokeStyle = 'rgba(160,140,110,0.25)';
+  ctx.strokeStyle = 'rgba(160,140,110,0.20)';
   ctx.lineWidth = 1.5;
-  const cm = 25, cs = 35;
+  const cm = 22, cs = 30;
   ctx.beginPath(); ctx.moveTo(cm, cm + cs); ctx.lineTo(cm, cm); ctx.lineTo(cm + cs, cm); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(W - cm - cs, cm); ctx.lineTo(W - cm, cm); ctx.lineTo(W - cm, cm + cs); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(cm, H - cm - cs); ctx.lineTo(cm, H - cm); ctx.lineTo(cm + cs, H - cm); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(W - cm - cs, H - cm); ctx.lineTo(W - cm, H - cm); ctx.lineTo(W - cm, H - cm - cs); ctx.stroke();
 
-  // Thin ornamental rule under icon area
-  ctx.strokeStyle = mat.accentColor;
-  ctx.globalAlpha = 0.3;
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(W * 0.2, 235); ctx.lineTo(W * 0.8, 235); ctx.stroke();
-  ctx.globalAlpha = 1;
+  // ─── LEFT SIDE: Return indicator ───
+  // Small "back" arrow in the bottom-left area
+  ctx.fillStyle = 'rgba(107,66,38,0.25)';
+  ctx.font = 'italic 14px Georgia, serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('\u2190 Return', W * 0.25, H - 40);
 
-  // Book icon/emoji
+  // ─── RIGHT SIDE: Content area ───
+
+  // Book icon/emoji (on right side of spread)
   const iconEmoji = book.icon || '\ud83d\udcd6';
-  ctx.font = '52px serif';
+  ctx.font = '48px serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(iconEmoji, W / 2, 160);
+  ctx.fillText(iconEmoji, W * 0.72, 140);
 
-  // Title
+  // Thin ornamental rule under icon
+  ctx.strokeStyle = mat.accentColor;
+  ctx.globalAlpha = 0.25;
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(W * 0.56, 200); ctx.lineTo(W * 0.88, 200); ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // Title (on right side)
   ctx.fillStyle = '#1B2A4A';
-  ctx.shadowColor = 'rgba(0,0,0,0.08)';
+  ctx.shadowColor = 'rgba(0,0,0,0.06)';
   ctx.shadowBlur = 2;
-  ctx.font = 'bold 30px Georgia, serif';
+  ctx.font = 'bold 26px Georgia, serif';
   ctx.textAlign = 'center';
 
   const titleText = book.title || '';
   const titleWords = titleText.split(' ');
   if (titleWords.length > 3) {
     const half = Math.ceil(titleWords.length / 2);
-    ctx.fillText(titleWords.slice(0, half).join(' '), W / 2, 275);
-    ctx.fillText(titleWords.slice(half).join(' '), W / 2, 312);
+    ctx.fillText(titleWords.slice(0, half).join(' '), W * 0.72, 240);
+    ctx.fillText(titleWords.slice(half).join(' '), W * 0.72, 272);
   } else {
-    ctx.fillText(titleText, W / 2, 290);
+    ctx.fillText(titleText, W * 0.72, 255);
   }
   ctx.shadowBlur = 0;
 
   // Subtitle / description
   ctx.fillStyle = '#6B4226';
-  ctx.font = 'italic 18px Georgia, serif';
+  ctx.font = 'italic 16px Georgia, serif';
   const subtitleText = book.subtitle || '';
-  if (subtitleText.length > 40) {
-    const mid = subtitleText.lastIndexOf(' ', 40);
-    ctx.fillText(subtitleText.slice(0, mid), W / 2, 370);
-    ctx.fillText(subtitleText.slice(mid + 1), W / 2, 396);
+  if (subtitleText.length > 35) {
+    const mid = subtitleText.lastIndexOf(' ', 35);
+    ctx.fillText(subtitleText.slice(0, mid), W * 0.72, 320);
+    ctx.fillText(subtitleText.slice(mid + 1), W * 0.72, 344);
   } else {
-    ctx.fillText(subtitleText, W / 2, 380);
+    ctx.fillText(subtitleText, W * 0.72, 330);
   }
+
+  // "Today's Page" label
+  ctx.fillStyle = 'rgba(27,42,74,0.5)';
+  ctx.font = '600 15px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.fillText("Today's Page", W * 0.72, 400);
 
   // Question text
   ctx.fillStyle = '#1B2A4A';
-  ctx.font = '500 20px Georgia, serif';
-  ctx.fillText('Would you like to open this page?', W / 2, 470);
+  ctx.font = '500 17px Georgia, serif';
+  ctx.fillText('Would you like to', W * 0.72, 450);
+  ctx.fillText('open this page?', W * 0.72, 474);
 
-  // Single centered Open Page button (tap this side to open, tap left page to return)
-  const btnY = 540;
-  const btnW = 240;
-  const btnH = 52;
-  const btnX = W / 2 - btnW / 2;
+  // Open Page button (right side)
+  const btnY = 520;
+  const btnW = 200;
+  const btnH = 48;
+  const btnX = W * 0.72 - btnW / 2;
 
   const openGrad = ctx.createLinearGradient(btnX, btnY, btnX + btnW, btnY + btnH);
   openGrad.addColorStop(0, '#B8922A');
@@ -637,26 +662,22 @@ function buildOpenPageContentTexture(book, mat) {
   ctx.shadowOffsetY = 0;
 
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = '600 18px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.font = '600 17px -apple-system, BlinkMacSystemFont, sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText('Open Page \u2192', btnX + btnW / 2, btnY + btnH / 2 + 6);
 
-  // Hint text below button
-  ctx.fillStyle = 'rgba(107,66,38,0.4)';
-  ctx.font = 'italic 13px Georgia, serif';
-  ctx.fillText('tap this page to open', W / 2, btnY + btnH + 25);
+  // Tap hint
+  ctx.fillStyle = 'rgba(107,66,38,0.3)';
+  ctx.font = 'italic 12px Georgia, serif';
+  ctx.fillText('tap right side to open \u2022 left to return', W / 2, btnY + btnH + 30);
 
   // Decorative flourish at bottom
   ctx.strokeStyle = mat.accentColor;
-  ctx.globalAlpha = 0.25;
+  ctx.globalAlpha = 0.20;
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(W * 0.3, H - 70);
-  ctx.bezierCurveTo(W * 0.4, H - 80, W * 0.6, H - 80, W * 0.7, H - 70);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(W * 0.35, H - 65);
-  ctx.bezierCurveTo(W * 0.45, H - 73, W * 0.55, H - 73, W * 0.65, H - 65);
+  ctx.moveTo(W * 0.25, H - 70);
+  ctx.bezierCurveTo(W * 0.35, H - 80, W * 0.55, H - 80, W * 0.75, H - 70);
   ctx.stroke();
   ctx.globalAlpha = 1;
 
@@ -666,78 +687,6 @@ function buildOpenPageContentTexture(book, mat) {
   return tex;
 }
 
-// ──── left-page decorative texture (when book is open) ────────────────────
-function buildLeftPageTexture(mat) {
-  const W = 512, H = 768;
-  const canvas = document.createElement('canvas');
-  canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext('2d');
-
-  // Slightly different warm tone for left page
-  const bg = ctx.createLinearGradient(0, 0, 0, H);
-  bg.addColorStop(0, '#FAF6EE');
-  bg.addColorStop(0.5, '#F8F3E8');
-  bg.addColorStop(1, '#F5F0E5');
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, W, H);
-
-  // Ruled lines
-  ctx.strokeStyle = 'rgba(180,160,130,0.10)';
-  ctx.lineWidth = 0.5;
-  for (let y = 80; y < H - 60; y += 24) {
-    ctx.beginPath(); ctx.moveTo(60, y); ctx.lineTo(W - 50, y); ctx.stroke();
-  }
-
-  // Red margin line
-  ctx.strokeStyle = 'rgba(200,140,140,0.12)';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(80, 50); ctx.lineTo(80, H - 50); ctx.stroke();
-
-  // Decorative corner brackets
-  ctx.strokeStyle = 'rgba(160,140,110,0.20)';
-  ctx.lineWidth = 1.5;
-  const cm = 25, cs = 35;
-  ctx.beginPath(); ctx.moveTo(cm, cm + cs); ctx.lineTo(cm, cm); ctx.lineTo(cm + cs, cm); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(W - cm - cs, cm); ctx.lineTo(W - cm, cm); ctx.lineTo(W - cm, cm + cs); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cm, H - cm - cs); ctx.lineTo(cm, H - cm); ctx.lineTo(cm + cs, H - cm); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(W - cm - cs, H - cm); ctx.lineTo(W - cm, H - cm); ctx.lineTo(W - cm, H - cm - cs); ctx.stroke();
-
-  // Center decorative ornament
-  ctx.strokeStyle = mat.accentColor;
-  ctx.globalAlpha = 0.18;
-  ctx.lineWidth = 1;
-  ctx.save();
-  ctx.translate(W / 2, H / 2);
-  ctx.rotate(Math.PI / 4);
-  ctx.strokeRect(-30, -30, 60, 60);
-  ctx.strokeRect(-20, -20, 40, 40);
-  ctx.restore();
-  for (let i = 0; i < 8; i++) {
-    const a = (i / 8) * Math.PI * 2;
-    ctx.beginPath();
-    ctx.arc(W / 2 + Math.cos(a) * 55, H / 2 + Math.sin(a) * 55, 3, 0, Math.PI * 2);
-    ctx.fillStyle = mat.accentColor;
-    ctx.fill();
-  }
-  ctx.globalAlpha = 1;
-
-  // Return hint at bottom
-  ctx.fillStyle = 'rgba(107,66,38,0.35)';
-  ctx.font = 'italic 15px Georgia, serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('\u2190 tap to return', W / 2, H - 45);
-
-  // Aging speckles
-  for (let i = 0; i < 1000; i++) {
-    ctx.fillStyle = `rgba(0,0,0,${0.002 + Math.random() * 0.004})`;
-    ctx.fillRect(Math.random() * W, Math.random() * H, 1, 1);
-  }
-
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
-  tex.anisotropy = 8;
-  return tex;
-}
 // ─── main component ───────────────────────────────────────────────────────────
 const Book = ({
   book,
@@ -804,7 +753,6 @@ const Book = ({
   const pageEdgeTex       = useMemo(() => buildPageEdgeTexture(),            []);
   const innerPageTex      = useMemo(() => buildInnerPageTexture(),           []);
   const openPageTex       = useMemo(() => buildOpenPageContentTexture(book, mat), [book, mat]);
-  const leftPageTex       = useMemo(() => buildLeftPageTexture(mat),         [mat]);
 
   // ── per-preset surface props ────────────────────────────────────────────────
   const coverRough = mat.preset === 'leather' ? 0.48 : mat.preset === 'velvet' ? 0.82 : mat.preset === 'modern' ? 0.15 : mat.preset === 'cloth' ? 0.72 : 0.65;
@@ -865,9 +813,9 @@ const Book = ({
       const p = easeOutBack(Math.min(animProgress.current, 0.98));
       g.position.x = THREE.MathUtils.lerp(snapPos.current.x, 0,    p);
       g.position.y = THREE.MathUtils.lerp(snapPos.current.y, 0.2,  p);
-      g.position.z = THREE.MathUtils.lerp(snapPos.current.z, 3.8,  p);
+      g.position.z = THREE.MathUtils.lerp(snapPos.current.z, 4.5,  p);
       g.rotation.set(0, -Math.PI / 2, 0);
-      g.scale.set(1.6, 1.6, 1.6);
+      g.scale.set(2.5, 2.5, 2.5);
       return;
     }
 
@@ -876,7 +824,7 @@ const Book = ({
       animProgress.current = Math.min(1, animProgress.current + delta / (TIMINGS.BOOK_OPEN / 1000));
       const p = easeOutCubic(animProgress.current);
       g.rotation.set(0, -Math.PI / 2 + 0.06, 0);
-      g.scale.set(1.6, 1.6, 1.6);
+      g.scale.set(2.5, 2.5, 2.5);
       if (cvr) cvr.rotation.y = THREE.MathUtils.lerp(0, -Math.PI * 0.80, p);
       return;
     }
@@ -884,7 +832,7 @@ const Book = ({
     // OPEN – gentle float, scaled up for readability on mobile
     if (animState === BOOK_STATES.OPEN) {
       g.position.y = 0.2 + Math.sin(time * 1.4) * 0.004;
-      g.scale.set(1.6, 1.6, 1.6);
+      g.scale.set(2.5, 2.5, 2.5);
       return;
     }
 
@@ -1159,35 +1107,15 @@ const Book = ({
         </mesh>
       )}
 
-      {/* ─── Open book: two-page spread facing camera ───
-          After group's -PI/2 Y-rotation: Ry(-PI/2) maps local (x,y,z) → world (z,y,-x)
-          -Z local → +X world (camera-right) → content/right page
-          +Z local → -X world (camera-left) → decorative/left page
-          Click detection uses world X: localX < 0 = camera-left = return */}
+      {/* ─── Open book: single content page filling the spread ───
+          After Ry(-PI/2): local Z maps to world -X. The full book depth becomes width.
+          Single page covers the entire open spread for maximum readability on mobile.
+          Left half (Z>0 → camera-LEFT) = tap to return. Right half = tap to open. */}
       {animState === BOOK_STATES.OPEN && (
         <group>
-          {/* Invisible click targets: camera-LEFT (Z=+0.55 local → -X world) = return, camera-RIGHT (Z=-0.55 local → +X world) = open */}
-          <mesh position={[0, 0, 0.55]} rotation={[0, Math.PI / 2, 0]}>
-            <planeGeometry args={[1.1, 1.5]} />
-            <meshBasicMaterial transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} />
-          </mesh>
-          <mesh position={[0, 0, -0.55]} rotation={[0, Math.PI / 2, 0]}>
-            <planeGeometry args={[1.1, 1.5]} />
-            <meshBasicMaterial transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} />
-          </mesh>
-          {/* Left page (decorative) - +Z local → -X world → camera-LEFT */}
-          <mesh position={[0, 0, 0.5]} rotation={[0, Math.PI / 2, 0]}>
-            <planeGeometry args={[0.95, 1.35]} />
-            <meshStandardMaterial
-              map={leftPageTex}
-              roughness={0.90}
-              metalness={0}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-          {/* Right page (content) - -Z local → +X world → camera-RIGHT */}
-          <mesh position={[0, 0, -0.5]} rotation={[0, Math.PI / 2, 0]}>
-            <planeGeometry args={[0.95, 1.35]} />
+          {/* Content page - fills the entire open book spread */}
+          <mesh position={[0, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+            <planeGeometry args={[d - 0.02, h - 0.04]} />
             <meshStandardMaterial
               map={openPageTex}
               roughness={0.90}
@@ -1195,10 +1123,15 @@ const Book = ({
               side={THREE.DoubleSide}
             />
           </mesh>
-          {/* Gutter shadow line at center */}
-          <mesh position={[0, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
-            <planeGeometry args={[0.02, 1.35]} />
-            <meshBasicMaterial color="#8B7D6B" transparent opacity={0.25} side={THREE.DoubleSide} />
+          {/* Spine gutter shadow line */}
+          <mesh position={[0, 0, 0.001]} rotation={[0, Math.PI / 2, 0]}>
+            <planeGeometry args={[0.015, h - 0.04]} />
+            <meshBasicMaterial color="#6B5B4B" transparent opacity={0.18} side={THREE.DoubleSide} />
+          </mesh>
+          {/* "Return" indicator on left side */}
+          <mesh position={[0, -h / 2 + 0.06, d / 4]} rotation={[0, Math.PI / 2, 0]}>
+            <planeGeometry args={[0.08, 0.08]} />
+            <meshBasicMaterial color="#8B7D6B" transparent opacity={0.35} side={THREE.DoubleSide} />
           </mesh>
         </group>
       )}
