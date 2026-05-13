@@ -777,7 +777,7 @@ const Book = ({
       const p = easeOutBack(Math.min(animProgress.current, 0.98));
       g.position.x = THREE.MathUtils.lerp(snapPos.current.x, 0,    p);
       g.position.y = THREE.MathUtils.lerp(snapPos.current.y, 0.2,  p);
-      g.position.z = THREE.MathUtils.lerp(snapPos.current.z, 6.5,  p);
+      g.position.z = THREE.MathUtils.lerp(snapPos.current.z, 4.5,  p);
       g.rotation.set(0, -Math.PI / 2, 0);
       g.scale.set(1, 1, 1);
       return;
