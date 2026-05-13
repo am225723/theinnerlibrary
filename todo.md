@@ -27,9 +27,10 @@
 - [x] Ensure click detection works on open book pages
 - [ ] Test on mobile device
 
-## Phase 5: Fix Issues from User Feedback
-- [ ] Fix return button click detection (change from localX to localZ - after -90° Y-rotation, pages are at localZ ±0.5)
-- [ ] Fix open book centering (replace flat wall back with wallpaper-textured panel behind books)
-- [ ] Enhance book realism (better spine textures, cover materials, page edges)
+## Phase 6: Fix New Issues from User Feedback
+- [ ] Fix page not displaying fully on screen (scale/position issue)
+- [ ] Fix return button still not working (debug click detection)
+- [ ] Fix backdrop behind book and shelves not appearing (wallpaper texture issue)
+- [ ] Fix book disappearing when opening (only shows page overlay - book mesh visibility issue)
 - [ ] Build and test all fixes
 - [ ] Push to GitHub

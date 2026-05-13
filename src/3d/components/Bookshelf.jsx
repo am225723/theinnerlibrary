@@ -24,7 +24,7 @@ function buildShelfWallpaperTexture() {
   ctx.fillRect(0, 0, W, H);
 
   // fine paper grain
-  ctx.globalAlpha = 0.035;
+  ctx.globalAlpha = 0.06;
   for (let i = 0; i < 6000; i++) {
     const x = Math.random() * W;
     const y = Math.random() * H;
@@ -34,7 +34,7 @@ function buildShelfWallpaperTexture() {
   ctx.globalAlpha = 1;
 
   // elegant damask-style pattern
-  ctx.globalAlpha = 0.06;
+  ctx.globalAlpha = 0.10;
   const cell = 80;
   for (let row = -1; row < H / cell + 1; row++) {
     for (let col = -1; col < W / cell + 1; col++) {
@@ -166,8 +166,8 @@ const Bookshelf = ({
     <group>
       {/* Back wall panel behind shelves – wallpaper texture */}
       <mesh position={[0, -1.2, -1.05]} receiveShadow>
-        <planeGeometry args={[10, 7]} />
-        <meshStandardMaterial map={wallpaperTex} roughness={0.94} metalness={0} />
+        <planeGeometry args={[12, 8]} />
+        <meshStandardMaterial map={wallpaperTex} roughness={0.92} metalness={0} />
       </mesh>
 
       {shelves.map((shelf) => (

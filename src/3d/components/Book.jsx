@@ -872,7 +872,7 @@ const Book = ({
       g.position.y = THREE.MathUtils.lerp(snapPos.current.y, 0.2,  p);
       g.position.z = THREE.MathUtils.lerp(snapPos.current.z, 4.5,  p);
       g.rotation.set(0, -Math.PI / 2, 0);
-      g.scale.set(1, 1, 1);
+      g.scale.set(2.2, 2.2, 2.2);
       return;
     }
 
@@ -881,15 +881,15 @@ const Book = ({
       animProgress.current = Math.min(1, animProgress.current + delta / (TIMINGS.BOOK_OPEN / 1000));
       const p = easeOutCubic(animProgress.current);
       g.rotation.set(0, -Math.PI / 2 + 0.06, 0);
-      g.scale.set(1, 1, 1);
+      g.scale.set(2.2, 2.2, 2.2);
       if (cvr) cvr.rotation.y = THREE.MathUtils.lerp(0, -Math.PI * 0.80, p);
       return;
     }
 
-    // OPEN – gentle float, no scale (WebGL-friendly)
+    // OPEN – gentle float, scaled up for readability on mobile
     if (animState === BOOK_STATES.OPEN) {
       g.position.y = 0.2 + Math.sin(time * 1.4) * 0.004;
-      g.scale.set(1, 1, 1);
+      g.scale.set(2.2, 2.2, 2.2);
       return;
     }
 
@@ -939,12 +939,14 @@ const Book = ({
     e.stopPropagation();
     if (animState === BOOK_STATES.OPEN) {
       // When book is open (group rotated -90° around Y), the local Z axis
-      // maps to the camera's left/right. Pages sit at local Z = ±0.5:
-      //   -Z local → camera-left (return button)
-      //   +Z local → camera-right (open button)
+      // maps to the world X axis. Pages sit at local Z = ±0.5, which after
+      // the rotation end up at world X = ∓0.5 relative to group position.
+      // So we check world X to determine which page was clicked:
+      //   world X < group X → camera-left → return to shelf
+      //   world X ≥ group X → camera-right → open the page
       if (e.point) {
-        const localZ = e.point.z - (groupRef.current?.position.z || 0);
-        if (localZ < 0) {
+        const localX = e.point.x - (groupRef.current?.position.x || 0);
+        if (localX < 0) {
           // Clicked left side – return to shelf
           if (onBookReturn) onBookReturn(book.id);
         } else {
@@ -1033,22 +1035,20 @@ const Book = ({
         </mesh>
       )}
 
-      {/* Spine artwork overlay (hidden when open) */}
-      {animState !== BOOK_STATES.OPEN && (
-        <mesh position={[0, 0, cT + 0.001]}>
-          <planeGeometry args={[t - 0.008, h - 0.008]} />
-          <meshStandardMaterial
-            map={spineTex}
-            transparent
-            opacity={0.97}
-            roughness={spineRough}
-            metalness={0.04}
-          />
-        </mesh>
-      )}
+      {/* Spine artwork overlay (always visible) */}
+      <mesh position={[0, 0, cT + 0.001]}>
+        <planeGeometry args={[t - 0.008, h - 0.008]} />
+        <meshStandardMaterial
+          map={spineTex}
+          transparent
+          opacity={0.97}
+          roughness={spineRough}
+          metalness={0.04}
+        />
+      </mesh>
 
-      {/* Raised bands (hidden when open) */}
-      {mat.spineStyle === 'raised_bands' && animState !== BOOK_STATES.OPEN && (
+      {/* Raised bands (always visible) */}
+      {mat.spineStyle === 'raised_bands' && (
         [0.18, 0.32, 0.62, 0.76].map((p, i) => (
           <mesh key={i} position={[0, h * (p - 0.5), cT / 2]} castShadow>
             <boxGeometry args={[t + 0.004, 0.028, cT + 0.008]} />
@@ -1061,9 +1061,8 @@ const Book = ({
         ))
       )}
 
-      {/* Headbands & page-edge caps (hidden when open) */}
-      {animState !== BOOK_STATES.OPEN && (
-        <>
+      {/* Headbands & page-edge caps (always visible) */}
+      <>
           {/* Top headband */}
           <mesh position={[0, h / 2 - 0.004, -d / 2]}>
             <boxGeometry args={[t + 0.008, 0.010, d * 0.035]} />
@@ -1086,15 +1085,13 @@ const Book = ({
             <meshStandardMaterial color="#EDE7D8" roughness={0.92} metalness={0} />
           </mesh>
         </>
-      )}
 
       {/* ══ FRONT COVER – pivots open at the SPINE edge ══
           The group is always rendered so the ref survives state transitions.
           Children are hidden when OPEN to prevent occlusion. */}
       <group ref={frontCoverPivotRef} position={[t / 2, 0, 0]}>
-        {animState !== BOOK_STATES.OPEN && (
         <group position={[cT / 2, 0, -d / 2]}>
-          {/* Cover board */}
+          {/* Cover board - always visible */}
           <mesh castShadow receiveShadow>
             <boxGeometry args={[cT, h, d]} />
             <meshStandardMaterial
@@ -1122,7 +1119,6 @@ const Book = ({
             <meshStandardMaterial color="#E8DDD0" roughness={0.78} metalness={0} />
           </mesh>
         </group>
-        )}
 
         {/* First flyleaf (only when in motion and not open) */}
         {isMoving && animState !== BOOK_STATES.OPEN && (
@@ -1160,6 +1156,15 @@ const Book = ({
           Left page (camera-left) at +Z offset; right page at -Z offset. */}
       {animState === BOOK_STATES.OPEN && (
         <group>
+          {/* Invisible click targets for reliable left/right detection */}
+          <mesh position={[0, 0, -0.55]} rotation={[0, Math.PI / 2, 0]}>
+            <planeGeometry args={[1.1, 1.5]} />
+            <meshBasicMaterial transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} />
+          </mesh>
+          <mesh position={[0, 0, 0.55]} rotation={[0, Math.PI / 2, 0]}>
+            <planeGeometry args={[1.1, 1.5]} />
+            <meshBasicMaterial transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} />
+          </mesh>
           {/* Left page (decorative) - -Z local → camera-left after Ry(-PI/2) */}
           <mesh position={[0, 0, -0.5]} rotation={[0, Math.PI / 2, 0]}>
             <planeGeometry args={[0.95, 1.35]} />
@@ -1189,6 +1194,31 @@ const Book = ({
       )}
 
 
+
+      {/* Page block visible when open - shows page edges between covers */}
+      {animState === BOOK_STATES.OPEN && (
+        <mesh position={[0, 0, -d / 2]}>
+          <boxGeometry args={[t - 0.018, h - 0.03, d - 0.016]} />
+          <meshStandardMaterial
+            map={pageEdgeTex}
+            color="#F0EAD8"
+            roughness={0.88}
+            metalness={0}
+          />
+        </mesh>
+      )}
+
+      {/* Back cover visible when open */}
+      {animState === BOOK_STATES.OPEN && (
+        <mesh position={[-t / 2 - cT / 2, 0, -d / 2]}>
+          <boxGeometry args={[cT, h, d]} />
+          <meshStandardMaterial
+            color={mat.coverColor}
+            roughness={coverRough}
+            metalness={coverMetal}
+          />
+        </mesh>
+      )}
 
       {/* Hover glow shell */}
       {hovered && !isMoving && (
