@@ -615,34 +615,18 @@ function buildOpenPageContentTexture(book, mat) {
   ctx.font = '500 20px Georgia, serif';
   ctx.fillText('Would you like to open this page?', W / 2, 470);
 
-  // Return button (left side)
+  // Single centered Open Page button (tap this side to open, tap left page to return)
   const btnY = 540;
-  const btnW = 170;
-  const btnH = 48;
-  const leftBtnX = W / 2 - btnW - 15;
+  const btnW = 240;
+  const btnH = 52;
+  const btnX = W / 2 - btnW / 2;
 
-  ctx.fillStyle = '#E8DDD0';
-  ctx.beginPath();
-  ctx.roundRect(leftBtnX, btnY, btnW, btnH, 8);
-  ctx.fill();
-  ctx.strokeStyle = '#D0C4B0';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  ctx.fillStyle = '#6B4226';
-  ctx.font = '600 17px -apple-system, BlinkMacSystemFont, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('\u2190 Return', leftBtnX + btnW / 2, btnY + btnH / 2 + 6);
-
-  // Open button (right side)
-  const rightBtnX = W / 2 + 15;
-
-  const openGrad = ctx.createLinearGradient(rightBtnX, btnY, rightBtnX + btnW, btnY + btnH);
+  const openGrad = ctx.createLinearGradient(btnX, btnY, btnX + btnW, btnY + btnH);
   openGrad.addColorStop(0, '#B8922A');
   openGrad.addColorStop(1, '#9A7A22');
   ctx.fillStyle = openGrad;
   ctx.beginPath();
-  ctx.roundRect(rightBtnX, btnY, btnW, btnH, 8);
+  ctx.roundRect(btnX, btnY, btnW, btnH, 10);
   ctx.fill();
 
   ctx.shadowColor = 'rgba(184,146,42,0.3)';
@@ -653,9 +637,14 @@ function buildOpenPageContentTexture(book, mat) {
   ctx.shadowOffsetY = 0;
 
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = '600 17px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.font = '600 18px -apple-system, BlinkMacSystemFont, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('Open Page \u2192', rightBtnX + btnW / 2, btnY + btnH / 2 + 6);
+  ctx.fillText('Open Page \u2192', btnX + btnW / 2, btnY + btnH / 2 + 6);
+
+  // Hint text below button
+  ctx.fillStyle = 'rgba(107,66,38,0.4)';
+  ctx.font = 'italic 13px Georgia, serif';
+  ctx.fillText('tap this page to open', W / 2, btnY + btnH + 25);
 
   // Decorative flourish at bottom
   ctx.strokeStyle = mat.accentColor;
@@ -731,6 +720,12 @@ function buildLeftPageTexture(mat) {
     ctx.fill();
   }
   ctx.globalAlpha = 1;
+
+  // Return hint at bottom
+  ctx.fillStyle = 'rgba(107,66,38,0.35)';
+  ctx.font = 'italic 15px Georgia, serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('\u2190 tap to return', W / 2, H - 45);
 
   // Aging speckles
   for (let i = 0; i < 1000; i++) {
@@ -870,9 +865,9 @@ const Book = ({
       const p = easeOutBack(Math.min(animProgress.current, 0.98));
       g.position.x = THREE.MathUtils.lerp(snapPos.current.x, 0,    p);
       g.position.y = THREE.MathUtils.lerp(snapPos.current.y, 0.2,  p);
-      g.position.z = THREE.MathUtils.lerp(snapPos.current.z, 4.5,  p);
+      g.position.z = THREE.MathUtils.lerp(snapPos.current.z, 3.8,  p);
       g.rotation.set(0, -Math.PI / 2, 0);
-      g.scale.set(2.2, 2.2, 2.2);
+      g.scale.set(1.6, 1.6, 1.6);
       return;
     }
 
@@ -881,7 +876,7 @@ const Book = ({
       animProgress.current = Math.min(1, animProgress.current + delta / (TIMINGS.BOOK_OPEN / 1000));
       const p = easeOutCubic(animProgress.current);
       g.rotation.set(0, -Math.PI / 2 + 0.06, 0);
-      g.scale.set(2.2, 2.2, 2.2);
+      g.scale.set(1.6, 1.6, 1.6);
       if (cvr) cvr.rotation.y = THREE.MathUtils.lerp(0, -Math.PI * 0.80, p);
       return;
     }
@@ -889,7 +884,7 @@ const Book = ({
     // OPEN – gentle float, scaled up for readability on mobile
     if (animState === BOOK_STATES.OPEN) {
       g.position.y = 0.2 + Math.sin(time * 1.4) * 0.004;
-      g.scale.set(2.2, 2.2, 2.2);
+      g.scale.set(1.6, 1.6, 1.6);
       return;
     }
 
@@ -938,19 +933,21 @@ const Book = ({
   const handleClick = useCallback((e) => {
     e.stopPropagation();
     if (animState === BOOK_STATES.OPEN) {
-      // When book is open (group rotated -90° around Y), the local Z axis
-      // maps to the world X axis. Pages sit at local Z = ±0.5, which after
-      // the rotation end up at world X = ∓0.5 relative to group position.
-      // So we check world X to determine which page was clicked:
-      //   world X < group X → camera-left → return to shelf
-      //   world X ≥ group X → camera-right → open the page
+      // After Ry(-PI/2): local Z → world -X (negated). So:
+      //   local Z = +0.5 → world X = -0.5 (camera-LEFT) → decorative page / return
+      //   local Z = -0.5 → world X = +0.5 (camera-RIGHT) → content page / open
+      // We check e.point.x relative to group.x to determine left vs right click.
       if (e.point) {
         const localX = e.point.x - (groupRef.current?.position.x || 0);
         if (localX < 0) {
-          // Clicked left side – return to shelf
-          if (onBookReturn) onBookReturn(book.id);
+          // Clicked left side (camera-LEFT) – animate return to shelf
+          startState(BOOK_STATES.RETURNING);
+          setTimeout(() => {
+            startState(BOOK_STATES.IDLE);
+            if (onBookReturn) onBookReturn(book.id);
+          }, TIMINGS.RETURN_TO_SHELF);
         } else {
-          // Clicked right side – open the page
+          // Clicked right side (camera-RIGHT) – navigate to tool page
           if (onBookOpen) onBookOpen(book);
           if (onClick) onClick(book);
         }
@@ -1169,17 +1166,17 @@ const Book = ({
           Click detection uses world X: localX < 0 = camera-left = return */}
       {animState === BOOK_STATES.OPEN && (
         <group>
-          {/* Invisible click targets for reliable left/right detection */}
-          <mesh position={[0, 0, -0.55]} rotation={[0, Math.PI / 2, 0]}>
-            <planeGeometry args={[1.1, 1.5]} />
-            <meshBasicMaterial transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} />
-          </mesh>
+          {/* Invisible click targets: camera-LEFT (Z=+0.55 local → -X world) = return, camera-RIGHT (Z=-0.55 local → +X world) = open */}
           <mesh position={[0, 0, 0.55]} rotation={[0, Math.PI / 2, 0]}>
             <planeGeometry args={[1.1, 1.5]} />
             <meshBasicMaterial transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} />
           </mesh>
-          {/* Left page (decorative) - -Z local → camera-left after Ry(-PI/2) */}
-          <mesh position={[0, 0, -0.5]} rotation={[0, Math.PI / 2, 0]}>
+          <mesh position={[0, 0, -0.55]} rotation={[0, Math.PI / 2, 0]}>
+            <planeGeometry args={[1.1, 1.5]} />
+            <meshBasicMaterial transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} />
+          </mesh>
+          {/* Left page (decorative) - +Z local → -X world → camera-LEFT */}
+          <mesh position={[0, 0, 0.5]} rotation={[0, Math.PI / 2, 0]}>
             <planeGeometry args={[0.95, 1.35]} />
             <meshStandardMaterial
               map={leftPageTex}
@@ -1188,8 +1185,8 @@ const Book = ({
               side={THREE.DoubleSide}
             />
           </mesh>
-          {/* Right page (content) - +Z local → camera-right after Ry(-PI/2) */}
-          <mesh position={[0, 0, 0.5]} rotation={[0, Math.PI / 2, 0]}>
+          {/* Right page (content) - -Z local → +X world → camera-RIGHT */}
+          <mesh position={[0, 0, -0.5]} rotation={[0, Math.PI / 2, 0]}>
             <planeGeometry args={[0.95, 1.35]} />
             <meshStandardMaterial
               map={openPageTex}
