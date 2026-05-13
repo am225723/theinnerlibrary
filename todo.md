@@ -28,9 +28,9 @@
 - [ ] Test on mobile device
 
 ## Phase 6: Fix New Issues from User Feedback
-- [ ] Fix page not displaying fully on screen (scale/position issue)
-- [ ] Fix return button still not working (debug click detection)
-- [ ] Fix backdrop behind book and shelves not appearing (wallpaper texture issue)
-- [ ] Fix book disappearing when opening (only shows page overlay - book mesh visibility issue)
-- [ ] Build and test all fixes
-- [ ] Push to GitHub
+- [x] Fix book disappearing when opening (keep spine, covers, page block visible when OPEN)
+- [x] Fix return button still not working (reverted to localX - correct axis after Ry(-PI/2))
+- [x] Fix backdrop behind book and shelves not appearing (enlarged wallpaper, increased pattern visibility)
+- [x] Fix page not displaying fully on screen (scaled up open book to 2.2x, added invisible click targets)
+- [x] Build and test all fixes
+- [x] Push to GitHub (commit f62bccc)

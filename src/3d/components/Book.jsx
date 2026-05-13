@@ -1047,6 +1047,19 @@ const Book = ({
         />
       </mesh>
 
+      {/* Spine board visible when open - provides solid backing for spine artwork */}
+      {animState === BOOK_STATES.OPEN && (
+        <mesh position={[0, 0, cT / 2]}>
+          <boxGeometry args={[t, h, cT]} />
+          <meshStandardMaterial
+            color={mat.darkColor}
+            roughness={spineRough}
+            metalness={0.05}
+          />
+        </mesh>
+      )}
+
+
       {/* Raised bands (always visible) */}
       {mat.spineStyle === 'raised_bands' && (
         [0.18, 0.32, 0.62, 0.76].map((p, i) => (
@@ -1150,10 +1163,10 @@ const Book = ({
       )}
 
       {/* ─── Open book: two-page spread facing camera ───
-          After group's -PI/2 Y-rotation: +X local → +Z world (toward camera),
-          +Z local → -X world (camera-left), -Z local → +X world (camera-right).
-          Plane rotation=[0, PI/2, 0] makes +Z normal point along +X local → camera.
-          Left page (camera-left) at +Z offset; right page at -Z offset. */}
+          After group's -PI/2 Y-rotation: Ry(-PI/2) maps local (x,y,z) → world (z,y,-x)
+          -Z local → +X world (camera-right) → content/right page
+          +Z local → -X world (camera-left) → decorative/left page
+          Click detection uses world X: localX < 0 = camera-left = return */}
       {animState === BOOK_STATES.OPEN && (
         <group>
           {/* Invisible click targets for reliable left/right detection */}
