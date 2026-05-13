@@ -701,6 +701,9 @@ const Book = ({
   onBookOpen,
   onBookReturn,
   returnToShelf = false,
+  openBookScale = 2.5,
+  openBookPosZ = 4.5,
+  openBookPosY = 0.2,
 }) => {
   const groupRef            = useRef();
   const frontCoverPivotRef  = useRef();
@@ -812,10 +815,10 @@ const Book = ({
       animProgress.current = Math.min(1, animProgress.current + delta / (TIMINGS.CENTER_MOVE / 1000));
       const p = easeOutBack(Math.min(animProgress.current, 0.98));
       g.position.x = THREE.MathUtils.lerp(snapPos.current.x, 0,    p);
-      g.position.y = THREE.MathUtils.lerp(snapPos.current.y, 0.2,  p);
-      g.position.z = THREE.MathUtils.lerp(snapPos.current.z, 4.5,  p);
+      g.position.y = THREE.MathUtils.lerp(snapPos.current.y, openBookPosY,  p);
+      g.position.z = THREE.MathUtils.lerp(snapPos.current.z, openBookPosZ,  p);
       g.rotation.set(0, -Math.PI / 2, 0);
-      g.scale.set(2.5, 2.5, 2.5);
+      g.scale.set(openBookScale, openBookScale, openBookScale);
       return;
     }
 
@@ -824,15 +827,15 @@ const Book = ({
       animProgress.current = Math.min(1, animProgress.current + delta / (TIMINGS.BOOK_OPEN / 1000));
       const p = easeOutCubic(animProgress.current);
       g.rotation.set(0, -Math.PI / 2 + 0.06, 0);
-      g.scale.set(2.5, 2.5, 2.5);
+      g.scale.set(openBookScale, openBookScale, openBookScale);
       if (cvr) cvr.rotation.y = THREE.MathUtils.lerp(0, -Math.PI * 0.80, p);
       return;
     }
 
     // OPEN – gentle float, scaled up for readability on mobile
     if (animState === BOOK_STATES.OPEN) {
-      g.position.y = 0.2 + Math.sin(time * 1.4) * 0.004;
-      g.scale.set(2.5, 2.5, 2.5);
+      g.position.y = openBookPosY + Math.sin(time * 1.4) * 0.004;
+      g.scale.set(openBookScale, openBookScale, openBookScale);
       return;
     }
 

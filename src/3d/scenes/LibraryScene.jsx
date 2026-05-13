@@ -363,7 +363,7 @@ const Wainscoting = () => {
 };
 
 // ─── SceneContent ─────────────────────────────────────────────────────────────
-const LibrarySceneContent = ({ onBookSelect, onBookOpen, onBookReturn, returnToShelfId }) => {
+const LibrarySceneContent = ({ onBookSelect, onBookOpen, onBookReturn, returnToShelfId, openBookScale = 2.5, openBookPosZ = 4.5, openBookPosY = 0.2 }) => {
   const [selectedBookId, setSelectedBookId] = useState(null);
   const [, setHoveredBookId] = useState(null);
 
@@ -493,6 +493,9 @@ const LibrarySceneContent = ({ onBookSelect, onBookOpen, onBookReturn, returnToS
           onBookOpen={handleBookOpen}
           onBookReturn={handleBookReturn}
           returnToShelfId={returnToShelfId}
+          openBookScale={openBookScale}
+          openBookPosZ={openBookPosZ}
+          openBookPosY={openBookPosY}
         />
 
         {/* Bookends */}
@@ -848,7 +851,7 @@ const Bookend = ({ position, mirror = false }) => (
 );
 
 // ─── LibraryScene (Canvas wrapper) ───────────────────────────────────────────
-const LibraryScene = ({ onBookSelect, onBookOpen, onBookReturn, returnToShelfId }) => (
+const LibraryScene = ({ onBookSelect, onBookOpen, onBookReturn, returnToShelfId, openBookScale, openBookPosZ, openBookPosY }) => (
   <Canvas
     shadows
     camera={{ position: [0, -0.2, 8], fov: 42, near: 0.1, far: 55 }}
@@ -872,6 +875,9 @@ const LibraryScene = ({ onBookSelect, onBookOpen, onBookReturn, returnToShelfId 
       onBookOpen={onBookOpen}
       onBookReturn={onBookReturn}
       returnToShelfId={returnToShelfId}
+      openBookScale={openBookScale}
+      openBookPosZ={openBookPosZ}
+      openBookPosY={openBookPosY}
     />
   </Canvas>
 );

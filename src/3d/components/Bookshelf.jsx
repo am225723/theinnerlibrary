@@ -146,6 +146,9 @@ const Bookshelf = ({
   onBookOpen,
   onBookReturn,
   returnToShelfId,
+  openBookScale = 2.5,
+  openBookPosZ = 4.5,
+  openBookPosY = 0.2,
 }) => {
   const woodTex     = useMemo(() => buildWoodTexture('#8B6844'), []);
   const darkWoodTex = useMemo(() => buildWoodTexture('#5C3D20'), []);
@@ -185,6 +188,9 @@ const Bookshelf = ({
           onBookOpen={onBookOpen}
           onBookReturn={onBookReturn}
           returnToShelfId={returnToShelfId}
+          openBookScale={openBookScale}
+          openBookPosZ={openBookPosZ}
+          openBookPosY={openBookPosY}
         />
       ))}
 
@@ -210,6 +216,7 @@ const ShelfLevel = ({
   shelf, woodTex, darkWoodTex, edgeTex,
   onBookClick, onBookHover, onBookHoverEnd, selectedBookId, bookmarks,
   onBookOpen, onBookReturn, returnToShelfId,
+  openBookScale = 2.5, openBookPosZ = 4.5, openBookPosY = 0.2,
 }) => {
   const sy = shelf.y;
   const W  = SHELF_DIMENSIONS.width;
@@ -269,6 +276,9 @@ const ShelfLevel = ({
         onBookOpen={onBookOpen}
         onBookReturn={onBookReturn}
         returnToShelfId={returnToShelfId}
+        openBookScale={openBookScale}
+        openBookPosZ={openBookPosZ}
+        openBookPosY={openBookPosY}
       />
     </group>
   );
@@ -306,6 +316,7 @@ const SnugBookRow = ({
   shelfBooks, shelfY,
   onBookClick, onBookHover, onBookHoverEnd, selectedBookId, bookmarks,
   onBookOpen, onBookReturn, returnToShelfId,
+  openBookScale, openBookPosZ, openBookPosY,
 }) => {
   const positions = useMemo(() => {
     const gap = 0.03;
@@ -345,6 +356,9 @@ const SnugBookRow = ({
             onBookOpen={onBookOpen}
             onBookReturn={onBookReturn}
             returnToShelf={returnToShelfId === book.id}
+            openBookScale={openBookScale}
+            openBookPosZ={openBookPosZ}
+            openBookPosY={openBookPosY}
           />
         );
       })}

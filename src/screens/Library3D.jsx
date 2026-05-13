@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useEffect, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ErrorBoundary from '../components/ErrorBoundary';
+import OpenBookControls from '../3d/components/OpenBookControls';
 import styles from './Library3D.module.css';
 
 const LibraryScene = React.lazy(() => import('../3d/scenes/LibraryScene'));
@@ -12,6 +13,12 @@ export const Library3D = () => {
   const [returnToShelfId, setReturnToShelfId] = useState(null);
   const [openBookId, setOpenBookId] = useState(null);
   const [showFallback, setShowFallback] = useState(false);
+  
+  // Open book controls state
+  const [showControls, setShowControls] = useState(true);
+  const [openBookScale, setOpenBookScale] = useState(2.5);
+  const [openBookPosZ, setOpenBookPosZ] = useState(4.5);
+  const [openBookPosY, setOpenBookPosY] = useState(0.2);
 
   useEffect(() => {
     const checkWebGL = () => {
@@ -67,6 +74,13 @@ export const Library3D = () => {
     navigate('/classic');
   }, [navigate]);
 
+  // Reset controls to defaults
+  const handleResetControls = useCallback(() => {
+    setOpenBookScale(2.5);
+    setOpenBookPosZ(4.5);
+    setOpenBookPosY(0.2);
+  }, []);
+
   if (showFallback) {
     return (
       <div className={styles.fallback}>
@@ -110,6 +124,14 @@ export const Library3D = () => {
             >
               ⚙️
             </button>
+            <button
+              className={styles.settingsButton}
+              onClick={() => setShowControls(!showControls)}
+              aria-label="Toggle controls"
+              title="Toggle open book controls"
+            >
+              CTRL
+            </button>
           </div>
         </div>
       </div>
@@ -136,10 +158,26 @@ export const Library3D = () => {
               onBookOpen={handleOpenPage}
               onBookReturn={handleBookReturn}
               returnToShelfId={returnToShelfId}
+              openBookScale={openBookScale}
+              openBookPosZ={openBookPosZ}
+              openBookPosY={openBookPosY}
             />
           </Suspense>
         </ErrorBoundary>
       </div>
+
+      {/* Open Book Controls */}
+      {showControls && (
+        <OpenBookControls
+          scale={openBookScale}
+          positionZ={openBookPosZ}
+          positionY={openBookPosY}
+          onScaleChange={setOpenBookScale}
+          onPositionZChange={setOpenBookPosZ}
+          onPositionYChange={setOpenBookPosY}
+          onReset={handleResetControls}
+        />
+      )}
     </div>
   );
 };

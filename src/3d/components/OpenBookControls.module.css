@@ -1,0 +1,155 @@
+.controls {
+  position: fixed;
+  top: 70px;
+  right: 8px;
+  z-index: 1000;
+  background: rgba(27, 42, 74, 0.92);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  max-width: 260px;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #F5F0E8;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.collapsed {
+  background: rgba(27, 42, 74, 0.85);
+  border-radius: 8px;
+}
+
+.toggleButton {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: #B8922A;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: center;
+  border-radius: 12px;
+}
+
+.collapsed .toggleButton {
+  padding: 10px 12px;
+}
+
+.controlsContent {
+  padding: 0 12px 12px;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #B8922A;
+  margin: 0 0 10px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.controlGroup {
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.controlGroup:last-of-type {
+  border-bottom: none;
+  margin-bottom: 8px;
+}
+
+.label {
+  display: block;
+  font-size: 12px;
+  color: #E8DDD0;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.slider {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  outline: none;
+  margin: 4px 0 8px;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #B8922A;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #B8922A;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.quickButtons {
+  display: flex;
+  gap: 4px;
+}
+
+.quickButtons button {
+  flex: 1;
+  padding: 5px 2px;
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #E8DDD0;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.quickButtons button:hover {
+  background: rgba(184, 146, 42, 0.3);
+  border-color: #B8922A;
+}
+
+.quickButtons button:active {
+  transform: scale(0.95);
+}
+
+.resetButton {
+  width: 100%;
+  padding: 8px;
+  background: rgba(184, 146, 42, 0.2);
+  border: 1px solid rgba(184, 146, 42, 0.4);
+  border-radius: 8px;
+  color: #B8922A;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: all 0.15s;
+}
+
+.resetButton:hover {
+  background: rgba(184, 146, 42, 0.35);
+}
+
+.info {
+  font-size: 11px;
+  color: rgba(232, 221, 208, 0.5);
+  line-height: 1.4;
+}
+
+.info p {
+  margin: 0 0 4px;
+}
