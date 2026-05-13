@@ -57,47 +57,81 @@ function buildSpineTexture(mat) {
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
 
-  // base gradient (left-to-right light variation)
+  // base gradient (left-to-right light variation simulating curvature)
   const g = ctx.createLinearGradient(0, 0, W, 0);
-  g.addColorStop(0,   darken(mat.darkColor, 18));
-  g.addColorStop(0.1, lighten(mat.darkColor, 12));
-  g.addColorStop(0.5, lighten(mat.darkColor, 6));
-  g.addColorStop(0.9, lighten(mat.darkColor, 10));
-  g.addColorStop(1,   darken(mat.darkColor, 14));
+  g.addColorStop(0,   darken(mat.darkColor, 22));
+  g.addColorStop(0.08, darken(mat.darkColor, 12));
+  g.addColorStop(0.25, lighten(mat.darkColor, 8));
+  g.addColorStop(0.5,  lighten(mat.darkColor, 14));
+  g.addColorStop(0.75, lighten(mat.darkColor, 8));
+  g.addColorStop(0.92, darken(mat.darkColor, 10));
+  g.addColorStop(1,   darken(mat.darkColor, 20));
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
 
-  // micro-grain
-  for (let i = 0; i < 6000; i++) {
+  // vertical highlight streak (simulates light catching the rounded spine)
+  const vg = ctx.createLinearGradient(0, 0, W, 0);
+  vg.addColorStop(0,   'rgba(255,255,255,0)');
+  vg.addColorStop(0.35, 'rgba(255,255,255,0.03)');
+  vg.addColorStop(0.5,  'rgba(255,255,255,0.06)');
+  vg.addColorStop(0.65, 'rgba(255,255,255,0.03)');
+  vg.addColorStop(1,   'rgba(255,255,255,0)');
+  ctx.fillStyle = vg;
+  ctx.fillRect(0, 0, W, H);
+
+  // leather/cloth micro-grain
+  const isLeather = mat.preset === 'leather';
+  const grainCount = isLeather ? 10000 : 6000;
+  for (let i = 0; i < grainCount; i++) {
     const x = Math.random() * W, y = Math.random() * H;
-    const a = 0.012 + Math.random() * 0.018;
-    ctx.fillStyle = Math.random() > 0.5
-      ? `rgba(255,255,255,${a})`
-      : `rgba(0,0,0,${a})`;
-    ctx.fillRect(x, y, 1 + Math.random(), 1);
+    const a = 0.012 + Math.random() * 0.02;
+    if (isLeather) {
+      // Leather has tiny pores and creases
+      if (Math.random() > 0.85) {
+        ctx.fillStyle = `rgba(0,0,0,${a * 2})`;
+        ctx.fillRect(x, y, 1 + Math.random() * 2, 1 + Math.random());
+      } else {
+        ctx.fillStyle = Math.random() > 0.5
+          ? `rgba(255,255,255,${a * 0.5})`
+          : `rgba(0,0,0,${a * 0.8})`;
+        ctx.fillRect(x, y, 1, 1);
+      }
+    } else {
+      ctx.fillStyle = Math.random() > 0.5
+        ? `rgba(255,255,255,${a})`
+        : `rgba(0,0,0,${a})`;
+      if (mat.preset === 'cloth') ctx.fillRect(x, y, 2 + Math.random() * 3, 1);
+      else ctx.fillRect(x, y, 1 + Math.random() * 2, 1 + Math.random() * 2);
+    }
   }
 
   // raised-band grooves
   if (mat.spineStyle === 'raised_bands') {
     [0.18, 0.32, 0.62, 0.76].forEach((p) => {
       const y = H * p;
-      const lg = ctx.createLinearGradient(0, y - 10, 0, y + 10);
-      lg.addColorStop(0,   darken(mat.darkColor, 8));
-      lg.addColorStop(0.5, lighten(mat.darkColor, 22));
-      lg.addColorStop(1,   darken(mat.darkColor, 8));
+      const lg = ctx.createLinearGradient(0, y - 12, 0, y + 12);
+      lg.addColorStop(0,   darken(mat.darkColor, 12));
+      lg.addColorStop(0.3, lighten(mat.darkColor, 28));
+      lg.addColorStop(0.5, lighten(mat.darkColor, 32));
+      lg.addColorStop(0.7, lighten(mat.darkColor, 28));
+      lg.addColorStop(1,   darken(mat.darkColor, 12));
       ctx.fillStyle = lg;
-      ctx.fillRect(0, y - 9, W, 18);
-      ctx.fillStyle = mat.accentColor + '60';
-      ctx.fillRect(0, y - 10, W, 2);
-      ctx.fillRect(0, y + 8,  W, 2);
+      ctx.fillRect(2, y - 10, W - 4, 20);
+      // band edge highlights
+      ctx.fillStyle = mat.accentColor + '70';
+      ctx.fillRect(2, y - 11, W - 4, 1.5);
+      ctx.fillStyle = 'rgba(0,0,0,0.12)';
+      ctx.fillRect(2, y + 9, W - 4, 1.5);
     });
   }
 
-  // gold accent lines
+  // gold accent lines at top and bottom
   ctx.fillStyle = mat.accentColor;
   ctx.globalAlpha = 0.55;
-  ctx.fillRect(18, 36,  W - 36, 1.5);
-  ctx.fillRect(18, H - 36, W - 36, 1.5);
+  ctx.fillRect(14, 30,  W - 28, 1.8);
+  ctx.fillRect(14, 36,  W - 28, 0.5);
+  ctx.fillRect(14, H - 32, W - 28, 1.8);
+  ctx.fillRect(14, H - 38, W - 28, 0.5);
   ctx.globalAlpha = 1;
 
   // spine title – rotated
@@ -106,13 +140,26 @@ function buildSpineTexture(mat) {
   ctx.translate(W / 2, H / 2);
   ctx.rotate(-Math.PI / 2);
   ctx.fillStyle = mat.accentColor;
-  ctx.shadowColor = 'rgba(0,0,0,0.5)';
-  ctx.shadowBlur = 4;
-  ctx.font = `bold 36px Georgia, serif`;
+  ctx.shadowColor = 'rgba(0,0,0,0.6)';
+  ctx.shadowBlur = 5;
+  ctx.font = `bold 34px Georgia, serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(label, 0, 0);
+  // Second pass without shadow for crispness
+  ctx.shadowBlur = 0;
+  ctx.fillText(label, 0, 0);
   ctx.restore();
+
+  // Subtle edge wear marks
+  ctx.globalAlpha = 0.04;
+  for (let i = 0; i < 30; i++) {
+    const wx = Math.random() < 0.5 ? Math.random() * 12 : W - Math.random() * 12;
+    const wy = Math.random() * H;
+    ctx.fillStyle = 'rgba(200,180,140,0.3)';
+    ctx.fillRect(wx, wy, 2 + Math.random() * 4, 1 + Math.random() * 2);
+  }
+  ctx.globalAlpha = 1;
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
@@ -127,24 +174,53 @@ function buildCoverTexture(mat, title) {
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
 
-  // base gradient
+  // base gradient with better curvature simulation
   const bg = ctx.createLinearGradient(0, 0, W, H);
-  bg.addColorStop(0,    lighten(mat.coverColor, 8));
+  bg.addColorStop(0,    lighten(mat.coverColor, 12));
+  bg.addColorStop(0.2,  lighten(mat.coverColor, 6));
   bg.addColorStop(0.45, mat.coverColor);
-  bg.addColorStop(1,    darken(mat.coverColor, 20));
+  bg.addColorStop(0.7,  darken(mat.coverColor, 10));
+  bg.addColorStop(1,    darken(mat.coverColor, 24));
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
-  // material grain
-  const grains = mat.preset === 'cloth' ? 8000 : mat.preset === 'velvet' ? 10000 : 5000;
+  // Spine edge shadow (left side gets darker near the hinge)
+  const hingeShadow = ctx.createLinearGradient(0, 0, W * 0.12, 0);
+  hingeShadow.addColorStop(0, 'rgba(0,0,0,0.15)');
+  hingeShadow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = hingeShadow;
+  ctx.fillRect(0, 0, W * 0.12, H);
+
+  // material grain - varies by preset
+  const isLeather = mat.preset === 'leather';
+  const grains = isLeather ? 12000 : mat.preset === 'cloth' ? 8000 : mat.preset === 'velvet' ? 10000 : 5000;
   for (let i = 0; i < grains; i++) {
     const x = Math.random() * W, y = Math.random() * H;
     const a = 0.008 + Math.random() * 0.018;
-    ctx.fillStyle = Math.random() > 0.5
-      ? `rgba(255,255,255,${a})`
-      : `rgba(0,0,0,${a})`;
-    if (mat.preset === 'cloth') ctx.fillRect(x, y, 3 + Math.random() * 3, 1);
-    else ctx.fillRect(x, y, 1 + Math.random() * 2, 1 + Math.random() * 2);
+    if (isLeather) {
+      // Leather pores
+      if (Math.random() > 0.9) {
+        ctx.fillStyle = `rgba(0,0,0,${a * 1.5})`;
+        ctx.beginPath();
+        ctx.arc(x, y, 0.5 + Math.random(), 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.fillStyle = Math.random() > 0.5
+          ? `rgba(255,255,255,${a * 0.5})`
+          : `rgba(0,0,0,${a * 0.7})`;
+        ctx.fillRect(x, y, 1, 1);
+      }
+    } else if (mat.preset === 'cloth') {
+      ctx.fillStyle = Math.random() > 0.5
+        ? `rgba(255,255,255,${a})`
+        : `rgba(0,0,0,${a})`;
+      ctx.fillRect(x, y, 3 + Math.random() * 3, 1);
+    } else {
+      ctx.fillStyle = Math.random() > 0.5
+        ? `rgba(255,255,255,${a})`
+        : `rgba(0,0,0,${a})`;
+      ctx.fillRect(x, y, 1 + Math.random() * 2, 1 + Math.random() * 2);
+    }
   }
 
   const ac = mat.accentColor;
@@ -391,15 +467,32 @@ function buildPageEdgeTexture() {
   const canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#F0EBE0'; ctx.fillRect(0,0,W,H);
-  for (let y=0;y<H;y+=2) {
-    ctx.fillStyle = `rgba(0,0,0,${0.015+Math.random()*0.025})`;
-    ctx.fillRect(0,y,W,1);
+  // Creamy page background
+  ctx.fillStyle = '#F0EBE0';
+  ctx.fillRect(0, 0, W, H);
+  // Horizontal page-edge lines (visible when looking at page stack from the side)
+  for (let y = 0; y < H; y += 2) {
+    const shade = 0.012 + Math.random() * 0.022;
+    ctx.fillStyle = `rgba(0,0,0,${shade})`;
+    ctx.fillRect(0, y, W, 1);
   }
-  for (let i=0;i<20;i++) {
-    const x=Math.random()*W, y=Math.random()*H, r=1+Math.random()*3;
-    ctx.fillStyle = `rgba(190,160,110,${0.06+Math.random()*0.08})`;
-    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+  // Small foxing/age spots
+  for (let i = 0; i < 25; i++) {
+    const x = Math.random() * W, y = Math.random() * H, r = 1 + Math.random() * 3;
+    ctx.fillStyle = `rgba(190,160,110,${0.06 + Math.random() * 0.08})`;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  }
+  // Subtle page ripple shadows (simulates slight waviness)
+  for (let i = 0; i < 8; i++) {
+    const startX = Math.random() * W;
+    ctx.strokeStyle = `rgba(0,0,0,${0.02 + Math.random() * 0.02})`;
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(startX, 0);
+    for (let y = 0; y < H; y += 10) {
+      ctx.lineTo(startX + Math.sin(y * 0.05 + i) * 3, y);
+    }
+    ctx.stroke();
   }
   const tex = new THREE.CanvasTexture(canvas);
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
@@ -719,9 +812,9 @@ const Book = ({
   const leftPageTex       = useMemo(() => buildLeftPageTexture(mat),         [mat]);
 
   // ── per-preset surface props ────────────────────────────────────────────────
-  const coverRough = mat.preset === 'leather' ? 0.50 : mat.preset === 'modern' ? 0.18 : 0.70;
-  const coverMetal = mat.preset === 'modern'  ? 0.12 : 0.03;
-  const spineRough = mat.preset === 'leather' ? 0.45 : 0.62;
+  const coverRough = mat.preset === 'leather' ? 0.48 : mat.preset === 'velvet' ? 0.82 : mat.preset === 'modern' ? 0.15 : mat.preset === 'cloth' ? 0.72 : 0.65;
+  const coverMetal = mat.preset === 'modern'  ? 0.14 : mat.preset === 'leather' ? 0.05 : 0.03;
+  const spineRough = mat.preset === 'leather' ? 0.42 : mat.preset === 'velvet' ? 0.78 : 0.58;
 
   // ── "is book in flight" flag ────────────────────────────────────────────────
   const isMoving = animState === BOOK_STATES.SELECTED
@@ -845,11 +938,13 @@ const Book = ({
   const handleClick = useCallback((e) => {
     e.stopPropagation();
     if (animState === BOOK_STATES.OPEN) {
-      // When book is open, detect which side was clicked
-      // Left side = return, Right side = open page
+      // When book is open (group rotated -90° around Y), the local Z axis
+      // maps to the camera's left/right. Pages sit at local Z = ±0.5:
+      //   -Z local → camera-left (return button)
+      //   +Z local → camera-right (open button)
       if (e.point) {
-        const localX = e.point.x - (groupRef.current?.position.x || 0);
-        if (localX < 0) {
+        const localZ = e.point.z - (groupRef.current?.position.z || 0);
+        if (localZ < 0) {
           // Clicked left side – return to shelf
           if (onBookReturn) onBookReturn(book.id);
         } else {
@@ -1065,8 +1160,8 @@ const Book = ({
           Left page (camera-left) at +Z offset; right page at -Z offset. */}
       {animState === BOOK_STATES.OPEN && (
         <group>
-          {/* Left page (decorative) - +Z local → camera-left after rotation */}
-          <mesh position={[0, 0, 0.5]} rotation={[0, Math.PI / 2, 0]}>
+          {/* Left page (decorative) - -Z local → camera-left after Ry(-PI/2) */}
+          <mesh position={[0, 0, -0.5]} rotation={[0, Math.PI / 2, 0]}>
             <planeGeometry args={[0.95, 1.35]} />
             <meshStandardMaterial
               map={leftPageTex}
@@ -1075,8 +1170,8 @@ const Book = ({
               side={THREE.DoubleSide}
             />
           </mesh>
-          {/* Right page (content) - -Z local → camera-right after rotation */}
-          <mesh position={[0, 0, -0.5]} rotation={[0, Math.PI / 2, 0]}>
+          {/* Right page (content) - +Z local → camera-right after Ry(-PI/2) */}
+          <mesh position={[0, 0, 0.5]} rotation={[0, Math.PI / 2, 0]}>
             <planeGeometry args={[0.95, 1.35]} />
             <meshStandardMaterial
               map={openPageTex}

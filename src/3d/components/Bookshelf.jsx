@@ -7,6 +7,86 @@ import * as THREE from 'three';
 import Book from './Book';
 import { SHELF_DIMENSIONS, getBookDimensionsById } from '../utils/bookGeometry';
 
+// ─── shelf wallpaper texture ───────────────────────────────────────────
+function buildShelfWallpaperTexture() {
+  const W = 512, H = 512;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // warm cream base
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0,   '#DDD5C3');
+  bg.addColorStop(0.3, '#D8CEBC');
+  bg.addColorStop(0.6, '#DDD8C8');
+  bg.addColorStop(1,   '#D5CBB8');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // fine paper grain
+  ctx.globalAlpha = 0.035;
+  for (let i = 0; i < 6000; i++) {
+    const x = Math.random() * W;
+    const y = Math.random() * H;
+    ctx.fillStyle = Math.random() > 0.5 ? '#B0A080' : '#F0E8D8';
+    ctx.fillRect(x, y, 1.5, 1.5);
+  }
+  ctx.globalAlpha = 1;
+
+  // elegant damask-style pattern
+  ctx.globalAlpha = 0.06;
+  const cell = 80;
+  for (let row = -1; row < H / cell + 1; row++) {
+    for (let col = -1; col < W / cell + 1; col++) {
+      const cx = col * cell + (row % 2) * cell * 0.5;
+      const cy = row * cell * 0.866;
+      
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(Math.PI / 4);
+      
+      ctx.strokeStyle = '#8B7040';
+      ctx.lineWidth = 1.2;
+      ctx.strokeRect(-14, -14, 28, 28);
+      
+      ctx.strokeStyle = '#A08050';
+      ctx.lineWidth = 0.8;
+      ctx.strokeRect(-9, -9, 18, 18);
+      
+      // center diamond
+      ctx.beginPath();
+      ctx.moveTo(-5, 0);
+      ctx.bezierCurveTo(-5, -6, 0, -6, 0, 0);
+      ctx.bezierCurveTo(0, 6, 5, 6, 5, 0);
+      ctx.stroke();
+      
+      ctx.restore();
+    }
+  }
+  ctx.globalAlpha = 1;
+
+  // aging spots
+  for (let i = 0; i < 12; i++) {
+    const x = Math.random() * W;
+    const y = Math.random() * H;
+    const r = 40 + Math.random() * 120;
+    const gr = ctx.createRadialGradient(x, y, 0, x, y, r);
+    const shade = Math.random() > 0.5;
+    gr.addColorStop(0, shade ? 'rgba(140,110,70,0.03)' : 'rgba(190,180,160,0.02)');
+    gr.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = gr;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(2.5, 2);
+  tex.anisotropy = 8;
+  return tex;
+}
+
 // ─── wood texture ─────────────────────────────────────────────────────────────
 function buildWoodTexture(baseColor = '#7A5C38', grain = true) {
   const W = 512, H = 256;
@@ -70,6 +150,7 @@ const Bookshelf = ({
   const woodTex     = useMemo(() => buildWoodTexture('#8B6844'), []);
   const darkWoodTex = useMemo(() => buildWoodTexture('#5C3D20'), []);
   const edgeTex     = useMemo(() => buildWoodTexture('#7A5530', false), []);
+  const wallpaperTex = useMemo(() => buildShelfWallpaperTexture(), []);
 
   const shelves = useMemo(() => {
     const per = SHELF_DIMENSIONS.booksPerShelf;
@@ -83,10 +164,10 @@ const Bookshelf = ({
 
   return (
     <group>
-      {/* Back wall panel behind shelves */}
+      {/* Back wall panel behind shelves – wallpaper texture */}
       <mesh position={[0, -1.2, -1.05]} receiveShadow>
         <planeGeometry args={[10, 7]} />
-        <meshStandardMaterial color="#DDD5C3" roughness={0.95} metalness={0} />
+        <meshStandardMaterial map={wallpaperTex} roughness={0.94} metalness={0} />
       </mesh>
 
       {shelves.map((shelf) => (

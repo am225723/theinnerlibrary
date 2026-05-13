@@ -23,6 +23,13 @@
 - [x] Push to GitHub (commit 9a6792c)
 
 ## Phase 4: Polish (awaiting user feedback)
-- [ ] Fine-tune page content layout and sizing
-- [ ] Ensure click detection works on open book pages
+- [x] Fine-tune page content layout and sizing
+- [x] Ensure click detection works on open book pages
 - [ ] Test on mobile device
+
+## Phase 5: Fix Issues from User Feedback
+- [ ] Fix return button click detection (change from localX to localZ - after -90° Y-rotation, pages are at localZ ±0.5)
+- [ ] Fix open book centering (replace flat wall back with wallpaper-textured panel behind books)
+- [ ] Enhance book realism (better spine textures, cover materials, page edges)
+- [ ] Build and test all fixes
+- [ ] Push to GitHub
