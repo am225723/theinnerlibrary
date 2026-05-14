@@ -150,7 +150,7 @@ const Bookshelf = ({
   openBookPosX = 0,
   openBookPosZ = 3.5,
   openBookPosY = 0.2,
-  overlayOffsetX = 0,
+  overlayOffsetX = 0.22,
   overlayOffsetY = 0,
   overlayWidthScale = 1.0,
   overlayHeightScale = 1.0,
@@ -227,7 +227,7 @@ const ShelfLevel = ({
   onBookClick, onBookHover, onBookHoverEnd, selectedBookId, bookmarks,
   onBookOpen, onBookReturn, returnToShelfId,
   openBookScale = 1.2, openBookPosX = 0, openBookPosZ = 3.5, openBookPosY = 0.2,
-  overlayOffsetX = 0, overlayOffsetY = 0,
+  overlayOffsetX = 0.22, overlayOffsetY = 0,
   overlayWidthScale = 1.0, overlayHeightScale = 1.0,
 }) => {
   const sy = shelf.y;

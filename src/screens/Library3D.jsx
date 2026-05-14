@@ -20,7 +20,7 @@ export const Library3D = () => {
   const [openBookPosX, setOpenBookPosX] = useState(0);
   const [openBookPosZ, setOpenBookPosZ] = useState(3.5);
   const [openBookPosY, setOpenBookPosY] = useState(0.2);
-  const [overlayOffsetX, setOverlayOffsetX] = useState(0);
+  const [overlayOffsetX, setOverlayOffsetX] = useState(0.22);
   const [overlayOffsetY, setOverlayOffsetY] = useState(0);
   const [overlayWidthScale, setOverlayWidthScale] = useState(1.0);
   const [overlayHeightScale, setOverlayHeightScale] = useState(1.0);
@@ -85,7 +85,7 @@ export const Library3D = () => {
     setOpenBookPosX(0);
     setOpenBookPosZ(3.5);
     setOpenBookPosY(0.2);
-    setOverlayOffsetX(0);
+    setOverlayOffsetX(0.22);
     setOverlayOffsetY(0);
     setOverlayWidthScale(1.0);
     setOverlayHeightScale(1.0);

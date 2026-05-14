@@ -365,7 +365,7 @@ const Wainscoting = () => {
 // ─── SceneContent ─────────────────────────────────────────────────────────────
 const LibrarySceneContent = ({ onBookSelect, onBookOpen, onBookReturn, returnToShelfId,
   openBookScale = 1.2, openBookPosX = 0, openBookPosZ = 3.5, openBookPosY = 0.2,
-  overlayOffsetX = 0, overlayOffsetY = 0, overlayWidthScale = 1.0, overlayHeightScale = 1.0 }) => {
+  overlayOffsetX = 0.22, overlayOffsetY = 0, overlayWidthScale = 1.0, overlayHeightScale = 1.0 }) => {
   const [selectedBookId, setSelectedBookId] = useState(null);
   const [, setHoveredBookId] = useState(null);
 
