@@ -16,9 +16,12 @@ export const Library3D = () => {
   
   // Open book controls state
   const [showControls, setShowControls] = useState(true);
-  const [openBookScale, setOpenBookScale] = useState(2.5);
-  const [openBookPosZ, setOpenBookPosZ] = useState(4.5);
+  const [openBookScale, setOpenBookScale] = useState(1.2);
+  const [openBookPosX, setOpenBookPosX] = useState(0);
+  const [openBookPosZ, setOpenBookPosZ] = useState(3.5);
   const [openBookPosY, setOpenBookPosY] = useState(0.2);
+  const [overlayOffsetX, setOverlayOffsetX] = useState(0);
+  const [overlayOffsetY, setOverlayOffsetY] = useState(0);
 
   useEffect(() => {
     const checkWebGL = () => {
@@ -76,9 +79,12 @@ export const Library3D = () => {
 
   // Reset controls to defaults
   const handleResetControls = useCallback(() => {
-    setOpenBookScale(2.5);
-    setOpenBookPosZ(4.5);
+    setOpenBookScale(1.2);
+    setOpenBookPosX(0);
+    setOpenBookPosZ(3.5);
     setOpenBookPosY(0.2);
+    setOverlayOffsetX(0);
+    setOverlayOffsetY(0);
   }, []);
 
   if (showFallback) {
@@ -159,8 +165,11 @@ export const Library3D = () => {
               onBookReturn={handleBookReturn}
               returnToShelfId={returnToShelfId}
               openBookScale={openBookScale}
+              openBookPosX={openBookPosX}
               openBookPosZ={openBookPosZ}
               openBookPosY={openBookPosY}
+              overlayOffsetX={overlayOffsetX}
+              overlayOffsetY={overlayOffsetY}
             />
           </Suspense>
         </ErrorBoundary>
@@ -170,11 +179,17 @@ export const Library3D = () => {
       {showControls && (
         <OpenBookControls
           scale={openBookScale}
+          positionX={openBookPosX}
           positionZ={openBookPosZ}
           positionY={openBookPosY}
+          overlayOffsetX={overlayOffsetX}
+          overlayOffsetY={overlayOffsetY}
           onScaleChange={setOpenBookScale}
+          onPositionXChange={setOpenBookPosX}
           onPositionZChange={setOpenBookPosZ}
           onPositionYChange={setOpenBookPosY}
+          onOverlayOffsetXChange={setOverlayOffsetX}
+          onOverlayOffsetYChange={setOverlayOffsetY}
           onReset={handleResetControls}
         />
       )}

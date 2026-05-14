@@ -701,9 +701,12 @@ const Book = ({
   onBookOpen,
   onBookReturn,
   returnToShelf = false,
-  openBookScale = 2.5,
-  openBookPosZ = 4.5,
+  openBookScale = 1.2,
+  openBookPosX = 0,
+  openBookPosZ = 3.5,
   openBookPosY = 0.2,
+  overlayOffsetX = 0,
+  overlayOffsetY = 0,
 }) => {
   const groupRef            = useRef();
   const frontCoverPivotRef  = useRef();
@@ -814,7 +817,7 @@ const Book = ({
     if (animState === BOOK_STATES.CENTERED) {
       animProgress.current = Math.min(1, animProgress.current + delta / (TIMINGS.CENTER_MOVE / 1000));
       const p = easeOutBack(Math.min(animProgress.current, 0.98));
-      g.position.x = THREE.MathUtils.lerp(snapPos.current.x, 0,    p);
+      g.position.x = THREE.MathUtils.lerp(snapPos.current.x, openBookPosX, p);
       g.position.y = THREE.MathUtils.lerp(snapPos.current.y, openBookPosY,  p);
       g.position.z = THREE.MathUtils.lerp(snapPos.current.z, openBookPosZ,  p);
       g.rotation.set(0, -Math.PI / 2, 0);
@@ -834,6 +837,7 @@ const Book = ({
 
     // OPEN – gentle float, scaled up for readability on mobile
     if (animState === BOOK_STATES.OPEN) {
+      g.position.x = openBookPosX;
       g.position.y = openBookPosY + Math.sin(time * 1.4) * 0.004;
       g.scale.set(openBookScale, openBookScale, openBookScale);
       return;
@@ -1115,7 +1119,7 @@ const Book = ({
           Single page covers the entire open spread for maximum readability on mobile.
           Left half (Z>0 → camera-LEFT) = tap to return. Right half = tap to open. */}
       {animState === BOOK_STATES.OPEN && (
-        <group>
+        <group position={[overlayOffsetX, overlayOffsetY, 0]}>
           {/* Content page - fills the entire open book spread */}
           <mesh position={[0, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
             <planeGeometry args={[d - 0.02, h - 0.04]} />

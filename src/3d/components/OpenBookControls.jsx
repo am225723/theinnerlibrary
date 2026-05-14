@@ -3,11 +3,17 @@ import styles from './OpenBookControls.module.css';
 
 const OpenBookControls = ({ 
   scale, 
+  positionX,
   positionZ, 
   positionY,
+  overlayOffsetX,
+  overlayOffsetY,
   onScaleChange, 
+  onPositionXChange,
   onPositionZChange,
   onPositionYChange,
+  onOverlayOffsetXChange,
+  onOverlayOffsetYChange,
   onReset 
 }) => {
   const [isOpen, setIsOpen] = useState(true);
@@ -19,7 +25,7 @@ const OpenBookControls = ({
         onClick={() => setIsOpen(!isOpen)}
         aria-label={isOpen ? 'Hide controls' : 'Show controls'}
       >
-        {isOpen ? '▼' : '▲'}
+        {isOpen ? '\u25bc' : '\u25b2'}
       </button>
       
       {isOpen && (
@@ -32,28 +38,49 @@ const OpenBookControls = ({
             </label>
             <input
               type="range"
-              min="1.0"
-              max="4.0"
-              step="0.1"
+              min="0.5"
+              max="3.0"
+              step="0.05"
               value={scale}
               onChange={(e) => onScaleChange(parseFloat(e.target.value))}
               className={styles.slider}
             />
             <div className={styles.quickButtons}>
+              <button onClick={() => onScaleChange(0.8)}>0.8x</button>
+              <button onClick={() => onScaleChange(1.0)}>1.0x</button>
+              <button onClick={() => onScaleChange(1.2)}>1.2x</button>
               <button onClick={() => onScaleChange(1.5)}>1.5x</button>
-              <button onClick={() => onScaleChange(2.0)}>2.0x</button>
-              <button onClick={() => onScaleChange(2.5)}>2.5x</button>
-              <button onClick={() => onScaleChange(3.0)}>3.0x</button>
             </div>
           </div>
 
           <div className={styles.controlGroup}>
             <label className={styles.label}>
-              Position Z: {positionZ.toFixed(2)}
+              Pos X: {positionX.toFixed(2)}
             </label>
             <input
               type="range"
-              min="3.0"
+              min="-2.0"
+              max="2.0"
+              step="0.05"
+              value={positionX}
+              onChange={(e) => onPositionXChange(parseFloat(e.target.value))}
+              className={styles.slider}
+            />
+            <div className={styles.quickButtons}>
+              <button onClick={() => onPositionXChange(-0.5)}>-0.5</button>
+              <button onClick={() => onPositionXChange(0.0)}>0.0</button>
+              <button onClick={() => onPositionXChange(0.5)}>0.5</button>
+              <button onClick={() => onPositionXChange(1.0)}>1.0</button>
+            </div>
+          </div>
+
+          <div className={styles.controlGroup}>
+            <label className={styles.label}>
+              Pos Z: {positionZ.toFixed(2)}
+            </label>
+            <input
+              type="range"
+              min="2.0"
               max="6.0"
               step="0.1"
               value={positionZ}
@@ -61,22 +88,22 @@ const OpenBookControls = ({
               className={styles.slider}
             />
             <div className={styles.quickButtons}>
+              <button onClick={() => onPositionZChange(3.0)}>3.0</button>
               <button onClick={() => onPositionZChange(3.5)}>3.5</button>
               <button onClick={() => onPositionZChange(4.0)}>4.0</button>
               <button onClick={() => onPositionZChange(4.5)}>4.5</button>
-              <button onClick={() => onPositionZChange(5.0)}>5.0</button>
             </div>
           </div>
 
           <div className={styles.controlGroup}>
             <label className={styles.label}>
-              Position Y: {positionY.toFixed(2)}
+              Pos Y: {positionY.toFixed(2)}
             </label>
             <input
               type="range"
               min="-1.0"
               max="1.0"
-              step="0.1"
+              step="0.05"
               value={positionY}
               onChange={(e) => onPositionYChange(parseFloat(e.target.value))}
               className={styles.slider}
@@ -86,6 +113,50 @@ const OpenBookControls = ({
               <button onClick={() => onPositionYChange(0.0)}>0.0</button>
               <button onClick={() => onPositionYChange(0.2)}>0.2</button>
               <button onClick={() => onPositionYChange(0.5)}>0.5</button>
+            </div>
+          </div>
+
+          <div className={styles.sectionLabel}>Overlay Offset</div>
+
+          <div className={styles.controlGroup}>
+            <label className={styles.label}>
+              Overlay X: {overlayOffsetX.toFixed(2)}
+            </label>
+            <input
+              type="range"
+              min="-1.0"
+              max="1.0"
+              step="0.01"
+              value={overlayOffsetX}
+              onChange={(e) => onOverlayOffsetXChange(parseFloat(e.target.value))}
+              className={styles.slider}
+            />
+            <div className={styles.quickButtons}>
+              <button onClick={() => onOverlayOffsetXChange(-0.2)}>-0.2</button>
+              <button onClick={() => onOverlayOffsetXChange(0.0)}>0.0</button>
+              <button onClick={() => onOverlayOffsetXChange(0.2)}>0.2</button>
+              <button onClick={() => onOverlayOffsetXChange(0.5)}>0.5</button>
+            </div>
+          </div>
+
+          <div className={styles.controlGroup}>
+            <label className={styles.label}>
+              Overlay Y: {overlayOffsetY.toFixed(2)}
+            </label>
+            <input
+              type="range"
+              min="-1.0"
+              max="1.0"
+              step="0.01"
+              value={overlayOffsetY}
+              onChange={(e) => onOverlayOffsetYChange(parseFloat(e.target.value))}
+              className={styles.slider}
+            />
+            <div className={styles.quickButtons}>
+              <button onClick={() => onOverlayOffsetYChange(-0.2)}>-0.2</button>
+              <button onClick={() => onOverlayOffsetYChange(0.0)}>0.0</button>
+              <button onClick={() => onOverlayOffsetYChange(0.2)}>0.2</button>
+              <button onClick={() => onOverlayOffsetYChange(0.5)}>0.5</button>
             </div>
           </div>
 
