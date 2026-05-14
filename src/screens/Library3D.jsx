@@ -184,18 +184,10 @@ export const Library3D = () => {
       {/* Open Book Controls */}
       {showControls && (
         <OpenBookControls
-          scale={openBookScale}
-          positionX={openBookPosX}
-          positionZ={openBookPosZ}
-          positionY={openBookPosY}
           overlayOffsetX={overlayOffsetX}
           overlayOffsetY={overlayOffsetY}
           overlayWidthScale={overlayWidthScale}
           overlayHeightScale={overlayHeightScale}
-          onScaleChange={setOpenBookScale}
-          onPositionXChange={setOpenBookPosX}
-          onPositionZChange={setOpenBookPosZ}
-          onPositionYChange={setOpenBookPosY}
           onOverlayOffsetXChange={setOverlayOffsetX}
           onOverlayOffsetYChange={setOverlayOffsetY}
           onOverlayWidthScaleChange={setOverlayWidthScale}
