@@ -707,6 +707,8 @@ const Book = ({
   openBookPosY = 0.2,
   overlayOffsetX = 0,
   overlayOffsetY = 0,
+  overlayWidthScale = 1.0,
+  overlayHeightScale = 1.0,
 }) => {
   const groupRef            = useRef();
   const frontCoverPivotRef  = useRef();
@@ -1120,9 +1122,9 @@ const Book = ({
           Left half (Z>0 → camera-LEFT) = tap to return. Right half = tap to open. */}
       {animState === BOOK_STATES.OPEN && (
         <group position={[overlayOffsetX, overlayOffsetY, 0]}>
-          {/* Content page - fills the entire open book spread */}
+          {/* Content page - sized by overlay width/height scales */}
           <mesh position={[0, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
-            <planeGeometry args={[d - 0.02, h - 0.04]} />
+            <planeGeometry args={[(d - 0.02) * overlayWidthScale, (h - 0.04) * overlayHeightScale]} />
             <meshStandardMaterial
               map={openPageTex}
               roughness={0.90}
@@ -1132,7 +1134,7 @@ const Book = ({
           </mesh>
           {/* Spine gutter shadow line */}
           <mesh position={[0, 0, 0.001]} rotation={[0, Math.PI / 2, 0]}>
-            <planeGeometry args={[0.015, h - 0.04]} />
+            <planeGeometry args={[0.015, (h - 0.04) * overlayHeightScale]} />
             <meshBasicMaterial color="#6B5B4B" transparent opacity={0.18} side={THREE.DoubleSide} />
           </mesh>
           {/* "Return" indicator on left side */}

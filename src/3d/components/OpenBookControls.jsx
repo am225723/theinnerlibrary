@@ -8,12 +8,16 @@ const OpenBookControls = ({
   positionY,
   overlayOffsetX,
   overlayOffsetY,
+  overlayWidthScale,
+  overlayHeightScale,
   onScaleChange, 
   onPositionXChange,
   onPositionZChange,
   onPositionYChange,
   onOverlayOffsetXChange,
   onOverlayOffsetYChange,
+  onOverlayWidthScaleChange,
+  onOverlayHeightScaleChange,
   onReset 
 }) => {
   const [isOpen, setIsOpen] = useState(true);
@@ -116,7 +120,7 @@ const OpenBookControls = ({
             </div>
           </div>
 
-          <div className={styles.sectionLabel}>Overlay Offset</div>
+          <div className={styles.sectionLabel}>Overlay Position</div>
 
           <div className={styles.controlGroup}>
             <label className={styles.label}>
@@ -157,6 +161,50 @@ const OpenBookControls = ({
               <button onClick={() => onOverlayOffsetYChange(0.0)}>0.0</button>
               <button onClick={() => onOverlayOffsetYChange(0.2)}>0.2</button>
               <button onClick={() => onOverlayOffsetYChange(0.5)}>0.5</button>
+            </div>
+          </div>
+
+          <div className={styles.sectionLabel}>Overlay Size</div>
+
+          <div className={styles.controlGroup}>
+            <label className={styles.label}>
+              Overlay Width: {overlayWidthScale.toFixed(2)}x
+            </label>
+            <input
+              type="range"
+              min="0.3"
+              max="2.0"
+              step="0.05"
+              value={overlayWidthScale}
+              onChange={(e) => onOverlayWidthScaleChange(parseFloat(e.target.value))}
+              className={styles.slider}
+            />
+            <div className={styles.quickButtons}>
+              <button onClick={() => onOverlayWidthScaleChange(0.5)}>0.5x</button>
+              <button onClick={() => onOverlayWidthScaleChange(0.8)}>0.8x</button>
+              <button onClick={() => onOverlayWidthScaleChange(1.0)}>1.0x</button>
+              <button onClick={() => onOverlayWidthScaleChange(1.3)}>1.3x</button>
+            </div>
+          </div>
+
+          <div className={styles.controlGroup}>
+            <label className={styles.label}>
+              Overlay Height: {overlayHeightScale.toFixed(2)}x
+            </label>
+            <input
+              type="range"
+              min="0.3"
+              max="2.0"
+              step="0.05"
+              value={overlayHeightScale}
+              onChange={(e) => onOverlayHeightScaleChange(parseFloat(e.target.value))}
+              className={styles.slider}
+            />
+            <div className={styles.quickButtons}>
+              <button onClick={() => onOverlayHeightScaleChange(0.5)}>0.5x</button>
+              <button onClick={() => onOverlayHeightScaleChange(0.8)}>0.8x</button>
+              <button onClick={() => onOverlayHeightScaleChange(1.0)}>1.0x</button>
+              <button onClick={() => onOverlayHeightScaleChange(1.3)}>1.3x</button>
             </div>
           </div>
 

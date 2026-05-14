@@ -365,7 +365,7 @@ const Wainscoting = () => {
 // ─── SceneContent ─────────────────────────────────────────────────────────────
 const LibrarySceneContent = ({ onBookSelect, onBookOpen, onBookReturn, returnToShelfId,
   openBookScale = 1.2, openBookPosX = 0, openBookPosZ = 3.5, openBookPosY = 0.2,
-  overlayOffsetX = 0, overlayOffsetY = 0 }) => {
+  overlayOffsetX = 0, overlayOffsetY = 0, overlayWidthScale = 1.0, overlayHeightScale = 1.0 }) => {
   const [selectedBookId, setSelectedBookId] = useState(null);
   const [, setHoveredBookId] = useState(null);
 
@@ -501,6 +501,8 @@ const LibrarySceneContent = ({ onBookSelect, onBookOpen, onBookReturn, returnToS
           openBookPosY={openBookPosY}
           overlayOffsetX={overlayOffsetX}
           overlayOffsetY={overlayOffsetY}
+          overlayWidthScale={overlayWidthScale}
+          overlayHeightScale={overlayHeightScale}
         />
 
         {/* Bookends */}
@@ -858,7 +860,7 @@ const Bookend = ({ position, mirror = false }) => (
 // ─── LibraryScene (Canvas wrapper) ───────────────────────────────────────────
 const LibraryScene = ({ onBookSelect, onBookOpen, onBookReturn, returnToShelfId,
   openBookScale, openBookPosX, openBookPosZ, openBookPosY,
-  overlayOffsetX, overlayOffsetY }) => (
+  overlayOffsetX, overlayOffsetY, overlayWidthScale, overlayHeightScale }) => (
   <Canvas
     shadows
     camera={{ position: [0, -0.2, 8], fov: 42, near: 0.1, far: 55 }}
@@ -888,6 +890,8 @@ const LibraryScene = ({ onBookSelect, onBookOpen, onBookReturn, returnToShelfId,
       openBookPosY={openBookPosY}
       overlayOffsetX={overlayOffsetX}
       overlayOffsetY={overlayOffsetY}
+      overlayWidthScale={overlayWidthScale}
+      overlayHeightScale={overlayHeightScale}
     />
   </Canvas>
 );

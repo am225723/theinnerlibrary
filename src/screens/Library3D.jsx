@@ -22,6 +22,8 @@ export const Library3D = () => {
   const [openBookPosY, setOpenBookPosY] = useState(0.2);
   const [overlayOffsetX, setOverlayOffsetX] = useState(0);
   const [overlayOffsetY, setOverlayOffsetY] = useState(0);
+  const [overlayWidthScale, setOverlayWidthScale] = useState(1.0);
+  const [overlayHeightScale, setOverlayHeightScale] = useState(1.0);
 
   useEffect(() => {
     const checkWebGL = () => {
@@ -85,6 +87,8 @@ export const Library3D = () => {
     setOpenBookPosY(0.2);
     setOverlayOffsetX(0);
     setOverlayOffsetY(0);
+    setOverlayWidthScale(1.0);
+    setOverlayHeightScale(1.0);
   }, []);
 
   if (showFallback) {
@@ -170,6 +174,8 @@ export const Library3D = () => {
               openBookPosY={openBookPosY}
               overlayOffsetX={overlayOffsetX}
               overlayOffsetY={overlayOffsetY}
+              overlayWidthScale={overlayWidthScale}
+              overlayHeightScale={overlayHeightScale}
             />
           </Suspense>
         </ErrorBoundary>
@@ -184,12 +190,16 @@ export const Library3D = () => {
           positionY={openBookPosY}
           overlayOffsetX={overlayOffsetX}
           overlayOffsetY={overlayOffsetY}
+          overlayWidthScale={overlayWidthScale}
+          overlayHeightScale={overlayHeightScale}
           onScaleChange={setOpenBookScale}
           onPositionXChange={setOpenBookPosX}
           onPositionZChange={setOpenBookPosZ}
           onPositionYChange={setOpenBookPosY}
           onOverlayOffsetXChange={setOverlayOffsetX}
           onOverlayOffsetYChange={setOverlayOffsetY}
+          onOverlayWidthScaleChange={setOverlayWidthScale}
+          onOverlayHeightScaleChange={setOverlayHeightScale}
           onReset={handleResetControls}
         />
       )}

@@ -152,6 +152,8 @@ const Bookshelf = ({
   openBookPosY = 0.2,
   overlayOffsetX = 0,
   overlayOffsetY = 0,
+  overlayWidthScale = 1.0,
+  overlayHeightScale = 1.0,
 }) => {
   const woodTex     = useMemo(() => buildWoodTexture('#8B6844'), []);
   const darkWoodTex = useMemo(() => buildWoodTexture('#5C3D20'), []);
@@ -197,6 +199,8 @@ const Bookshelf = ({
           openBookPosY={openBookPosY}
           overlayOffsetX={overlayOffsetX}
           overlayOffsetY={overlayOffsetY}
+          overlayWidthScale={overlayWidthScale}
+          overlayHeightScale={overlayHeightScale}
         />
       ))}
 
@@ -224,6 +228,7 @@ const ShelfLevel = ({
   onBookOpen, onBookReturn, returnToShelfId,
   openBookScale = 1.2, openBookPosX = 0, openBookPosZ = 3.5, openBookPosY = 0.2,
   overlayOffsetX = 0, overlayOffsetY = 0,
+  overlayWidthScale = 1.0, overlayHeightScale = 1.0,
 }) => {
   const sy = shelf.y;
   const W  = SHELF_DIMENSIONS.width;
@@ -289,6 +294,8 @@ const ShelfLevel = ({
         openBookPosY={openBookPosY}
         overlayOffsetX={overlayOffsetX}
         overlayOffsetY={overlayOffsetY}
+        overlayWidthScale={overlayWidthScale}
+        overlayHeightScale={overlayHeightScale}
       />
     </group>
   );
@@ -328,6 +335,7 @@ const SnugBookRow = ({
   onBookOpen, onBookReturn, returnToShelfId,
   openBookScale, openBookPosX, openBookPosZ, openBookPosY,
   overlayOffsetX, overlayOffsetY,
+  overlayWidthScale, overlayHeightScale,
 }) => {
   const positions = useMemo(() => {
     const gap = 0.03;
@@ -373,6 +381,8 @@ const SnugBookRow = ({
             openBookPosY={openBookPosY}
             overlayOffsetX={overlayOffsetX}
             overlayOffsetY={overlayOffsetY}
+            overlayWidthScale={overlayWidthScale}
+            overlayHeightScale={overlayHeightScale}
           />
         );
       })}
