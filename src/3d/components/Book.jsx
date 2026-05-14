@@ -16,6 +16,7 @@ import React, {
 } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { Text } from '@react-three/drei';
 import { BOOK_STATES, TIMINGS } from '../utils/animationTimings';
 import { getBookMaterial, BOOK_COLORS } from '../utils/materialPresets';
 import { loadAllCovers } from '../hooks/useCoverDesigner';
@@ -524,169 +525,6 @@ function buildInnerPageTexture() {
 }
 
 
-// ──── open-page content texture (right page when book is open) ────────────
-function buildOpenPageContentTexture(book, mat) {
-  const W = 512, H = 768;
-  const canvas = document.createElement('canvas');
-  canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext('2d');
-
-  // Warm parchment background
-  const bg = ctx.createLinearGradient(0, 0, 0, H);
-  bg.addColorStop(0, '#FDFAF4');
-  bg.addColorStop(0.5, '#FAF6EE');
-  bg.addColorStop(1, '#F5F0E8');
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, W, H);
-
-  // Subtle ruled lines
-  ctx.strokeStyle = 'rgba(180,160,130,0.10)';
-  ctx.lineWidth = 0.5;
-  for (let y = 90; y < H - 70; y += 26) {
-    ctx.beginPath(); ctx.moveTo(55, y); ctx.lineTo(W - 55, y); ctx.stroke();
-  }
-
-  // Red margin line
-  ctx.strokeStyle = 'rgba(200,140,140,0.12)';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(75, 45); ctx.lineTo(75, H - 45); ctx.stroke();
-
-  // Spine gutter shadow at center
-  const gutterGrad = ctx.createLinearGradient(W / 2 - 15, 0, W / 2 + 15, 0);
-  gutterGrad.addColorStop(0, 'rgba(0,0,0,0)');
-  gutterGrad.addColorStop(0.4, 'rgba(0,0,0,0.04)');
-  gutterGrad.addColorStop(0.5, 'rgba(0,0,0,0.06)');
-  gutterGrad.addColorStop(0.6, 'rgba(0,0,0,0.04)');
-  gutterGrad.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = gutterGrad;
-  ctx.fillRect(W / 2 - 15, 0, 30, H);
-
-  // Page aging speckles
-  for (let i = 0; i < 1200; i++) {
-    ctx.fillStyle = `rgba(0,0,0,${0.002 + Math.random() * 0.004})`;
-    ctx.fillRect(Math.random() * W, Math.random() * H, 1, 1);
-  }
-
-  // Decorative corner brackets
-  ctx.strokeStyle = 'rgba(160,140,110,0.20)';
-  ctx.lineWidth = 1.5;
-  const cm = 22, cs = 30;
-  ctx.beginPath(); ctx.moveTo(cm, cm + cs); ctx.lineTo(cm, cm); ctx.lineTo(cm + cs, cm); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(W - cm - cs, cm); ctx.lineTo(W - cm, cm); ctx.lineTo(W - cm, cm + cs); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cm, H - cm - cs); ctx.lineTo(cm, H - cm); ctx.lineTo(cm + cs, H - cm); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(W - cm - cs, H - cm); ctx.lineTo(W - cm, H - cm); ctx.lineTo(W - cm, H - cm - cs); ctx.stroke();
-
-  // ─── LEFT SIDE: Return indicator ───
-  // Small "back" arrow in the bottom-left area
-  ctx.fillStyle = 'rgba(107,66,38,0.25)';
-  ctx.font = 'italic 14px Georgia, serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('\u2190 Return', W * 0.25, H - 40);
-
-  // ─── RIGHT SIDE: Content area ───
-
-  // Book icon/emoji (on right side of spread)
-  const iconEmoji = book.icon || '\ud83d\udcd6';
-  ctx.font = '48px serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(iconEmoji, W * 0.72, 140);
-
-  // Thin ornamental rule under icon
-  ctx.strokeStyle = mat.accentColor;
-  ctx.globalAlpha = 0.25;
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(W * 0.56, 200); ctx.lineTo(W * 0.88, 200); ctx.stroke();
-  ctx.globalAlpha = 1;
-
-  // Title (on right side)
-  ctx.fillStyle = '#1B2A4A';
-  ctx.shadowColor = 'rgba(0,0,0,0.06)';
-  ctx.shadowBlur = 2;
-  ctx.font = 'bold 26px Georgia, serif';
-  ctx.textAlign = 'center';
-
-  const titleText = book.title || '';
-  const titleWords = titleText.split(' ');
-  if (titleWords.length > 3) {
-    const half = Math.ceil(titleWords.length / 2);
-    ctx.fillText(titleWords.slice(0, half).join(' '), W * 0.72, 240);
-    ctx.fillText(titleWords.slice(half).join(' '), W * 0.72, 272);
-  } else {
-    ctx.fillText(titleText, W * 0.72, 255);
-  }
-  ctx.shadowBlur = 0;
-
-  // Subtitle / description
-  ctx.fillStyle = '#6B4226';
-  ctx.font = 'italic 16px Georgia, serif';
-  const subtitleText = book.subtitle || '';
-  if (subtitleText.length > 35) {
-    const mid = subtitleText.lastIndexOf(' ', 35);
-    ctx.fillText(subtitleText.slice(0, mid), W * 0.72, 320);
-    ctx.fillText(subtitleText.slice(mid + 1), W * 0.72, 344);
-  } else {
-    ctx.fillText(subtitleText, W * 0.72, 330);
-  }
-
-  // "Today's Page" label
-  ctx.fillStyle = 'rgba(27,42,74,0.5)';
-  ctx.font = '600 15px -apple-system, BlinkMacSystemFont, sans-serif';
-  ctx.fillText("Today's Page", W * 0.72, 400);
-
-  // Question text
-  ctx.fillStyle = '#1B2A4A';
-  ctx.font = '500 17px Georgia, serif';
-  ctx.fillText('Would you like to', W * 0.72, 450);
-  ctx.fillText('open this page?', W * 0.72, 474);
-
-  // Open Page button (right side)
-  const btnY = 520;
-  const btnW = 200;
-  const btnH = 48;
-  const btnX = W * 0.72 - btnW / 2;
-
-  const openGrad = ctx.createLinearGradient(btnX, btnY, btnX + btnW, btnY + btnH);
-  openGrad.addColorStop(0, '#B8922A');
-  openGrad.addColorStop(1, '#9A7A22');
-  ctx.fillStyle = openGrad;
-  ctx.beginPath();
-  ctx.roundRect(btnX, btnY, btnW, btnH, 10);
-  ctx.fill();
-
-  ctx.shadowColor = 'rgba(184,146,42,0.3)';
-  ctx.shadowBlur = 8;
-  ctx.shadowOffsetY = 3;
-  ctx.fill();
-  ctx.shadowBlur = 0;
-  ctx.shadowOffsetY = 0;
-
-  ctx.fillStyle = '#FFFFFF';
-  ctx.font = '600 17px -apple-system, BlinkMacSystemFont, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('Open Page \u2192', btnX + btnW / 2, btnY + btnH / 2 + 6);
-
-  // Tap hint
-  ctx.fillStyle = 'rgba(107,66,38,0.3)';
-  ctx.font = 'italic 12px Georgia, serif';
-  ctx.fillText('tap right side to open \u2022 left to return', W / 2, btnY + btnH + 30);
-
-  // Decorative flourish at bottom
-  ctx.strokeStyle = mat.accentColor;
-  ctx.globalAlpha = 0.20;
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(W * 0.25, H - 70);
-  ctx.bezierCurveTo(W * 0.35, H - 80, W * 0.55, H - 80, W * 0.75, H - 70);
-  ctx.stroke();
-  ctx.globalAlpha = 1;
-
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
-  tex.anisotropy = 8;
-  return tex;
-}
-
 // ─── main component ───────────────────────────────────────────────────────────
 const Book = ({
   book,
@@ -760,7 +598,6 @@ const Book = ({
   const coverTex          = useMemo(() => buildCoverTexture(mat, book.title), [mat, book.title]);
   const pageEdgeTex       = useMemo(() => buildPageEdgeTexture(),            []);
   const innerPageTex      = useMemo(() => buildInnerPageTexture(),           []);
-  const openPageTex       = useMemo(() => buildOpenPageContentTexture(book, mat), [book, mat]);
 
   // ── per-preset surface props ────────────────────────────────────────────────
   const coverRough = mat.preset === 'leather' ? 0.48 : mat.preset === 'velvet' ? 0.82 : mat.preset === 'modern' ? 0.15 : mat.preset === 'cloth' ? 0.72 : 0.65;
@@ -1116,31 +953,147 @@ const Book = ({
         </mesh>
       )}
 
-      {/* ─── Open book: single content page filling the spread ───
-          After Ry(-PI/2): local Z maps to world -X. The full book depth becomes width.
-          Single page covers the entire open spread for maximum readability on mobile.
+      {/* ─── Open book: 3D text content page ───
+          After Ry(-PI/2): local (x,y,z) → world (-z, y, x)
+          So local Z → world -X (camera-LEFT/RIGHT), local X → world Z (depth)
+          Content is positioned on the book's open spread using 3D Text from drei.
           Left half (Z>0 → camera-LEFT) = tap to return. Right half = tap to open. */}
       {animState === BOOK_STATES.OPEN && (
         <group position={[overlayOffsetX, overlayOffsetY, 0]}>
-          {/* Content page - sized by overlay width/height scales */}
+          {/* Parchment page background */}
           <mesh position={[0, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
             <planeGeometry args={[(d - 0.02) * overlayWidthScale, (h - 0.04) * overlayHeightScale]} />
-            <meshStandardMaterial
-              map={openPageTex}
-              roughness={0.90}
-              metalness={0}
-              side={THREE.DoubleSide}
-            />
+            <meshStandardMaterial color="#FAF6EE" roughness={0.90} metalness={0} side={THREE.DoubleSide} />
           </mesh>
           {/* Spine gutter shadow line */}
           <mesh position={[0, 0, 0.001]} rotation={[0, Math.PI / 2, 0]}>
             <planeGeometry args={[0.015, (h - 0.04) * overlayHeightScale]} />
             <meshBasicMaterial color="#6B5B4B" transparent opacity={0.18} side={THREE.DoubleSide} />
           </mesh>
-          {/* "Return" indicator on left side */}
-          <mesh position={[0, -h / 2 + 0.06, d / 4]} rotation={[0, Math.PI / 2, 0]}>
-            <planeGeometry args={[0.08, 0.08]} />
-            <meshBasicMaterial color="#8B7D6B" transparent opacity={0.35} side={THREE.DoubleSide} />
+
+          {/* ── LEFT SIDE: Return indicator ── */}
+          {/* Small back arrow positioned on left half of spread */}
+          <Text
+            position={[0, -(h * 0.35) * overlayHeightScale, d * 0.15 * overlayWidthScale]}
+            rotation={[0, Math.PI / 2, 0]}
+            fontSize={0.03 * Math.min(overlayWidthScale, overlayHeightScale)}
+            color="rgba(107,66,38,0.4)"
+            anchorX="center"
+            anchorY="middle"
+            font={undefined}
+          >
+            {'← Return'}
+          </Text>
+
+          {/* ── RIGHT SIDE: Content area ── */}
+          
+          {/* Book icon emoji */}
+          <Text
+            position={[0, h * 0.28 * overlayHeightScale, -(d * 0.15) * overlayWidthScale]}
+            rotation={[0, Math.PI / 2, 0]}
+            fontSize={0.07 * Math.min(overlayWidthScale, overlayHeightScale)}
+            anchorX="center"
+            anchorY="middle"
+          >
+            {book.icon || '📖'}
+          </Text>
+
+          {/* Ornamental rule under icon */}
+          <mesh position={[0, h * 0.20 * overlayHeightScale, -(d * 0.15) * overlayWidthScale]} rotation={[0, Math.PI / 2, 0]}>
+            <planeGeometry args={[d * 0.30 * overlayWidthScale, 0.003]} />
+            <meshBasicMaterial color={mat.accentColor} transparent opacity={0.3} side={THREE.DoubleSide} />
+          </mesh>
+
+          {/* Title */}
+          <Text
+            position={[0, h * 0.14 * overlayHeightScale, -(d * 0.15) * overlayWidthScale]}
+            rotation={[0, Math.PI / 2, 0]}
+            fontSize={0.04 * Math.min(overlayWidthScale, overlayHeightScale)}
+            color="#1B2A4A"
+            anchorX="center"
+            anchorY="middle"
+            maxWidth={d * 0.55 * overlayWidthScale}
+            font={undefined}
+          >
+            {book.title || ''}
+          </Text>
+
+          {/* Subtitle / description */}
+          <Text
+            position={[0, h * 0.04 * overlayHeightScale, -(d * 0.15) * overlayWidthScale]}
+            rotation={[0, Math.PI / 2, 0]}
+            fontSize={0.025 * Math.min(overlayWidthScale, overlayHeightScale)}
+            color="#6B4226"
+            anchorX="center"
+            anchorY="middle"
+            maxWidth={d * 0.50 * overlayWidthScale}
+            font={undefined}
+          >
+            {book.subtitle || ''}
+          </Text>
+
+          {/* "Today's Page" label */}
+          <Text
+            position={[0, -h * 0.06 * overlayHeightScale, -(d * 0.15) * overlayWidthScale]}
+            rotation={[0, Math.PI / 2, 0]}
+            fontSize={0.02 * Math.min(overlayWidthScale, overlayHeightScale)}
+            color="rgba(27,42,74,0.5)"
+            anchorX="center"
+            anchorY="middle"
+            font={undefined}
+          >
+            {"Today's Page"}
+          </Text>
+
+          {/* Question text */}
+          <Text
+            position={[0, -h * 0.14 * overlayHeightScale, -(d * 0.15) * overlayWidthScale]}
+            rotation={[0, Math.PI / 2, 0]}
+            fontSize={0.022 * Math.min(overlayWidthScale, overlayHeightScale)}
+            color="#1B2A4A"
+            anchorX="center"
+            anchorY="middle"
+            maxWidth={d * 0.45 * overlayWidthScale}
+            font={undefined}
+          >
+            {'Would you like to\nopen this page?'}
+          </Text>
+
+          {/* Open Page button background */}
+          <mesh position={[0, -h * 0.25 * overlayHeightScale, -(d * 0.15) * overlayWidthScale]} rotation={[0, Math.PI / 2, 0]}>
+            <planeGeometry args={[d * 0.30 * overlayWidthScale, 0.065 * overlayHeightScale]} />
+            <meshBasicMaterial color="#B8922A" side={THREE.DoubleSide} />
+          </mesh>
+          {/* Button text */}
+          <Text
+            position={[0, -h * 0.25 * overlayHeightScale, -(d * 0.15) * overlayWidthScale - 0.001]}
+            rotation={[0, Math.PI / 2, 0]}
+            fontSize={0.022 * Math.min(overlayWidthScale, overlayHeightScale)}
+            color="#FFFFFF"
+            anchorX="center"
+            anchorY="middle"
+            font={undefined}
+          >
+            {'Open Page →'}
+          </Text>
+
+          {/* Tap hint */}
+          <Text
+            position={[0, -h * 0.34 * overlayHeightScale, 0]}
+            rotation={[0, Math.PI / 2, 0]}
+            fontSize={0.016 * Math.min(overlayWidthScale, overlayHeightScale)}
+            color="rgba(107,66,38,0.35)"
+            anchorX="center"
+            anchorY="middle"
+            font={undefined}
+          >
+            {'tap right to open • left to return'}
+          </Text>
+
+          {/* Decorative bottom flourish */}
+          <mesh position={[0, -h * 0.38 * overlayHeightScale, 0]} rotation={[0, Math.PI / 2, 0]}>
+            <planeGeometry args={[d * 0.40 * overlayWidthScale, 0.002]} />
+            <meshBasicMaterial color={mat.accentColor} transparent opacity={0.2} side={THREE.DoubleSide} />
           </mesh>
         </group>
       )}
