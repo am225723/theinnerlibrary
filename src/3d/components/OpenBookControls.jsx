@@ -4,10 +4,12 @@ import styles from './OpenBookControls.module.css';
 const OpenBookControls = ({ 
   overlayOffsetX,
   overlayOffsetY,
+  overlayOffsetZ,
   overlayWidthScale,
   overlayHeightScale,
   onOverlayOffsetXChange,
   onOverlayOffsetYChange,
+  onOverlayOffsetZChange,
   onOverlayWidthScaleChange,
   onOverlayHeightScaleChange,
   onReset 
@@ -69,6 +71,27 @@ const OpenBookControls = ({
               <button onClick={() => onOverlayOffsetYChange(0.0)}>0.0</button>
               <button onClick={() => onOverlayOffsetYChange(0.2)}>0.2</button>
               <button onClick={() => onOverlayOffsetYChange(0.5)}>0.5</button>
+            </div>
+          </div>
+
+          <div className={styles.controlGroup}>
+            <label className={styles.label}>
+              Forward/Back: {overlayOffsetZ.toFixed(2)}
+            </label>
+            <input
+              type="range"
+              min="-1.0"
+              max="1.0"
+              step="0.01"
+              value={overlayOffsetZ}
+              onChange={(e) => onOverlayOffsetZChange(parseFloat(e.target.value))}
+              className={styles.slider}
+            />
+            <div className={styles.quickButtons}>
+              <button onClick={() => onOverlayOffsetZChange(-0.2)}>-0.2</button>
+              <button onClick={() => onOverlayOffsetZChange(0.0)}>0.0</button>
+              <button onClick={() => onOverlayOffsetZChange(0.2)}>0.2</button>
+              <button onClick={() => onOverlayOffsetZChange(0.5)}>0.5</button>
             </div>
           </div>
 

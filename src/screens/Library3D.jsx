@@ -22,6 +22,7 @@ export const Library3D = () => {
   const [openBookPosY, setOpenBookPosY] = useState(0.2);
   const [overlayOffsetX, setOverlayOffsetX] = useState(0.22);
   const [overlayOffsetY, setOverlayOffsetY] = useState(0);
+  const [overlayOffsetZ, setOverlayOffsetZ] = useState(0);
   const [overlayWidthScale, setOverlayWidthScale] = useState(1.0);
   const [overlayHeightScale, setOverlayHeightScale] = useState(1.0);
 
@@ -87,6 +88,7 @@ export const Library3D = () => {
     setOpenBookPosY(0.2);
     setOverlayOffsetX(0.22);
     setOverlayOffsetY(0);
+    setOverlayOffsetZ(0);
     setOverlayWidthScale(1.0);
     setOverlayHeightScale(1.0);
   }, []);
@@ -174,6 +176,7 @@ export const Library3D = () => {
               openBookPosY={openBookPosY}
               overlayOffsetX={overlayOffsetX}
               overlayOffsetY={overlayOffsetY}
+              overlayOffsetZ={overlayOffsetZ}
               overlayWidthScale={overlayWidthScale}
               overlayHeightScale={overlayHeightScale}
             />
@@ -186,10 +189,12 @@ export const Library3D = () => {
         <OpenBookControls
           overlayOffsetX={overlayOffsetX}
           overlayOffsetY={overlayOffsetY}
+          overlayOffsetZ={overlayOffsetZ}
           overlayWidthScale={overlayWidthScale}
           overlayHeightScale={overlayHeightScale}
           onOverlayOffsetXChange={setOverlayOffsetX}
           onOverlayOffsetYChange={setOverlayOffsetY}
+          onOverlayOffsetZChange={setOverlayOffsetZ}
           onOverlayWidthScaleChange={setOverlayWidthScale}
           onOverlayHeightScaleChange={setOverlayHeightScale}
           onReset={handleResetControls}

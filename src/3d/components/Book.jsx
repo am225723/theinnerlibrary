@@ -545,6 +545,7 @@ const Book = ({
   openBookPosY = 0.2,
   overlayOffsetX = 0.22,
   overlayOffsetY = 0,
+  overlayOffsetZ = 0,
   overlayWidthScale = 1.0,
   overlayHeightScale = 1.0,
 }) => {
@@ -959,7 +960,7 @@ const Book = ({
           Content is positioned on the book's open spread using 3D Text from drei.
           Left half (Z>0 → camera-LEFT) = tap to return. Right half = tap to open. */}
       {animState === BOOK_STATES.OPEN && (
-        <group position={[overlayOffsetX, overlayOffsetY, 0]}>
+        <group position={[overlayOffsetX, overlayOffsetY, overlayOffsetZ]}>
           {/* Parchment page background */}
           <mesh position={[0, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
             <planeGeometry args={[(d - 0.02) * overlayWidthScale, (h - 0.04) * overlayHeightScale]} />
@@ -972,15 +973,12 @@ const Book = ({
           </mesh>
 
           {/* ── LEFT SIDE: Return indicator ── */}
-          {/* Small back arrow positioned on left half of spread */}
           <Text
-            position={[0, -(h * 0.35) * overlayHeightScale, d * 0.15 * overlayWidthScale]}
-            rotation={[0, Math.PI / 2, 0]}
-            fontSize={0.03 * Math.min(overlayWidthScale, overlayHeightScale)}
+            position={[(d * 0.2) * overlayWidthScale, -h * 0.30 * overlayHeightScale, 0.01]}
+            fontSize={0.025 * Math.min(overlayWidthScale, overlayHeightScale)}
             color="rgba(107,66,38,0.4)"
             anchorX="center"
             anchorY="middle"
-            font={undefined}
           >
             {'← Return'}
           </Text>
@@ -989,9 +987,8 @@ const Book = ({
           
           {/* Book icon emoji */}
           <Text
-            position={[0, h * 0.28 * overlayHeightScale, -(d * 0.15) * overlayWidthScale]}
-            rotation={[0, Math.PI / 2, 0]}
-            fontSize={0.07 * Math.min(overlayWidthScale, overlayHeightScale)}
+            position={[-(d * 0.2) * overlayWidthScale, h * 0.25 * overlayHeightScale, 0.01]}
+            fontSize={0.06 * Math.min(overlayWidthScale, overlayHeightScale)}
             anchorX="center"
             anchorY="middle"
           >
@@ -999,100 +996,88 @@ const Book = ({
           </Text>
 
           {/* Ornamental rule under icon */}
-          <mesh position={[0, h * 0.20 * overlayHeightScale, -(d * 0.15) * overlayWidthScale]} rotation={[0, Math.PI / 2, 0]}>
-            <planeGeometry args={[d * 0.30 * overlayWidthScale, 0.003]} />
+          <mesh position={[-(d * 0.2) * overlayWidthScale, h * 0.18 * overlayHeightScale, 0.01]} rotation={[0, 0, 0]}>
+            <planeGeometry args={[d * 0.25 * overlayWidthScale, 0.002]} />
             <meshBasicMaterial color={mat.accentColor} transparent opacity={0.3} side={THREE.DoubleSide} />
           </mesh>
 
           {/* Title */}
           <Text
-            position={[0, h * 0.14 * overlayHeightScale, -(d * 0.15) * overlayWidthScale]}
-            rotation={[0, Math.PI / 2, 0]}
-            fontSize={0.04 * Math.min(overlayWidthScale, overlayHeightScale)}
+            position={[-(d * 0.2) * overlayWidthScale, h * 0.12 * overlayHeightScale, 0.01]}
+            fontSize={0.035 * Math.min(overlayWidthScale, overlayHeightScale)}
             color="#1B2A4A"
             anchorX="center"
             anchorY="middle"
-            maxWidth={d * 0.55 * overlayWidthScale}
-            font={undefined}
+            maxWidth={d * 0.40 * overlayWidthScale}
           >
             {book.title || ''}
           </Text>
 
           {/* Subtitle / description */}
           <Text
-            position={[0, h * 0.04 * overlayHeightScale, -(d * 0.15) * overlayWidthScale]}
-            rotation={[0, Math.PI / 2, 0]}
-            fontSize={0.025 * Math.min(overlayWidthScale, overlayHeightScale)}
+            position={[-(d * 0.2) * overlayWidthScale, h * 0.03 * overlayHeightScale, 0.01]}
+            fontSize={0.022 * Math.min(overlayWidthScale, overlayHeightScale)}
             color="#6B4226"
             anchorX="center"
             anchorY="middle"
-            maxWidth={d * 0.50 * overlayWidthScale}
-            font={undefined}
+            maxWidth={d * 0.35 * overlayWidthScale}
           >
             {book.subtitle || ''}
           </Text>
 
           {/* "Today's Page" label */}
           <Text
-            position={[0, -h * 0.06 * overlayHeightScale, -(d * 0.15) * overlayWidthScale]}
-            rotation={[0, Math.PI / 2, 0]}
-            fontSize={0.02 * Math.min(overlayWidthScale, overlayHeightScale)}
+            position={[-(d * 0.2) * overlayWidthScale, -h * 0.05 * overlayHeightScale, 0.01]}
+            fontSize={0.018 * Math.min(overlayWidthScale, overlayHeightScale)}
             color="rgba(27,42,74,0.5)"
             anchorX="center"
             anchorY="middle"
-            font={undefined}
           >
             {"Today's Page"}
           </Text>
 
           {/* Question text */}
           <Text
-            position={[0, -h * 0.14 * overlayHeightScale, -(d * 0.15) * overlayWidthScale]}
-            rotation={[0, Math.PI / 2, 0]}
-            fontSize={0.022 * Math.min(overlayWidthScale, overlayHeightScale)}
+            position={[-(d * 0.2) * overlayWidthScale, -h * 0.11 * overlayHeightScale, 0.01]}
+            fontSize={0.02 * Math.min(overlayWidthScale, overlayHeightScale)}
             color="#1B2A4A"
             anchorX="center"
             anchorY="middle"
-            maxWidth={d * 0.45 * overlayWidthScale}
-            font={undefined}
+            maxWidth={d * 0.35 * overlayWidthScale}
           >
             {'Would you like to\nopen this page?'}
           </Text>
 
           {/* Open Page button background */}
-          <mesh position={[0, -h * 0.25 * overlayHeightScale, -(d * 0.15) * overlayWidthScale]} rotation={[0, Math.PI / 2, 0]}>
-            <planeGeometry args={[d * 0.30 * overlayWidthScale, 0.065 * overlayHeightScale]} />
+          <mesh position={[-(d * 0.2) * overlayWidthScale, -h * 0.20 * overlayHeightScale, 0.01]} rotation={[0, 0, 0]}>
+            <planeGeometry args={[d * 0.25 * overlayWidthScale, 0.055 * overlayHeightScale]} />
             <meshBasicMaterial color="#B8922A" side={THREE.DoubleSide} />
           </mesh>
           {/* Button text */}
           <Text
-            position={[0, -h * 0.25 * overlayHeightScale, -(d * 0.15) * overlayWidthScale - 0.001]}
-            rotation={[0, Math.PI / 2, 0]}
-            fontSize={0.022 * Math.min(overlayWidthScale, overlayHeightScale)}
+            position={[-(d * 0.2) * overlayWidthScale, -h * 0.20 * overlayHeightScale, 0.011]}
+            fontSize={0.018 * Math.min(overlayWidthScale, overlayHeightScale)}
             color="#FFFFFF"
             anchorX="center"
             anchorY="middle"
-            font={undefined}
           >
             {'Open Page →'}
           </Text>
 
           {/* Tap hint */}
           <Text
-            position={[0, -h * 0.34 * overlayHeightScale, 0]}
-            rotation={[0, Math.PI / 2, 0]}
-            fontSize={0.016 * Math.min(overlayWidthScale, overlayHeightScale)}
-            color="rgba(107,66,38,0.35)"
+            position={[0, -h * 0.30 * overlayHeightScale, 0.01]}
+            fontSize={0.014 * Math.min(overlayWidthScale, overlayHeightScale)}
+            color="rgba(107,66,38,0.3)"
             anchorX="center"
             anchorY="middle"
-            font={undefined}
           >
             {'tap right to open • left to return'}
           </Text>
 
           {/* Decorative bottom flourish */}
-          <mesh position={[0, -h * 0.38 * overlayHeightScale, 0]} rotation={[0, Math.PI / 2, 0]}>
-            <planeGeometry args={[d * 0.40 * overlayWidthScale, 0.002]} />
+          <mesh position={[0, -h * 0.34 * overlayHeightScale, 0.01]} rotation={[0, 0, 0]}>
+            <planeGeometry args={[d * 0.35 * overlayWidthScale, 0.002]} />
             <meshBasicMaterial color={mat.accentColor} transparent opacity={0.2} side={THREE.DoubleSide} />
           </mesh>
         </group>
