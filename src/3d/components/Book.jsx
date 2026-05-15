@@ -943,7 +943,6 @@ const Book = ({
       {!isMoving && animState !== BOOK_STATES.OPEN && (
         <mesh
           position={[0, 0, -d / 2 + cT + 0.004]}
-          rotation={[0, -Math.PI / 2, 0]}
         >
           <planeGeometry args={[d - 0.05, h - 0.07]} />
           <meshStandardMaterial
@@ -974,8 +973,7 @@ const Book = ({
 
           {/* ── LEFT SIDE: Return indicator ── */}
           <Text
-            position={[(d * 0.2) * overlayWidthScale, -h * 0.30 * overlayHeightScale, 0.01]}
-            rotation={[0, -Math.PI / 2, 0]}
+            position={[(d * 0.2) * overlayWidthScale, -h * 0.30 * overlayHeightScale, 0.1]}
             fontSize={0.025 * Math.min(overlayWidthScale, overlayHeightScale)}
             color="rgba(107,66,38,0.4)"
             anchorX="center"
@@ -988,8 +986,7 @@ const Book = ({
           
           {/* Book icon emoji */}
           <Text
-            position={[-(d * 0.2) * overlayWidthScale, h * 0.25 * overlayHeightScale, 0.01]}
-            rotation={[0, -Math.PI / 2, 0]}
+            position={[-(d * 0.2) * overlayWidthScale, h * 0.25 * overlayHeightScale, 0.1]}
             fontSize={0.06 * Math.min(overlayWidthScale, overlayHeightScale)}
             anchorX="center"
             anchorY="middle"
@@ -998,15 +995,14 @@ const Book = ({
           </Text>
 
           {/* Ornamental rule under icon */}
-          <mesh position={[-(d * 0.2) * overlayWidthScale, h * 0.18 * overlayHeightScale, 0.01]} rotation={[0, 0, 0]}>
+          <mesh position={[-(d * 0.2) * overlayWidthScale, h * 0.18 * overlayHeightScale, 0.1]} rotation={[0, 0, 0]}>
             <planeGeometry args={[d * 0.25 * overlayWidthScale, 0.002]} />
             <meshBasicMaterial color={mat.accentColor} transparent opacity={0.3} side={THREE.DoubleSide} />
           </mesh>
 
           {/* Title */}
           <Text
-            position={[-(d * 0.2) * overlayWidthScale, h * 0.12 * overlayHeightScale, 0.01]}
-            rotation={[0, -Math.PI / 2, 0]}
+            position={[-(d * 0.2) * overlayWidthScale, h * 0.12 * overlayHeightScale, 0.1]}
             fontSize={0.035 * Math.min(overlayWidthScale, overlayHeightScale)}
             color="#1B2A4A"
             anchorX="center"
@@ -1018,8 +1014,7 @@ const Book = ({
 
           {/* Subtitle / description */}
           <Text
-            position={[-(d * 0.2) * overlayWidthScale, h * 0.03 * overlayHeightScale, 0.01]}
-            rotation={[0, -Math.PI / 2, 0]}
+            position={[-(d * 0.2) * overlayWidthScale, h * 0.03 * overlayHeightScale, 0.1]}
             fontSize={0.022 * Math.min(overlayWidthScale, overlayHeightScale)}
             color="#6B4226"
             anchorX="center"
@@ -1031,8 +1026,7 @@ const Book = ({
 
           {/* "Today's Page" label */}
           <Text
-            position={[-(d * 0.2) * overlayWidthScale, -h * 0.05 * overlayHeightScale, 0.01]}
-            rotation={[0, -Math.PI / 2, 0]}
+            position={[-(d * 0.2) * overlayWidthScale, -h * 0.05 * overlayHeightScale, 0.1]}
             fontSize={0.018 * Math.min(overlayWidthScale, overlayHeightScale)}
             color="rgba(27,42,74,0.5)"
             anchorX="center"
@@ -1043,8 +1037,7 @@ const Book = ({
 
           {/* Question text */}
           <Text
-            position={[-(d * 0.2) * overlayWidthScale, -h * 0.11 * overlayHeightScale, 0.01]}
-            rotation={[0, -Math.PI / 2, 0]}
+            position={[-(d * 0.2) * overlayWidthScale, -h * 0.11 * overlayHeightScale, 0.1]}
             fontSize={0.02 * Math.min(overlayWidthScale, overlayHeightScale)}
             color="#1B2A4A"
             anchorX="center"
@@ -1055,14 +1048,13 @@ const Book = ({
           </Text>
 
           {/* Open Page button background */}
-          <mesh position={[-(d * 0.2) * overlayWidthScale, -h * 0.20 * overlayHeightScale, 0.01]} rotation={[0, 0, 0]}>
+          <mesh position={[-(d * 0.2) * overlayWidthScale, -h * 0.20 * overlayHeightScale, 0.1]} rotation={[0, 0, 0]}>
             <planeGeometry args={[d * 0.25 * overlayWidthScale, 0.055 * overlayHeightScale]} />
             <meshBasicMaterial color="#B8922A" side={THREE.DoubleSide} />
           </mesh>
           {/* Button text */}
           <Text
             position={[-(d * 0.2) * overlayWidthScale, -h * 0.20 * overlayHeightScale, 0.011]}
-            rotation={[0, -Math.PI / 2, 0]}
             fontSize={0.018 * Math.min(overlayWidthScale, overlayHeightScale)}
             color="#FFFFFF"
             anchorX="center"
@@ -1073,8 +1065,7 @@ const Book = ({
 
           {/* Tap hint */}
           <Text
-            position={[0, -h * 0.30 * overlayHeightScale, 0.01]}
-            rotation={[0, -Math.PI / 2, 0]}
+            position={[0, -h * 0.30 * overlayHeightScale, 0.1]}
             fontSize={0.014 * Math.min(overlayWidthScale, overlayHeightScale)}
             color="rgba(107,66,38,0.3)"
             anchorX="center"
@@ -1084,7 +1075,7 @@ const Book = ({
           </Text>
 
           {/* Decorative bottom flourish */}
-          <mesh position={[0, -h * 0.34 * overlayHeightScale, 0.01]} rotation={[0, 0, 0]}>
+          <mesh position={[0, -h * 0.34 * overlayHeightScale, 0.1]} rotation={[0, 0, 0]}>
             <planeGeometry args={[d * 0.35 * overlayWidthScale, 0.002]} />
             <meshBasicMaterial color={mat.accentColor} transparent opacity={0.2} side={THREE.DoubleSide} />
           </mesh>
