@@ -975,6 +975,7 @@ const Book = ({
           {/* ── LEFT SIDE: Return indicator ── */}
           <Text
             position={[(d * 0.2) * overlayWidthScale, -h * 0.30 * overlayHeightScale, 0.01]}
+            rotation={[0, -Math.PI / 2, 0]}
             fontSize={0.025 * Math.min(overlayWidthScale, overlayHeightScale)}
             color="rgba(107,66,38,0.4)"
             anchorX="center"
@@ -988,6 +989,7 @@ const Book = ({
           {/* Book icon emoji */}
           <Text
             position={[-(d * 0.2) * overlayWidthScale, h * 0.25 * overlayHeightScale, 0.01]}
+            rotation={[0, -Math.PI / 2, 0]}
             fontSize={0.06 * Math.min(overlayWidthScale, overlayHeightScale)}
             anchorX="center"
             anchorY="middle"
@@ -1004,6 +1006,7 @@ const Book = ({
           {/* Title */}
           <Text
             position={[-(d * 0.2) * overlayWidthScale, h * 0.12 * overlayHeightScale, 0.01]}
+            rotation={[0, -Math.PI / 2, 0]}
             fontSize={0.035 * Math.min(overlayWidthScale, overlayHeightScale)}
             color="#1B2A4A"
             anchorX="center"
@@ -1016,6 +1019,7 @@ const Book = ({
           {/* Subtitle / description */}
           <Text
             position={[-(d * 0.2) * overlayWidthScale, h * 0.03 * overlayHeightScale, 0.01]}
+            rotation={[0, -Math.PI / 2, 0]}
             fontSize={0.022 * Math.min(overlayWidthScale, overlayHeightScale)}
             color="#6B4226"
             anchorX="center"
@@ -1028,6 +1032,7 @@ const Book = ({
           {/* "Today's Page" label */}
           <Text
             position={[-(d * 0.2) * overlayWidthScale, -h * 0.05 * overlayHeightScale, 0.01]}
+            rotation={[0, -Math.PI / 2, 0]}
             fontSize={0.018 * Math.min(overlayWidthScale, overlayHeightScale)}
             color="rgba(27,42,74,0.5)"
             anchorX="center"
@@ -1039,6 +1044,7 @@ const Book = ({
           {/* Question text */}
           <Text
             position={[-(d * 0.2) * overlayWidthScale, -h * 0.11 * overlayHeightScale, 0.01]}
+            rotation={[0, -Math.PI / 2, 0]}
             fontSize={0.02 * Math.min(overlayWidthScale, overlayHeightScale)}
             color="#1B2A4A"
             anchorX="center"
@@ -1056,6 +1062,7 @@ const Book = ({
           {/* Button text */}
           <Text
             position={[-(d * 0.2) * overlayWidthScale, -h * 0.20 * overlayHeightScale, 0.011]}
+            rotation={[0, -Math.PI / 2, 0]}
             fontSize={0.018 * Math.min(overlayWidthScale, overlayHeightScale)}
             color="#FFFFFF"
             anchorX="center"
@@ -1067,6 +1074,7 @@ const Book = ({
           {/* Tap hint */}
           <Text
             position={[0, -h * 0.30 * overlayHeightScale, 0.01]}
+            rotation={[0, -Math.PI / 2, 0]}
             fontSize={0.014 * Math.min(overlayWidthScale, overlayHeightScale)}
             color="rgba(107,66,38,0.3)"
             anchorX="center"
