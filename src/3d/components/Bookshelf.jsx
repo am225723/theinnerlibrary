@@ -7,6 +7,7 @@ import { ContactShadows } from '@react-three/drei';
 import * as THREE from 'three';
 import Book from './Book';
 import { SHELF_DIMENSIONS, getBookDimensionsById } from '../utils/bookGeometry';
+import { useElapsedTime } from '../hooks/useElapsedTime';
 
 // ─── shelf wallpaper texture ───────────────────────────────────────────
 function buildShelfWallpaperTexture() {
@@ -222,19 +223,18 @@ const Bookshelf = ({
       )}
 
       {/* ── Contact shadows beneath each shelf for grounding ── */}
-      {shelves.map((shelf) => (
-        <ContactShadows
-          key={`cs-${shelf.index}`}
-          position={[0, shelf.y + 0.046, 0.28]}
-          rotation={[Math.PI / 2, 0, 0]}
-          width={SHELF_DIMENSIONS.width * 0.95}
-          height={SHELF_DIMENSIONS.depth * 0.8}
-          far={1.5}
-          opacity={0.35}
-          blur={2.2}
-          color="#2A1808"
-        />
-      ))}
+      {/* Single ContactShadows covers all shelf rows – avoids GPU overload from multiple instances */}
+      <ContactShadows
+        position={[0, shelves[0]?.y + 0.046, 0.28]}
+        rotation={[Math.PI / 2, 0, 0]}
+        width={SHELF_DIMENSIONS.width * 0.95}
+        height={SHELF_DIMENSIONS.shelfGap * shelves.length}
+        far={SHELF_DIMENSIONS.shelfGap * shelves.length + 1}
+        opacity={0.32}
+        blur={2}
+        color="#2A1808"
+        frames={6}
+      />
     </group>
   );
 };
@@ -413,9 +413,10 @@ const SnugBookRow = ({
 // ─── Candle ───────────────────────────────────────────────────────────────────
 const Candle = ({ position }) => {
   const flameRef = useRef();
-  useFrame(({ clock }) => {
+  const elapsed = useElapsedTime();
+  useFrame(() => {
     if (!flameRef.current) return;
-    const t = clock.getElapsedTime();
+    const t = elapsed.current;
     flameRef.current.scale.x = 1 + Math.sin(t * 7.3) * 0.09;
     flameRef.current.scale.y = 1 + Math.sin(t * 5.1) * 0.12;
     flameRef.current.position.y = 0.36 + Math.sin(t * 6.7) * 0.005;
@@ -555,9 +556,10 @@ const PictureFrame = ({ position }) => (
 // ─── SaltLamp ─────────────────────────────────────────────────────────────────
 const SaltLamp = ({ position }) => {
   const lampRef = useRef();
-  useFrame(({ clock }) => {
+  const elapsed = useElapsedTime();
+  useFrame(() => {
     if (!lampRef.current) return;
-    lampRef.current.material.emissiveIntensity = 0.28 + Math.sin(clock.getElapsedTime() * 2.2) * 0.06;
+    lampRef.current.material.emissiveIntensity = 0.28 + Math.sin(elapsed.current * 2.2) * 0.06;
   });
   return (
     <group position={position}>

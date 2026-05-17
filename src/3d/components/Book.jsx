@@ -23,6 +23,7 @@ import * as THREE from 'three';
 import { Text } from '@react-three/drei';
 import { BOOK_STATES, TIMINGS } from '../utils/animationTimings';
 import { getBookMaterial, BOOK_COLORS } from '../utils/materialPresets';
+import { useElapsedTime } from '../hooks/useElapsedTime';
 import { loadAllCovers } from '../hooks/useCoverDesigner';
 import { getBookDimensionsById } from '../utils/bookGeometry';
 
@@ -678,11 +679,12 @@ const Book = ({
   const isOnShelf = !isMoving && animState !== BOOK_STATES.OPEN;
 
   // ─── animation loop ────────────────────────────────────────────────
-  useFrame(({ clock }, delta) => {
+  const elapsed = useElapsedTime();
+  useFrame((_, delta) => {
     if (!groupRef.current) return;
     const g   = groupRef.current;
     const cvr = frontCoverPivotRef.current;
-    const time = clock.getElapsedTime();
+    const time = elapsed.current;
 
     // IDLE - gentle breathing
     if (animState === BOOK_STATES.IDLE) {
@@ -1066,7 +1068,8 @@ const Book = ({
           <Text
             position={[(d * 0.2) * overlayWidthScale, -h * 0.30 * overlayHeightScale, 0.02]}
             fontSize={0.025 * Math.min(overlayWidthScale, overlayHeightScale)}
-            color="rgba(107,66,38,0.4)"
+            color="#6B4226"
+            fillOpacity={0.4}
             anchorX="center"
             anchorY="middle"
           >
@@ -1113,7 +1116,8 @@ const Book = ({
           <Text
             position={[-(d * 0.2) * overlayWidthScale, -h * 0.05 * overlayHeightScale, 0.02]}
             fontSize={0.018 * Math.min(overlayWidthScale, overlayHeightScale)}
-            color="rgba(27,42,74,0.5)"
+            color="#1B2A4A"
+            fillOpacity={0.5}
             anchorX="center"
             anchorY="middle"
           >
@@ -1150,7 +1154,8 @@ const Book = ({
           <Text
             position={[0, -h * 0.30 * overlayHeightScale, 0.02]}
             fontSize={0.014 * Math.min(overlayWidthScale, overlayHeightScale)}
-            color="rgba(107,66,38,0.3)"
+            color="#6B4226"
+            fillOpacity={0.3}
             anchorX="center"
             anchorY="middle"
           >
@@ -1218,9 +1223,10 @@ const Book = ({
 // ─── Bookmark ────────────────────────────────────────────────────────
 const Bookmark = ({ bookHeight, bookDepth, bookThickness, count }) => {
   const ref = useRef();
-  useFrame(({ clock }) => {
+  const elapsed = useElapsedTime();
+  useFrame(() => {
     if (!ref.current) return;
-    ref.current.rotation.z = Math.sin(clock.getElapsedTime() * 1.8) * 0.04;
+    ref.current.rotation.z = Math.sin(elapsed.current * 1.8) * 0.04;
   });
   return (
     <group

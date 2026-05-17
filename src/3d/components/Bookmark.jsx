@@ -2,6 +2,7 @@
 
 import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { useElapsedTime } from '../hooks/useElapsedTime';
 
 const Bookmark3D = ({ 
   position = [0, 0, 0], 
@@ -24,9 +25,10 @@ const Bookmark3D = ({
   const style = bookmarkStyles[type] || bookmarkStyles.daily;
 
   // Sway animation
-  useFrame((state) => {
+  const elapsed = useElapsedTime();
+  useFrame(() => {
     if (!groupRef.current || !animated) return;
-    const time = state.clock.getElapsedTime();
+    const time = elapsed.current;
     groupRef.current.rotation.z = Math.sin(time * (2 * Math.PI / 3)) * (Math.PI / 60);
   });
 
