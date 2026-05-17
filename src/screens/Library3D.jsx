@@ -16,10 +16,16 @@ export const Library3D = () => {
   
   // Open book controls state
   const [showControls, setShowControls] = useState(true);
-  const [openBookScale, setOpenBookScale] = useState(1.2);
-  const [openBookPosX, setOpenBookPosX] = useState(0);
-  const [openBookPosZ, setOpenBookPosZ] = useState(3.5);
-  const [openBookPosY, setOpenBookPosY] = useState(0.2);
+
+  // Detect mobile viewport for larger open-book scale
+  const isMobile = typeof window !== 'undefined' && (
+    window.innerWidth <= 768 || ('ontouchstart' in window && window.innerWidth <= 1024)
+  );
+
+  const [openBookScale, setOpenBookScale]           = useState(isMobile ? 1.55 : 1.2);
+  const [openBookPosX, setOpenBookPosX]             = useState(0);
+  const [openBookPosZ, setOpenBookPosZ]             = useState(isMobile ? 3.0 : 3.5);
+  const [openBookPosY, setOpenBookPosY]             = useState(isMobile ? 0.0 : 0.2);
   const [overlayOffsetX, setOverlayOffsetX] = useState(0.22);
   const [overlayOffsetY, setOverlayOffsetY] = useState(0);
   const [overlayOffsetZ, setOverlayOffsetZ] = useState(0);
@@ -80,18 +86,18 @@ export const Library3D = () => {
     navigate('/classic');
   }, [navigate]);
 
-  // Reset controls to defaults
+  // Reset controls to defaults (mobile-aware)
   const handleResetControls = useCallback(() => {
-    setOpenBookScale(1.2);
+    setOpenBookScale(isMobile ? 1.55 : 1.2);
     setOpenBookPosX(0);
-    setOpenBookPosZ(3.5);
-    setOpenBookPosY(0.2);
+    setOpenBookPosZ(isMobile ? 3.0 : 3.5);
+    setOpenBookPosY(isMobile ? 0.0 : 0.2);
     setOverlayOffsetX(0.22);
     setOverlayOffsetY(0);
     setOverlayOffsetZ(0);
     setOverlayWidthScale(1.0);
     setOverlayHeightScale(1.0);
-  }, []);
+  }, [isMobile]);
 
   if (showFallback) {
     return (
