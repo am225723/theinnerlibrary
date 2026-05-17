@@ -558,7 +558,7 @@ const RoundedSpine = ({ thickness, height, depth, spineRough, darkColor, spineTe
         />
       </mesh>
       {/* Spine artwork overlay on the curved surface apex */}
-      <mesh position={[0, 0, radius + 0.001]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh position={[0, 0, radius + 0.001]} rotation={[0, 0, 0]}>
         <planeGeometry args={[thickness - 0.008, height - 0.008]} />
         <meshStandardMaterial
           map={spineTex}
@@ -606,10 +606,10 @@ const Book = ({
   openBookPosX = 0,
   openBookPosZ = 3.5,
   openBookPosY = 0.2,
-  overlayOffsetX = 0.22,
+    overlayOffsetX = 0.22,
+  overlayWidthScale = 1.0,
   overlayOffsetY = 0,
   overlayOffsetZ = 0,
-  overlayWidthScale = 1.0,
   overlayHeightScale = 1.0,
 }) => {
   const groupRef            = useRef();
@@ -1052,7 +1052,7 @@ const Book = ({
 
       {/* Open book: 3D text content page */}
       {animState === BOOK_STATES.OPEN && (
-        <group position={[overlayOffsetX, overlayOffsetY, overlayOffsetZ]} rotation={[0, Math.PI / 2, 0]}>
+        <group position={[d / 2 + 0.04, overlayOffsetY, -d / 2 + 0.02]} rotation={[0, Math.PI / 2, 0]}>
           {/* Parchment page background */}
           <mesh position={[0, 0, 0.0]}>
             <planeGeometry args={[(d - 0.02) * overlayWidthScale, (h - 0.04) * overlayHeightScale]} />

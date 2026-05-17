@@ -9,4 +9,4 @@
 
 ## Integration
 - [x] Verify build compiles
-- [ ] Push fix to feature branch
+- [x] Push fix to feature branch

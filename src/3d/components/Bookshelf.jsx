@@ -231,9 +231,9 @@ const Bookshelf = ({
         height={SHELF_DIMENSIONS.shelfGap * shelves.length}
         far={SHELF_DIMENSIONS.shelfGap * shelves.length + 1}
         opacity={0.32}
-        blur={2}
+        blur={1.5}
         color="#2A1808"
-        frames={6}
+        frames={1}
       />
     </group>
   );
