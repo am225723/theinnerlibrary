@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import Bookshelf from '../components/Bookshelf';
 import { useBookshelfLayout } from '../hooks/useBookshelfLayout';
 import { getEntries } from '../../utils/storage';
+import { useElapsedTime } from '../hooks/useElapsedTime';
 
 // ─── wallpaper texture ────────────────────────────────────────────────────────
 function buildWallpaperTexture() {
@@ -234,9 +235,10 @@ const Window = ({ position }) => (
 // ─── Ceiling lamp ─────────────────────────────────────────────────────────────
 const CeilingLamp = ({ position }) => {
   const shadeRef = useRef();
-  useFrame(({ clock }) => {
+  const elapsed = useElapsedTime();
+  useFrame(() => {
     if (!shadeRef.current) return;
-    shadeRef.current.material.emissiveIntensity = 0.4 + Math.sin(clock.getElapsedTime() * 0.8) * 0.03;
+    shadeRef.current.material.emissiveIntensity = 0.4 + Math.sin(elapsed.current * 0.8) * 0.03;
   });
   return (
     <group position={position}>
@@ -296,9 +298,11 @@ const DustParticles = () => {
     return arr;
   }, []);
 
-  useFrame(({ clock }) => {
+  const elapsed = useElapsedTime();
+
+  useFrame(() => {
     if (!ref.current) return;
-    const t   = clock.getElapsedTime();
+    const t   = elapsed.current;
     const pos = ref.current.geometry.attributes.position.array;
     for (let i = 0; i < count; i++) {
       pos[i * 3]     += Math.sin(t * 0.28 + i) * 0.00045;
@@ -526,12 +530,13 @@ const LibrarySceneContent = ({ onBookSelect, onBookOpen, onBookReturn, returnToS
         <ContactShadows
           position={[0, -5.08, 3.5]}
           rotation={[Math.PI / 2, 0, 0]}
-          width={12}
-          height={8}
-          far={6}
-          opacity={0.28}
-          blur={2.5}
+          width={8}
+          height={6}
+          far={4}
+          opacity={0.22}
+          blur={2}
           color="#1A0E04"
+          frames={6}
         />
 
         {/* Bookends */}
@@ -687,9 +692,10 @@ const HangingMirror = ({ position }) => (
 // ─── Wall Clock ─────────────────────────────────────────────────
 const WallClock = ({ position }) => {
   const handRef = useRef();
-  useFrame(({ clock }) => {
+  const elapsed = useElapsedTime();
+  useFrame(() => {
     if (!handRef.current) return;
-    handRef.current.rotation.z = -(clock.getElapsedTime() * 0.1) % (Math.PI * 2);
+    handRef.current.rotation.z = -(elapsed.current * 0.1) % (Math.PI * 2);
   });
 
   return (
@@ -768,9 +774,10 @@ const SideTable = ({ position }) => (
 // ─── Floor Plant ─────────────────────────────────────────────────
 const FloorPlant = ({ position }) => {
   const leafRef = useRef();
-  useFrame(({ clock }) => {
+  const elapsed = useElapsedTime();
+  useFrame(() => {
     if (!leafRef.current) return;
-    const t = clock.getElapsedTime();
+    const t = elapsed.current;
     leafRef.current.rotation.z = Math.sin(t * 0.4) * 0.02;
   });
 
@@ -897,7 +904,7 @@ const LibraryScene = ({ onBookSelect, onBookOpen, onBookReturn, returnToShelfId,
   openBookScale, openBookPosX, openBookPosZ, openBookPosY,
   overlayOffsetX, overlayOffsetY, overlayOffsetZ, overlayWidthScale, overlayHeightScale }) => (
   <Canvas
-    shadows
+    shadows="pcf"
     camera={{ position: [0, -0.2, 8], fov: 42, near: 0.1, far: 55 }}
     style={{
       position: 'absolute',
