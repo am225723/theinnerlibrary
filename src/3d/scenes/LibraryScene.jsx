@@ -3,7 +3,7 @@
 
 import React, { useState, useCallback, Suspense, useMemo, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Environment } from '@react-three/drei';
+import { OrbitControls, Environment, ContactShadows } from '@react-three/drei';
 import * as THREE from 'three';
 import Bookshelf from '../components/Bookshelf';
 import { useBookshelfLayout } from '../hooks/useBookshelfLayout';
@@ -403,29 +403,45 @@ const LibrarySceneContent = ({ onBookSelect, onBookOpen, onBookReturn, returnToS
         <Environment preset="apartment" />
 
         {/* ── Lights ── */}
-        {/* Primary warm sun from upper-right */}
-        <directionalLight
+        {/* PRIMARY: Warm SpotLight — reading lamp from upper-right */}
+        <spotLight
           position={[6, 9, 5]}
-          intensity={1.6}
-          color="#FFF4E0"
+          intensity={2.4}
+          color="#FFE4B5"
+          angle={Math.PI / 5}
+          penumbra={0.65}
+          decay={2}
+          distance={22}
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
+          shadow-bias={-0.0002}
+          shadow-normalBias={0.04}
+        />
+        {/* SECONDARY: Cool window light — north-facing daylight */}
+        <directionalLight
+          position={[-6, 7, 2]}
+          intensity={0.55}
+          color="#B0C4DE"
+          castShadow
+          shadow-mapSize-width={1024}
+          shadow-mapSize-height={1024}
           shadow-camera-far={22}
           shadow-camera-left={-11}
           shadow-camera-right={11}
           shadow-camera-top={11}
           shadow-camera-bottom={-11}
           shadow-bias={-0.00015}
+          shadow-normalBias={0.02}
         />
-        {/* Soft fill */}
+        {/* Soft warm ambient */}
         <ambientLight intensity={0.38} color="#FFF6EC" />
         {/* Back-rim bounce */}
-        <directionalLight position={[-4, 4, -4]} intensity={0.28} color="#FFE5CC" />
+        <directionalLight position={[-4, 4, -4]} intensity={0.18} color="#FFE5CC" />
         {/* Left-side window spill */}
-        <pointLight position={[-5, 1.5, 2]} intensity={0.65} color="#FFD8A0" distance={9} decay={2} />
+        <pointLight position={[-5, 1.5, 2]} intensity={0.55} color="#FFD8A0" distance={9} decay={2} />
         {/* Overhead warm fill */}
-        <pointLight position={[0, 5, 0.5]} intensity={0.45} color="#FFF0CC" distance={7} decay={2} />
+        <pointLight position={[0, 5, 0.5]} intensity={0.35} color="#FFF0CC" distance={7} decay={2} />
 
         {/* ── Room shell ── */}
 
@@ -504,6 +520,18 @@ const LibrarySceneContent = ({ onBookSelect, onBookOpen, onBookReturn, returnToS
           overlayOffsetZ={overlayOffsetZ}
           overlayWidthScale={overlayWidthScale}
           overlayHeightScale={overlayHeightScale}
+        />
+
+        {/* ── Grounding contact shadows on floor ── */}
+        <ContactShadows
+          position={[0, -5.08, 3.5]}
+          rotation={[Math.PI / 2, 0, 0]}
+          width={12}
+          height={8}
+          far={6}
+          opacity={0.28}
+          blur={2.5}
+          color="#1A0E04"
         />
 
         {/* Bookends */}
@@ -858,6 +886,12 @@ const Bookend = ({ position, mirror = false }) => (
   </group>
 );
 
+// DPR auto-detection for crisp rendering on high-res mobile displays
+const detectDPR = () => {
+  const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1;
+  return [1, Math.min(dpr, 2)];
+};
+
 // ─── LibraryScene (Canvas wrapper) ───────────────────────────────────────────
 const LibraryScene = ({ onBookSelect, onBookOpen, onBookReturn, returnToShelfId,
   openBookScale, openBookPosX, openBookPosZ, openBookPosY,
@@ -878,7 +912,7 @@ const LibraryScene = ({ onBookSelect, onBookOpen, onBookReturn, returnToShelfId,
       failIfMajorPerformanceCaveat: false,
       version: 1,
     }}
-    dpr={[1, 2]}
+    dpr={detectDPR()}
   >
     <LibrarySceneContent
       onBookSelect={onBookSelect}

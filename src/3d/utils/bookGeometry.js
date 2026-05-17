@@ -9,8 +9,45 @@
 // Front cover is on the +X face (wide, depth × height)
 // When selected: rotate group +π/2 around Y so front cover faces camera
 
-// Each book has unique dimensions - thinner, more realistic spines
-export const BOOK_DIMENSIONS_MAP = {
+// ── Seeded random for deterministic per-book variation ──────────────────
+function hashStr(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+  }
+  return h;
+}
+
+function seededRandom(seed) {
+  // Mulberry32 – fast, decent distribution
+  let s = seed | 0;
+  return () => {
+    s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// Apply small natural offsets so books don't look uniformly digital.
+// Thickness ±5%, Height ±3%, Depth ±4%, spineAngle ±0.01
+function vary(base, id) {
+  const rng = seededRandom(hashStr(id) * 0x9e3779b9);
+  const tOff = (rng() - 0.5) * 2 * base.thickness * 0.05;
+  const hOff = (rng() - 0.5) * 2 * base.height   * 0.03;
+  const dOff = (rng() - 0.5) * 2 * base.depth     * 0.04;
+  const aOff = (rng() - 0.5) * 2 * 0.01;
+  return {
+    ...base,
+    thickness: +(base.thickness + tOff).toFixed(4),
+    height:    +(base.height    + hOff).toFixed(4),
+    depth:     +(base.depth     + dOff).toFixed(4),
+    spineAngle:+(base.spineAngle + aOff).toFixed(4),
+  };
+}
+
+// Each book has unique base dimensions - thinner, more realistic spines
+const BASE_DIMENSIONS = {
   daily_checkin:    { thickness: 0.38, height: 1.08, depth: 0.65, spineAngle: -0.02 },
   needs_translator: { thickness: 0.32, height: 0.95, depth: 0.52, spineAngle: 0.03 },
   boundary_scripts: { thickness: 0.45, height: 1.15, depth: 0.72, spineAngle: -0.01 },
@@ -20,6 +57,11 @@ export const BOOK_DIMENSIONS_MAP = {
   younger_self:     { thickness: 0.34, height: 1.02, depth: 0.55, spineAngle: -0.02 },
   session_prep:     { thickness: 0.38, height: 0.98, depth: 0.62, spineAngle: 0.04 },
 };
+
+// Public map with deterministic natural variation baked in
+export const BOOK_DIMENSIONS_MAP = Object.fromEntries(
+  Object.entries(BASE_DIMENSIONS).map(([id, base]) => [id, vary(base, id)])
+);
 
 // Default dimensions
 export const BOOK_DIMENSIONS = {
@@ -42,9 +84,11 @@ export const SHELF_DIMENSIONS = {
   booksPerShelf: 4,
 };
 
-// Get book dimensions by ID
+// Get book dimensions by ID (with natural variation already applied)
 export const getBookDimensionsById = (bookId) => {
-  return BOOK_DIMENSIONS_MAP[bookId] || BOOK_DIMENSIONS;
+  if (BOOK_DIMENSIONS_MAP[bookId]) return BOOK_DIMENSIONS_MAP[bookId];
+  // Unknown book – vary the default so even fallbacks look natural
+  return vary(BOOK_DIMENSIONS, bookId || 'unknown');
 };
 
 // Calculate book position on shelf - snug side by side

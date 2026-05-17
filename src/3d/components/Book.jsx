@@ -1,15 +1,19 @@
-// Book.jsx  –  The Inner Library
-// ─────────────────────────────────────────────────────────────────────────────
+// Book.jsx - The Inner Library
 // WORLD-SPACE CONVENTION (book at rest on shelf, camera along +Z):
-//
 //   X  = book thickness   (spine width you see on the shelf)
 //   Y  = book height      (vertical)
 //   Z  = book depth       (pages run front-to-back when on shelf)
+// On shelf the spine (+Z face) faces the camera.
+// On click the whole group rotates -90 deg around Y so the front cover
+// (+X face) faces the camera, then the cover opens from the spine hinge.
 //
-//  On shelf the spine (+Z face) faces the camera.
-//  On click the whole group rotates -90° around Y so the front cover
-//  (+X face) faces the camera, then the cover opens from the spine hinge.
-// ─────────────────────────────────────────────────────────────────────────────
+// REALISM ENHANCEMENTS (v2):
+//   - Rounded spine via CylinderGeometry segment
+//   - French groove indent where covers meet the spine
+//   - Gold-foil embossing layer for spine titles
+//   - Enhanced PBR roughness / metalness per material preset
+//   - Page-edge foxing with richer noise
+//   - Mobile-first "gentle peek" on touch instead of hover
 
 import React, {
   useRef, useState, useMemo, useCallback, useEffect,
@@ -22,7 +26,11 @@ import { getBookMaterial, BOOK_COLORS } from '../utils/materialPresets';
 import { loadAllCovers } from '../hooks/useCoverDesigner';
 import { getBookDimensionsById } from '../utils/bookGeometry';
 
-// ─── colour helpers ───────────────────────────────────────────────────────────
+// ─── mobile / touch detection ────────────────────────────────────────
+const IS_TOUCH_DEVICE = typeof window !== 'undefined'
+  && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+
+// ─── colour helpers ──────────────────────────────────────────────────
 const hexToRgb = (hex) => {
   const c = (hex || '#444444').replace('#', '');
   return {
@@ -42,7 +50,7 @@ const darken = (hex, n = 20) => {
   return `#${f(r)}${f(g)}${f(b)}`;
 };
 
-// ─── easing ───────────────────────────────────────────────────────────────────
+// ─── easing ──────────────────────────────────────────────────────────
 const easeInOutCubic = (t) =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 const easeOutCubic  = (t) => 1 - Math.pow(1 - t, 3);
@@ -51,7 +59,7 @@ const easeOutBack   = (t) => {
   return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
 };
 
-// ─── spine texture ────────────────────────────────────────────────────────────
+// ─── spine texture ───────────────────────────────────────────────────
 function buildSpineTexture(mat) {
   const W = 256, H = 1024;
   const canvas = document.createElement('canvas');
@@ -87,7 +95,6 @@ function buildSpineTexture(mat) {
     const x = Math.random() * W, y = Math.random() * H;
     const a = 0.012 + Math.random() * 0.02;
     if (isLeather) {
-      // Leather has tiny pores and creases
       if (Math.random() > 0.85) {
         ctx.fillStyle = `rgba(0,0,0,${a * 2})`;
         ctx.fillRect(x, y, 1 + Math.random() * 2, 1 + Math.random());
@@ -118,7 +125,6 @@ function buildSpineTexture(mat) {
       lg.addColorStop(1,   darken(mat.darkColor, 12));
       ctx.fillStyle = lg;
       ctx.fillRect(2, y - 10, W - 4, 20);
-      // band edge highlights
       ctx.fillStyle = mat.accentColor + '70';
       ctx.fillRect(2, y - 11, W - 4, 1.5);
       ctx.fillStyle = 'rgba(0,0,0,0.12)';
@@ -135,21 +141,27 @@ function buildSpineTexture(mat) {
   ctx.fillRect(14, H - 38, W - 28, 0.5);
   ctx.globalAlpha = 1;
 
-  // spine title – rotated
+  // spine title - rotated (Playfair Display style via Georgia fallback)
   const label = (mat.spineText || '').replace(/\\n/g, ' ');
   ctx.save();
   ctx.translate(W / 2, H / 2);
   ctx.rotate(-Math.PI / 2);
+  // Gold foil embossing: shadow + highlight passes
   ctx.fillStyle = mat.accentColor;
   ctx.shadowColor = 'rgba(0,0,0,0.6)';
   ctx.shadowBlur = 5;
-  ctx.font = `bold 34px Georgia, serif`;
+  ctx.font = `bold 34px "Playfair Display", Georgia, serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(label, 0, 0);
   // Second pass without shadow for crispness
   ctx.shadowBlur = 0;
   ctx.fillText(label, 0, 0);
+  // Third pass: subtle gold highlight for foil effect
+  ctx.globalAlpha = 0.15;
+  ctx.fillStyle = '#FFE8A0';
+  ctx.fillText(label, 1, -1);
+  ctx.globalAlpha = 1;
   ctx.restore();
 
   // Subtle edge wear marks
@@ -168,7 +180,7 @@ function buildSpineTexture(mat) {
   return tex;
 }
 
-// ─── cover texture ────────────────────────────────────────────────────────────
+// ─── cover texture ───────────────────────────────────────────────────
 function buildCoverTexture(mat, title) {
   const W = 512, H = 768;
   const canvas = document.createElement('canvas');
@@ -185,9 +197,9 @@ function buildCoverTexture(mat, title) {
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
-  // Spine edge shadow (left side gets darker near the hinge)
+  // Spine edge shadow (left side gets darker near the hinge / French groove)
   const hingeShadow = ctx.createLinearGradient(0, 0, W * 0.12, 0);
-  hingeShadow.addColorStop(0, 'rgba(0,0,0,0.15)');
+  hingeShadow.addColorStop(0, 'rgba(0,0,0,0.18)');
   hingeShadow.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = hingeShadow;
   ctx.fillRect(0, 0, W * 0.12, H);
@@ -199,7 +211,6 @@ function buildCoverTexture(mat, title) {
     const x = Math.random() * W, y = Math.random() * H;
     const a = 0.008 + Math.random() * 0.018;
     if (isLeather) {
-      // Leather pores
       if (Math.random() > 0.9) {
         ctx.fillStyle = `rgba(0,0,0,${a * 1.5})`;
         ctx.beginPath();
@@ -269,12 +280,10 @@ function buildCoverTexture(mat, title) {
     ctx.fillRect(55, H-55, W-110, 1.5);
     ctx.globalAlpha = 1;
   } else if (mat.coverStyle === 'art_deco') {
-    // Art Deco style – bold geometric lines, sunburst, zigzag
     ctx.strokeStyle = ac; ctx.lineWidth = 2;
     ctx.strokeRect(20, 20, W-40, H-40);
     ctx.lineWidth = 1;
     ctx.strokeRect(28, 28, W-56, H-56);
-    // Sunburst rays from top center
     ctx.save(); ctx.translate(W/2, 0);
     for (let i = 0; i < 16; i++) {
       const a = (i / 16) * Math.PI * 0.6 - Math.PI * 0.3;
@@ -284,7 +293,6 @@ function buildCoverTexture(mat, title) {
       ctx.stroke();
     }
     ctx.globalAlpha = 1; ctx.restore();
-    // Zigzag border at bottom
     ctx.strokeStyle = ac; ctx.lineWidth = 1.5;
     ctx.beginPath();
     for (let x = 28; x < W - 28; x += 18) {
@@ -293,7 +301,6 @@ function buildCoverTexture(mat, title) {
       else ctx.lineTo(x, zigY);
     }
     ctx.stroke();
-    // Corner chevrons
     [[40, 40], [W-40, 40], [40, H-40], [W-40, H-40]].forEach(([cx, cy]) => {
       ctx.save(); ctx.translate(cx, cy);
       ctx.strokeStyle = ac; ctx.lineWidth = 1;
@@ -301,15 +308,12 @@ function buildCoverTexture(mat, title) {
       ctx.restore();
     });
   } else if (mat.coverStyle === 'ornate') {
-    // Ornate Victorian style – elaborate scrollwork, double borders, corner flourishes
     ctx.strokeStyle = ac; ctx.lineWidth = 2.5;
     ctx.strokeRect(18, 18, W-36, H-36);
     ctx.lineWidth = 1;
     ctx.strokeRect(26, 26, W-52, H-52);
-    // Inner decorative frame
     ctx.lineWidth = 0.8;
     ctx.strokeRect(38, 38, W-76, H-76);
-    // Corner flourishes
     [[32, 32, 1, 1], [W-32, 32, -1, 1], [32, H-32, 1, -1], [W-32, H-32, -1, -1]].forEach(([cx, cy, dx, dy]) => {
       ctx.save(); ctx.translate(cx, cy);
       ctx.strokeStyle = ac; ctx.lineWidth = 1.2;
@@ -321,21 +325,17 @@ function buildCoverTexture(mat, title) {
       ctx.stroke();
       ctx.restore();
     });
-    // Central oval medallion
     ctx.strokeStyle = ac; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.ellipse(W/2, H*0.38, 75, 55, 0, 0, Math.PI*2); ctx.stroke();
     ctx.lineWidth = 0.8;
     ctx.beginPath(); ctx.ellipse(W/2, H*0.38, 65, 45, 0, 0, Math.PI*2); ctx.stroke();
   } else if (mat.coverStyle === 'floral_vine') {
-    // Floral vine – organic botanical illustration
     ctx.strokeStyle = ac; ctx.lineWidth = 1.2;
-    // Vine from bottom-left
     ctx.beginPath();
     ctx.moveTo(40, H - 40);
     ctx.bezierCurveTo(80, H - 120, 60, H - 200, 120, H * 0.55);
     ctx.bezierCurveTo(140, H * 0.45, 100, H * 0.35, 160, H * 0.3);
     ctx.stroke();
-    // Leaves along vine
     for (let i = 0; i < 6; i++) {
       const t = 0.15 + i * 0.14;
       const lx = 40 + (120 - 40) * t + Math.sin(t * 4) * 20;
@@ -345,7 +345,6 @@ function buildCoverTexture(mat, title) {
       ctx.beginPath(); ctx.ellipse(0, 0, 18, 8, 0, 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 1; ctx.restore();
     }
-    // Small flower buds
     [[100, H * 0.65], [140, H * 0.45], [80, H * 0.55]].forEach(([fx, fy]) => {
       ctx.strokeStyle = ac; ctx.lineWidth = 1;
       for (let p = 0; p < 5; p++) {
@@ -355,51 +354,40 @@ function buildCoverTexture(mat, title) {
         ctx.stroke();
       }
     });
-    // Simple border
     ctx.strokeStyle = ac; ctx.lineWidth = 1;
     ctx.strokeRect(30, 30, W-60, H-60);
   } else if (mat.coverStyle === 'geometric_modern') {
-    // Modern geometric – overlapping shapes, clean lines
     ctx.strokeStyle = ac; ctx.lineWidth = 1;
-    // Overlapping circles
     ctx.globalAlpha = 0.12;
     [[W*0.3, H*0.3, 80], [W*0.6, H*0.25, 60], [W*0.5, H*0.5, 90], [W*0.35, H*0.6, 50]].forEach(([cx, cy, r]) => {
       ctx.fillStyle = ac;
       ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
     });
     ctx.globalAlpha = 1;
-    // Thin geometric lines
     ctx.strokeStyle = ac; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(40, H * 0.15); ctx.lineTo(W - 40, H * 0.15); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(40, H * 0.85); ctx.lineTo(W - 40, H * 0.85); ctx.stroke();
-    // Small square accent
     ctx.strokeStyle = ac; ctx.lineWidth = 1.5;
     ctx.strokeRect(W/2 - 20, H*0.35 - 20, 40, 40);
   } else if (mat.coverStyle === 'typographic') {
-    // Typographic style – decorative text treatment, large initial letter
-    // Large decorative initial
     ctx.fillStyle = ac; ctx.globalAlpha = 0.12;
     ctx.font = 'bold 280px Georgia, serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     const initial = (title || 'B').charAt(0).toUpperCase();
     ctx.fillText(initial, W/2, H * 0.35);
     ctx.globalAlpha = 1;
-    // Double rule
     ctx.strokeStyle = ac; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(60, H * 0.6); ctx.lineTo(W - 60, H * 0.6); ctx.stroke();
     ctx.lineWidth = 0.8;
     ctx.beginPath(); ctx.moveTo(70, H * 0.62); ctx.lineTo(W - 70, H * 0.62); ctx.stroke();
-    // Small decorative dot
     ctx.fillStyle = ac;
     ctx.beginPath(); ctx.arc(W/2, H * 0.64, 4, 0, Math.PI * 2); ctx.fill();
   } else if (mat.coverStyle === 'stars') {
-    // Celestial stars pattern
     ctx.fillStyle = ac; ctx.globalAlpha = 0.35;
     for (let i = 0; i < 30; i++) {
       const sx = 30 + Math.random() * (W - 60);
       const sy = 30 + Math.random() * (H - 100);
       const sr = 2 + Math.random() * 5;
-      // Draw 5-pointed star
       ctx.beginPath();
       for (let j = 0; j < 10; j++) {
         const a = (j / 10) * Math.PI * 2 - Math.PI / 2;
@@ -410,16 +398,13 @@ function buildCoverTexture(mat, title) {
       ctx.closePath(); ctx.fill();
     }
     ctx.globalAlpha = 1;
-    // Crescent moon
     ctx.strokeStyle = ac; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.4;
     ctx.beginPath(); ctx.arc(W/2, H*0.3, 35, 0, Math.PI*2); ctx.stroke();
     ctx.beginPath(); ctx.arc(W/2 + 12, H*0.3 - 5, 30, 0, Math.PI*2); ctx.stroke();
     ctx.globalAlpha = 1;
-    // Border
     ctx.strokeStyle = ac; ctx.lineWidth = 1;
     ctx.strokeRect(25, 25, W-50, H-50);
   } else if (mat.coverStyle === 'marbled') {
-    // Marbled paper effect
     for (let i = 0; i < 20; i++) {
       const mx = Math.random() * W;
       const my = Math.random() * H;
@@ -431,7 +416,6 @@ function buildCoverTexture(mat, title) {
       mg.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = mg;
       ctx.beginPath();
-      // Wavy shape
       ctx.moveTo(mx, my - mr);
       for (let a = 0; a < Math.PI * 2; a += 0.1) {
         const wave = Math.sin(a * 3 + i) * mr * 0.2;
@@ -441,11 +425,11 @@ function buildCoverTexture(mat, title) {
     }
   }
 
-  // title text
+  // title text with gold-foil embossing effect
   ctx.fillStyle = ac;
   ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 3;
   const words = (title||'').split(' ');
-  ctx.font = 'bold 28px Georgia, serif';
+  ctx.font = 'bold 28px "Playfair Display", Georgia, serif';
   ctx.textAlign = 'center';
   if (words.length > 3) {
     const half = Math.ceil(words.length / 2);
@@ -454,7 +438,18 @@ function buildCoverTexture(mat, title) {
   } else {
     ctx.fillText(title||'', W/2, H*0.72);
   }
+  // Gold foil highlight pass
   ctx.shadowBlur = 0;
+  ctx.globalAlpha = 0.12;
+  ctx.fillStyle = '#FFE8A0';
+  if (words.length > 3) {
+    const half = Math.ceil(words.length / 2);
+    ctx.fillText(words.slice(0, half).join(' '), W/2 + 1, H*0.72 - 1);
+    ctx.fillText(words.slice(half).join(' '),    W/2 + 1, H*0.72 + 37);
+  } else {
+    ctx.fillText(title||'', W/2 + 1, H*0.72 - 1);
+  }
+  ctx.globalAlpha = 1;
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
@@ -462,7 +457,7 @@ function buildCoverTexture(mat, title) {
   return tex;
 }
 
-// ─── page-edge texture ────────────────────────────────────────────────────────
+// ─── page-edge texture (enhanced foxing) ─────────────────────────────
 function buildPageEdgeTexture() {
   const W = 256, H = 256;
   const canvas = document.createElement('canvas');
@@ -471,19 +466,24 @@ function buildPageEdgeTexture() {
   // Creamy page background
   ctx.fillStyle = '#F0EBE0';
   ctx.fillRect(0, 0, W, H);
-  // Horizontal page-edge lines (visible when looking at page stack from the side)
+  // Horizontal page-edge lines
   for (let y = 0; y < H; y += 2) {
     const shade = 0.012 + Math.random() * 0.022;
     ctx.fillStyle = `rgba(0,0,0,${shade})`;
     ctx.fillRect(0, y, W, 1);
   }
-  // Small foxing/age spots
-  for (let i = 0; i < 25; i++) {
-    const x = Math.random() * W, y = Math.random() * H, r = 1 + Math.random() * 3;
-    ctx.fillStyle = `rgba(190,160,110,${0.06 + Math.random() * 0.08})`;
+  // Foxing / age spots - more numerous and varied
+  for (let i = 0; i < 60; i++) {
+    const x = Math.random() * W, y = Math.random() * H;
+    const r = 1 + Math.random() * 4;
+    const intensity = 0.04 + Math.random() * 0.10;
+    const isBrownSpot = Math.random() > 0.4;
+    ctx.fillStyle = isBrownSpot
+      ? `rgba(170,140,90,${intensity})`
+      : `rgba(200,180,120,${intensity * 0.6})`;
     ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
   }
-  // Subtle page ripple shadows (simulates slight waviness)
+  // Subtle page ripple shadows
   for (let i = 0; i < 8; i++) {
     const startX = Math.random() * W;
     ctx.strokeStyle = `rgba(0,0,0,${0.02 + Math.random() * 0.02})`;
@@ -495,13 +495,23 @@ function buildPageEdgeTexture() {
     }
     ctx.stroke();
   }
+  // Dust accumulation along top edge
+  ctx.globalAlpha = 0.03;
+  for (let i = 0; i < 200; i++) {
+    const x = Math.random() * W;
+    const y = Math.random() * 15;
+    ctx.fillStyle = 'rgba(120,100,70,0.5)';
+    ctx.fillRect(x, y, 1 + Math.random() * 2, 1);
+  }
+  ctx.globalAlpha = 1;
+
   const tex = new THREE.CanvasTexture(canvas);
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
   tex.anisotropy = 4;
   return tex;
 }
 
-// ─── inner-page texture ───────────────────────────────────────────────────────
+// ─── inner-page texture ──────────────────────────────────────────────
 function buildInnerPageTexture() {
   const W = 512, H = 768;
   const canvas = document.createElement('canvas');
@@ -524,8 +534,60 @@ function buildInnerPageTexture() {
   return tex;
 }
 
+// ─── RoundedSpine: CylinderGeometry segment for curved spine ─────────
+const RoundedSpine = ({ thickness, height, depth, spineRough, darkColor, spineTex }) => {
+  // The spine is a cylinder segment that curves from back to front.
+  // Radius = depth/2 so the arc spans the full depth.
+  const radius = depth / 2;
+  // The spine arc covers about 100 degrees for a natural book curve
+  const thetaLength = Math.PI * 0.55;
+  const thetaStart = -thetaLength / 2;
+  // Position the cylinder so the back of the arc sits at z=0 (the visible spine face)
+  const spineZ = -depth / 2 + radius;
 
-// ─── main component ───────────────────────────────────────────────────────────
+  return (
+    <group position={[0, 0, spineZ]}>
+      {/* Curved spine surface */}
+      <mesh castShadow>
+        <cylinderGeometry args={[radius, radius, height - 0.008, 32, 1, false, thetaStart, thetaLength]} />
+        <meshStandardMaterial
+          color={darkColor}
+          roughness={spineRough}
+          metalness={0.05}
+        />
+      </mesh>
+      {/* Spine artwork overlay on the curved surface apex */}
+      <mesh position={[0, 0, radius + 0.001]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[thickness - 0.008, height - 0.008]} />
+        <meshStandardMaterial
+          map={spineTex}
+          transparent
+          opacity={0.97}
+          roughness={spineRough}
+          metalness={0.04}
+        />
+      </mesh>
+    </group>
+  );
+};
+
+// ─── FrenchGroove: Indented hinge detail ─────────────────────────────
+const FrenchGroove = ({ height, depth, darkColor, side = 'front' }) => {
+  // The groove is a thin recessed strip where the cover meets the spine
+  const xOffset = side === 'front' ? 0.015 : -0.015;
+  return (
+    <mesh position={[xOffset, 0, -depth / 2]} castShadow>
+      <boxGeometry args={[0.008, height - 0.02, 0.005]} />
+      <meshStandardMaterial
+        color={darken(darkColor, 30)}
+        roughness={0.85}
+        metalness={0.02}
+      />
+    </mesh>
+  );
+};
+
+// ─── main component ──────────────────────────────────────────────────
 const Book = ({
   book,
   position = [0, 0, 0],
@@ -556,8 +618,9 @@ const Book = ({
   const animProgress  = useRef(0);
   const snapPos       = useRef(new THREE.Vector3());
   const snapRot       = useRef(new THREE.Euler());
+  const touchPeekTimer = useRef(null);
 
-  // ── material ────────────────────────────────────────────────────────────────
+  // ─── material ──────────────────────────────────────────────────────
   const savedCover = useMemo(() => {
     const all = loadAllCovers(); return all[book.id] || null;
   }, [book.id]);
@@ -587,39 +650,41 @@ const Book = ({
     };
   }, [book.spineLabel, book.title, savedCover, bookMat]);
 
-  // ── dimensions ──────────────────────────────────────────────────────────────
+  // ─── dimensions ────────────────────────────────────────────────────
   const dims = useMemo(() => getBookDimensionsById(book.id), [book.id]);
   const t  = dims.thickness;   // X
   const h  = dims.height;      // Y
   const d  = dims.depth;       // Z
   const cT = 0.022;            // cover board thickness
 
-  // ── textures ────────────────────────────────────────────────────────────────
+  // ─── textures ──────────────────────────────────────────────────────
   const spineTex          = useMemo(() => buildSpineTexture(mat),            [mat]);
   const coverTex          = useMemo(() => buildCoverTexture(mat, book.title), [mat, book.title]);
   const pageEdgeTex       = useMemo(() => buildPageEdgeTexture(),            []);
   const innerPageTex      = useMemo(() => buildInnerPageTexture(),           []);
 
-  // ── per-preset surface props ────────────────────────────────────────────────
-  const coverRough = mat.preset === 'leather' ? 0.48 : mat.preset === 'velvet' ? 0.82 : mat.preset === 'modern' ? 0.15 : mat.preset === 'cloth' ? 0.72 : 0.65;
-  const coverMetal = mat.preset === 'modern'  ? 0.14 : mat.preset === 'leather' ? 0.05 : 0.03;
-  const spineRough = mat.preset === 'leather' ? 0.42 : mat.preset === 'velvet' ? 0.78 : 0.58;
+  // ─── per-preset surface props (enhanced PBR) ───────────────────────
+  const coverRough = mat.preset === 'leather' ? 0.48 : mat.preset === 'velvet' ? 0.82 : mat.preset === 'modern' ? 0.15 : mat.preset === 'cloth' ? 0.72 : mat.preset === 'suede' ? 0.92 : mat.preset === 'patent' ? 0.08 : mat.preset === 'silk' ? 0.32 : mat.preset === 'canvas' ? 0.88 : 0.65;
+  const coverMetal = mat.preset === 'modern'  ? 0.14 : mat.preset === 'leather' ? 0.05 : mat.preset === 'patent' ? 0.22 : mat.preset === 'silk' ? 0.08 : mat.preset === 'metallic' ? 0.55 : 0.03;
+  const spineRough = mat.preset === 'leather' ? 0.42 : mat.preset === 'velvet' ? 0.78 : mat.preset === 'suede' ? 0.88 : 0.58;
 
-  // ── "is book in flight" flag ────────────────────────────────────────────────
+  // ─── "is book in flight" flag ──────────────────────────────────────
   const isMoving = animState === BOOK_STATES.SELECTED
     || animState === BOOK_STATES.CENTERED
     || animState === BOOK_STATES.FLIPPING
     || animState === BOOK_STATES.OPEN
     || animState === BOOK_STATES.RETURNING;
 
-  // ── animation loop ───────────────────────────────────────────────────────────
+  const isOnShelf = !isMoving && animState !== BOOK_STATES.OPEN;
+
+  // ─── animation loop ────────────────────────────────────────────────
   useFrame(({ clock }, delta) => {
     if (!groupRef.current) return;
     const g   = groupRef.current;
     const cvr = frontCoverPivotRef.current;
     const time = clock.getElapsedTime();
 
-    // IDLE – gentle breathing
+    // IDLE - gentle breathing
     if (animState === BOOK_STATES.IDLE) {
       const breathe = Math.sin(time * 2.1) * 0.006;
       g.position.set(position[0], position[1] + breathe, position[2]);
@@ -629,17 +694,18 @@ const Book = ({
       return;
     }
 
-    // HOVER – lift + lean toward camera
+    // HOVER (desktop) / GENTLE PEEK (mobile touch) - lift + lean toward camera
     if (animState === BOOK_STATES.HOVER) {
-      g.scale.set(1, 1, 1);
-      g.position.y = THREE.MathUtils.lerp(g.position.y, position[1] + 0.055, 0.09);
-      g.position.z = THREE.MathUtils.lerp(g.position.z, position[2] + 0.13,  0.09);
+      const peekScale = IS_TOUCH_DEVICE ? 1.03 : 1.0;
+      g.scale.set(peekScale, peekScale, peekScale);
+      g.position.y = THREE.MathUtils.lerp(g.position.y, position[1] + (IS_TOUCH_DEVICE ? 0.04 : 0.055), 0.09);
+      g.position.z = THREE.MathUtils.lerp(g.position.z, position[2] + (IS_TOUCH_DEVICE ? 0.08 : 0.13),  0.09);
       g.rotation.x = THREE.MathUtils.lerp(g.rotation.x, -0.04,  0.07);
       g.rotation.z = THREE.MathUtils.lerp(g.rotation.z,  0.015, 0.07);
       return;
     }
 
-    // SELECTED – slide forward + rotate -90° so the +X front cover faces camera
+    // SELECTED - slide forward + rotate -90 deg
     if (animState === BOOK_STATES.SELECTED) {
       g.scale.set(1, 1, 1);
       animProgress.current = Math.min(1, animProgress.current + delta / (TIMINGS.SELECTION_SLIDE / 1000));
@@ -653,7 +719,7 @@ const Book = ({
       return;
     }
 
-    // CENTERED – glide to screen centre (further back for open-book view)
+    // CENTERED - glide to screen centre
     if (animState === BOOK_STATES.CENTERED) {
       animProgress.current = Math.min(1, animProgress.current + delta / (TIMINGS.CENTER_MOVE / 1000));
       const p = easeOutBack(Math.min(animProgress.current, 0.98));
@@ -665,7 +731,7 @@ const Book = ({
       return;
     }
 
-    // FLIPPING – cover swings open (negative rotation to open left-to-right)
+    // FLIPPING - cover swings open
     if (animState === BOOK_STATES.FLIPPING) {
       animProgress.current = Math.min(1, animProgress.current + delta / (TIMINGS.BOOK_OPEN / 1000));
       const p = easeOutCubic(animProgress.current);
@@ -675,7 +741,7 @@ const Book = ({
       return;
     }
 
-    // OPEN – gentle float, scaled up for readability on mobile
+    // OPEN - gentle float, scaled up for readability on mobile
     if (animState === BOOK_STATES.OPEN) {
       g.position.x = openBookPosX;
       g.position.y = openBookPosY + Math.sin(time * 1.4) * 0.004;
@@ -683,7 +749,7 @@ const Book = ({
       return;
     }
 
-    // RETURNING – fly back to shelf
+    // RETURNING - fly back to shelf
     if (animState === BOOK_STATES.RETURNING) {
       animProgress.current = Math.min(1, animProgress.current + delta / (TIMINGS.RETURN_TO_SHELF / 1000));
       const p = easeInOutCubic(animProgress.current);
@@ -698,7 +764,7 @@ const Book = ({
     }
   });
 
-  // ── state transition helper ──────────────────────────────────────────────────
+  // ─── state transition helper ───────────────────────────────────────
   const startState = useCallback((next) => {
     if (groupRef.current) {
       snapPos.current.copy(groupRef.current.position);
@@ -708,9 +774,20 @@ const Book = ({
     setAnimState(next);
   }, []);
 
-  // ── pointer events ───────────────────────────────────────────────────────────
+  // ─── pointer events (mobile-first touch) ───────────────────────────
   const handlePointerOver = useCallback((e) => {
     e.stopPropagation();
+    // On touch devices, do a "gentle peek" then auto-revert
+    if (IS_TOUCH_DEVICE) {
+      if (animState === BOOK_STATES.IDLE) {
+        startState(BOOK_STATES.HOVER);
+        if (touchPeekTimer.current) clearTimeout(touchPeekTimer.current);
+        touchPeekTimer.current = setTimeout(() => {
+          if (animState === BOOK_STATES.HOVER) startState(BOOK_STATES.IDLE);
+        }, 1200);
+      }
+      return;
+    }
     setHovered(true);
     if (animState === BOOK_STATES.IDLE) startState(BOOK_STATES.HOVER);
     document.body.style.cursor = 'pointer';
@@ -719,6 +796,7 @@ const Book = ({
 
   const handlePointerOut = useCallback((e) => {
     e.stopPropagation();
+    if (IS_TOUCH_DEVICE) return; // no hover-out on touch
     setHovered(false);
     if (animState === BOOK_STATES.HOVER) startState(BOOK_STATES.IDLE);
     document.body.style.cursor = 'default';
@@ -727,22 +805,21 @@ const Book = ({
 
   const handleClick = useCallback((e) => {
     e.stopPropagation();
+    // Clear any pending peek timer
+    if (touchPeekTimer.current) {
+      clearTimeout(touchPeekTimer.current);
+      touchPeekTimer.current = null;
+    }
     if (animState === BOOK_STATES.OPEN) {
-      // After Ry(-PI/2): local Z → world -X (negated). So:
-      //   local Z = +0.5 → world X = -0.5 (camera-LEFT) → decorative page / return
-      //   local Z = -0.5 → world X = +0.5 (camera-RIGHT) → content page / open
-      // We check e.point.x relative to group.x to determine left vs right click.
       if (e.point) {
         const localX = e.point.x - (groupRef.current?.position.x || 0);
         if (localX < 0) {
-          // Clicked left side (camera-LEFT) – animate return to shelf
           startState(BOOK_STATES.RETURNING);
           setTimeout(() => {
             startState(BOOK_STATES.IDLE);
             if (onBookReturn) onBookReturn(book.id);
           }, TIMINGS.RETURN_TO_SHELF);
         } else {
-          // Clicked right side (camera-RIGHT) – navigate to tool page
           if (onBookOpen) onBookOpen(book);
           if (onClick) onClick(book);
         }
@@ -758,7 +835,6 @@ const Book = ({
         startState(BOOK_STATES.FLIPPING);
         setTimeout(() => {
           setAnimState(BOOK_STATES.OPEN);
-          // Don't call onBookOpen here – we show the in-book UI first
         }, TIMINGS.BOOK_OPEN);
       }, TIMINGS.CENTER_MOVE);
     }, TIMINGS.SELECTION_SLIDE);
@@ -770,7 +846,7 @@ const Book = ({
     }
   }, [isSelected, animState, startState]);
 
-  // ─── handle returnToShelf prop ───
+  // ─── handle returnToShelf prop ──────────────────────────────────────
   useEffect(() => {
     if (returnToShelf && animState === BOOK_STATES.OPEN) {
       startState(BOOK_STATES.RETURNING);
@@ -781,7 +857,7 @@ const Book = ({
     }
   }, [returnToShelf, animState, startState, onBookReturn, book.id]);
 
-  // ── geometry ──────────────────────────────────────────────────────────────
+  // ─── geometry ──────────────────────────────────────────────────────
   return (
     <group
       ref={groupRef}
@@ -790,7 +866,53 @@ const Book = ({
       onPointerOut={handlePointerOut}
       onClick={handleClick}
     >
-      {/* ═══ PAGE BLOCK (hidden when open) ═══ */}
+      {/* ROUNDED SPINE (CylinderGeometry segment) - shown when on shelf */}
+      {isOnShelf && (
+        <RoundedSpine
+          thickness={t}
+          height={h}
+          depth={d}
+          spineRough={spineRough}
+          darkColor={mat.darkColor}
+          spineTex={spineTex}
+        />
+      )}
+
+      {/* SPINE BOARD (visible when open) */}
+      {animState === BOOK_STATES.OPEN && (
+        <mesh position={[0, 0, cT / 2]}>
+          <boxGeometry args={[t, h, cT]} />
+          <meshStandardMaterial
+            color={mat.darkColor}
+            roughness={spineRough}
+            metalness={0.05}
+          />
+        </mesh>
+      )}
+
+      {/* Spine artwork overlay (always visible) - flat plane for open state */}
+      {animState === BOOK_STATES.OPEN && (
+        <mesh position={[0, 0, cT + 0.001]}>
+          <planeGeometry args={[t - 0.008, h - 0.008]} />
+          <meshStandardMaterial
+            map={spineTex}
+            transparent
+            opacity={0.97}
+            roughness={spineRough}
+            metalness={0.04}
+          />
+        </mesh>
+      )}
+
+      {/* FRENCH GROOVES (hinge indentations) - shown when on shelf */}
+      {isOnShelf && (
+        <>
+          <FrenchGroove height={h} depth={d} side="front" darkColor={mat.darkColor} />
+          <FrenchGroove height={h} depth={d} side="back" darkColor={mat.darkColor} />
+        </>
+      )}
+
+      {/* PAGE BLOCK (hidden when open) */}
       {animState !== BOOK_STATES.OPEN && (
         <mesh position={[0, 0, -d / 2]} castShadow receiveShadow>
           <boxGeometry args={[t - 0.018, h - 0.03, d - 0.016]} />
@@ -803,7 +925,7 @@ const Book = ({
         </mesh>
       )}
 
-      {/* ══ BACK COVER (hidden when open) ══ */}
+      {/* BACK COVER (hidden when open) */}
       {animState !== BOOK_STATES.OPEN && (
         <mesh position={[-t / 2 - cT / 2, 0, -d / 2]} castShadow receiveShadow>
           <boxGeometry args={[cT, h, d]} />
@@ -814,43 +936,6 @@ const Book = ({
           />
         </mesh>
       )}
-
-      {/* ══ SPINE BOARD (hidden when open) ══ */}
-      {animState !== BOOK_STATES.OPEN && (
-        <mesh position={[0, 0, cT / 2]} castShadow>
-          <boxGeometry args={[t, h, cT]} />
-          <meshStandardMaterial
-            color={mat.darkColor}
-            roughness={spineRough}
-            metalness={0.05}
-          />
-        </mesh>
-      )}
-
-      {/* Spine artwork overlay (always visible) */}
-      <mesh position={[0, 0, cT + 0.001]}>
-        <planeGeometry args={[t - 0.008, h - 0.008]} />
-        <meshStandardMaterial
-          map={spineTex}
-          transparent
-          opacity={0.97}
-          roughness={spineRough}
-          metalness={0.04}
-        />
-      </mesh>
-
-      {/* Spine board visible when open - provides solid backing for spine artwork */}
-      {animState === BOOK_STATES.OPEN && (
-        <mesh position={[0, 0, cT / 2]}>
-          <boxGeometry args={[t, h, cT]} />
-          <meshStandardMaterial
-            color={mat.darkColor}
-            roughness={spineRough}
-            metalness={0.05}
-          />
-        </mesh>
-      )}
-
 
       {/* Raised bands (always visible) */}
       {mat.spineStyle === 'raised_bands' && (
@@ -866,37 +951,34 @@ const Book = ({
         ))
       )}
 
-      {/* Headbands & page-edge caps (always visible) */}
+      {/* Headbands and page-edge caps (always visible) */}
       <>
-          {/* Top headband */}
-          <mesh position={[0, h / 2 - 0.004, -d / 2]}>
-            <boxGeometry args={[t + 0.008, 0.010, d * 0.035]} />
-            <meshStandardMaterial color={mat.ribbonColor} roughness={0.38} metalness={0.18} />
-          </mesh>
-          {/* Bottom tailband */}
-          <mesh position={[0, -h / 2 + 0.004, -d / 2]}>
-            <boxGeometry args={[t + 0.008, 0.010, d * 0.035]} />
-            <meshStandardMaterial color={mat.ribbonColor} roughness={0.38} metalness={0.18} />
-          </mesh>
+        {/* Top headband */}
+        <mesh position={[0, h / 2 - 0.004, -d / 2]}>
+          <boxGeometry args={[t + 0.008, 0.010, d * 0.035]} />
+          <meshStandardMaterial color={mat.ribbonColor} roughness={0.38} metalness={0.18} />
+        </mesh>
+        {/* Bottom tailband */}
+        <mesh position={[0, -h / 2 + 0.004, -d / 2]}>
+          <boxGeometry args={[t + 0.008, 0.010, d * 0.035]} />
+          <meshStandardMaterial color={mat.ribbonColor} roughness={0.38} metalness={0.18} />
+        </mesh>
+        {/* Top page-edge cap */}
+        <mesh position={[0,  h / 2 - 0.008, -d / 2]}>
+          <boxGeometry args={[t - 0.016, 0.005, d - 0.03]} />
+          <meshStandardMaterial color="#EDE7D8" roughness={0.92} metalness={0} />
+        </mesh>
+        {/* Bottom page-edge cap */}
+        <mesh position={[0, -h / 2 + 0.008, -d / 2]}>
+          <boxGeometry args={[t - 0.016, 0.005, d - 0.03]} />
+          <meshStandardMaterial color="#EDE7D8" roughness={0.92} metalness={0} />
+        </mesh>
+      </>
 
-          {/* Top page-edge cap */}
-          <mesh position={[0,  h / 2 - 0.008, -d / 2]}>
-            <boxGeometry args={[t - 0.016, 0.005, d - 0.03]} />
-            <meshStandardMaterial color="#EDE7D8" roughness={0.92} metalness={0} />
-          </mesh>
-          {/* Bottom page-edge cap */}
-          <mesh position={[0, -h / 2 + 0.008, -d / 2]}>
-            <boxGeometry args={[t - 0.016, 0.005, d - 0.03]} />
-            <meshStandardMaterial color="#EDE7D8" roughness={0.92} metalness={0} />
-          </mesh>
-        </>
-
-      {/* ══ FRONT COVER – pivots open at the SPINE edge ══
-          The group is always rendered so the ref survives state transitions.
-          Children are hidden when OPEN to prevent occlusion. */}
+      {/* FRONT COVER - pivots open at the SPINE edge */}
       <group ref={frontCoverPivotRef} position={[t / 2, 0, 0]}>
         <group position={[cT / 2, 0, -d / 2]}>
-          {/* Cover board - always visible */}
+          {/* Cover board */}
           <mesh castShadow receiveShadow>
             <boxGeometry args={[cT, h, d]} />
             <meshStandardMaterial
@@ -906,7 +988,7 @@ const Book = ({
             />
           </mesh>
 
-          {/* Outer face artwork (faces +X → camera after -90° book rotation) */}
+          {/* Outer face artwork */}
           <mesh position={[cT / 2 + 0.001, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
             <planeGeometry args={[d - 0.008, h - 0.008]} />
             <meshStandardMaterial
@@ -915,6 +997,21 @@ const Book = ({
               opacity={0.97}
               roughness={coverRough - 0.05}
               metalness={coverMetal}
+            />
+          </mesh>
+
+          {/* GOLD FOIL EMBOSING LAYER
+               A separate mesh that reacts to lighting angle like real gold leaf. */}
+          <mesh position={[cT / 2 + 0.002, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+            <planeGeometry args={[d * 0.5, h * 0.15]} />
+            <meshStandardMaterial
+              color={mat.accentColor}
+              roughness={0.25}
+              metalness={0.80}
+              emissive={mat.accentColor}
+              emissiveIntensity={0.08}
+              transparent
+              opacity={0.12}
             />
           </mesh>
 
@@ -941,9 +1038,7 @@ const Book = ({
 
       {/* Inner pages visible from front (only when closed and idle) */}
       {!isMoving && animState !== BOOK_STATES.OPEN && (
-        <mesh
-          position={[0, 0, -d / 2 + cT + 0.004]}
-        >
+        <mesh position={[0, 0, -d / 2 + cT + 0.004]}>
           <planeGeometry args={[d - 0.05, h - 0.07]} />
           <meshStandardMaterial
             map={innerPageTex}
@@ -953,11 +1048,7 @@ const Book = ({
         </mesh>
       )}
 
-      {/* ─── Open book: 3D text content page ───
-          After Ry(-PI/2): local (x,y,z) → world (-z, y, x)
-          So local Z → world -X (camera-LEFT/RIGHT), local X → world Z (depth)
-          Content is positioned on the book's open spread using 3D Text from drei.
-          Left half (Z>0 → camera-LEFT) = tap to return. Right half = tap to open. */}
+      {/* Open book: 3D text content page */}
       {animState === BOOK_STATES.OPEN && (
         <group position={[overlayOffsetX, overlayOffsetY, overlayOffsetZ]} rotation={[0, Math.PI / 2, 0]}>
           {/* Parchment page background */}
@@ -971,7 +1062,7 @@ const Book = ({
             <meshBasicMaterial color="#6B5B4B" transparent opacity={0.18} side={THREE.DoubleSide} />
           </mesh>
 
-          {/* ── LEFT SIDE: Return indicator ── */}
+          {/* LEFT SIDE: Return indicator */}
           <Text
             position={[(d * 0.2) * overlayWidthScale, -h * 0.30 * overlayHeightScale, 0.02]}
             fontSize={0.025 * Math.min(overlayWidthScale, overlayHeightScale)}
@@ -979,28 +1070,24 @@ const Book = ({
             anchorX="center"
             anchorY="middle"
           >
-            {'← Return'}
+            {'<- Return'}
           </Text>
 
-          {/* ── RIGHT SIDE: Content area ── */}
-          
-          {/* Book icon emoji */}
+          {/* RIGHT SIDE: Content area */}
           <Text
             position={[-(d * 0.2) * overlayWidthScale, h * 0.25 * overlayHeightScale, 0.02]}
             fontSize={0.06 * Math.min(overlayWidthScale, overlayHeightScale)}
             anchorX="center"
             anchorY="middle"
           >
-            {book.icon || '📖'}
+            {book.icon || '\uD83D\uDCD6'}
           </Text>
 
-          {/* Ornamental rule under icon */}
-          <mesh position={[-(d * 0.2) * overlayWidthScale, h * 0.18 * overlayHeightScale, 0.02]} rotation={[0, 0, 0]}>
+          <mesh position={[-(d * 0.2) * overlayWidthScale, h * 0.18 * overlayHeightScale, 0.02]}>
             <planeGeometry args={[d * 0.25 * overlayWidthScale, 0.002]} />
             <meshBasicMaterial color={mat.accentColor} transparent opacity={0.3} side={THREE.DoubleSide} />
           </mesh>
 
-          {/* Title */}
           <Text
             position={[-(d * 0.2) * overlayWidthScale, h * 0.12 * overlayHeightScale, 0.02]}
             fontSize={0.035 * Math.min(overlayWidthScale, overlayHeightScale)}
@@ -1012,7 +1099,6 @@ const Book = ({
             {book.title || ''}
           </Text>
 
-          {/* Subtitle / description */}
           <Text
             position={[-(d * 0.2) * overlayWidthScale, h * 0.03 * overlayHeightScale, 0.02]}
             fontSize={0.022 * Math.min(overlayWidthScale, overlayHeightScale)}
@@ -1024,7 +1110,6 @@ const Book = ({
             {book.subtitle || ''}
           </Text>
 
-          {/* "Today's Page" label */}
           <Text
             position={[-(d * 0.2) * overlayWidthScale, -h * 0.05 * overlayHeightScale, 0.02]}
             fontSize={0.018 * Math.min(overlayWidthScale, overlayHeightScale)}
@@ -1035,7 +1120,6 @@ const Book = ({
             {"Today's Page"}
           </Text>
 
-          {/* Question text */}
           <Text
             position={[-(d * 0.2) * overlayWidthScale, -h * 0.11 * overlayHeightScale, 0.02]}
             fontSize={0.02 * Math.min(overlayWidthScale, overlayHeightScale)}
@@ -1047,12 +1131,11 @@ const Book = ({
             {'Would you like to\nopen this page?'}
           </Text>
 
-          {/* Open Page button background */}
-          <mesh position={[-(d * 0.2) * overlayWidthScale, -h * 0.20 * overlayHeightScale, 0.02]} rotation={[0, 0, 0]}>
+          <mesh position={[-(d * 0.2) * overlayWidthScale, -h * 0.20 * overlayHeightScale, 0.02]}>
             <planeGeometry args={[d * 0.25 * overlayWidthScale, 0.055 * overlayHeightScale]} />
             <meshBasicMaterial color="#B8922A" side={THREE.DoubleSide} />
           </mesh>
-          {/* Button text */}
+
           <Text
             position={[-(d * 0.2) * overlayWidthScale, -h * 0.20 * overlayHeightScale, 0.011]}
             fontSize={0.018 * Math.min(overlayWidthScale, overlayHeightScale)}
@@ -1060,10 +1143,10 @@ const Book = ({
             anchorX="center"
             anchorY="middle"
           >
-            {'Open Page →'}
+            {'Open Page ->'}
           </Text>
 
-          {/* Tap hint */}
+          {/* Tap hint - mobile friendly */}
           <Text
             position={[0, -h * 0.30 * overlayHeightScale, 0.02]}
             fontSize={0.014 * Math.min(overlayWidthScale, overlayHeightScale)}
@@ -1071,20 +1154,17 @@ const Book = ({
             anchorX="center"
             anchorY="middle"
           >
-            {'tap right to open • left to return'}
+            {IS_TOUCH_DEVICE ? 'tap right to open / left to return' : 'click right to open / left to return'}
           </Text>
 
-          {/* Decorative bottom flourish */}
-          <mesh position={[0, -h * 0.34 * overlayHeightScale, 0.02]} rotation={[0, 0, 0]}>
+          <mesh position={[0, -h * 0.34 * overlayHeightScale, 0.02]}>
             <planeGeometry args={[d * 0.35 * overlayWidthScale, 0.002]} />
             <meshBasicMaterial color={mat.accentColor} transparent opacity={0.2} side={THREE.DoubleSide} />
           </mesh>
         </group>
       )}
 
-
-
-      {/* Page block visible when open - shows page edges between covers */}
+      {/* Page block visible when open */}
       {animState === BOOK_STATES.OPEN && (
         <mesh position={[0, 0, -d / 2]}>
           <boxGeometry args={[t - 0.018, h - 0.03, d - 0.016]} />
@@ -1109,7 +1189,7 @@ const Book = ({
         </mesh>
       )}
 
-      {/* Hover glow shell */}
+      {/* Hover / peek glow shell */}
       {hovered && !isMoving && (
         <mesh position={[0, 0, -d / 2]}>
           <boxGeometry args={[t + 0.05, h + 0.05, d + 0.05]} />
@@ -1135,7 +1215,7 @@ const Book = ({
   );
 };
 
-// ─── Bookmark ─────────────────────────────────────────────────────────────────
+// ─── Bookmark ────────────────────────────────────────────────────────
 const Bookmark = ({ bookHeight, bookDepth, bookThickness, count }) => {
   const ref = useRef();
   useFrame(({ clock }) => {

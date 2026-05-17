@@ -3,6 +3,7 @@
 
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { ContactShadows } from '@react-three/drei';
 import * as THREE from 'three';
 import Book from './Book';
 import { SHELF_DIMENSIONS, getBookDimensionsById } from '../utils/bookGeometry';
@@ -219,6 +220,21 @@ const Bookshelf = ({
           <SmallPlant position={[-SHELF_DIMENSIONS.width / 2 + 0.45, shelves[1]?.y + 0.78, 0.28]} variant="succulent" />
         </>
       )}
+
+      {/* ── Contact shadows beneath each shelf for grounding ── */}
+      {shelves.map((shelf) => (
+        <ContactShadows
+          key={`cs-${shelf.index}`}
+          position={[0, shelf.y + 0.046, 0.28]}
+          rotation={[Math.PI / 2, 0, 0]}
+          width={SHELF_DIMENSIONS.width * 0.95}
+          height={SHELF_DIMENSIONS.depth * 0.8}
+          far={1.5}
+          opacity={0.35}
+          blur={2.2}
+          color="#2A1808"
+        />
+      ))}
     </group>
   );
 };
