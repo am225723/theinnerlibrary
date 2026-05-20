@@ -435,7 +435,7 @@ const LibrarySceneContent = ({ onBookSelect, onBookOpen, onBookReturn, returnToS
           shadow-camera-right={11}
           shadow-camera-top={11}
           shadow-camera-bottom={-11}
-          shadow-bias={-0.00015}
+          shadow-bias={-0.0004}
           shadow-normalBias={0.02}
         />
         {/* Soft warm ambient */}
