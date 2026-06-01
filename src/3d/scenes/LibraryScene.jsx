@@ -435,16 +435,18 @@ const LibrarySceneContent = ({ onBookSelect, onBookOpen, onBookReturn, returnToS
           shadow-camera-right={11}
           shadow-camera-top={11}
           shadow-camera-bottom={-11}
-          shadow-bias={-0.00015}
+          shadow-bias={-0.0004}
           shadow-normalBias={0.02}
         />
         {/* Soft warm ambient */}
-        <ambientLight intensity={0.38} color="#FFF6EC" />
+        <ambientLight intensity={0.52} color="#FFF6EC" />
         {/* Back-rim bounce */}
         <directionalLight position={[-4, 4, -4]} intensity={0.18} color="#FFE5CC" />
         {/* Left-side window spill */}
         <pointLight position={[-5, 1.5, 2]} intensity={0.55} color="#FFD8A0" distance={9} decay={2} />
         {/* Overhead warm fill */}
+        {/* Bottom warm fill for lower half */}
+        <pointLight position={[0, -4, 2]} intensity={0.25} color="#FFEEDD" distance={8} decay={2} />
         <pointLight position={[0, 5, 0.5]} intensity={0.35} color="#FFF0CC" distance={7} decay={2} />
 
         {/* ── Room shell ── */}
@@ -534,9 +536,9 @@ const LibrarySceneContent = ({ onBookSelect, onBookOpen, onBookReturn, returnToS
           height={6}
           far={4}
           opacity={0.22}
-          blur={2}
+          blur={1.5}
           color="#1A0E04"
-          frames={6}
+          frames={1}
         />
 
         {/* Bookends */}
